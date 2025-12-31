@@ -4,6 +4,9 @@ class OrdenTrabajo {
   final String vehId;
   final String descripcion;
   final String fechaIngreso;
+  final String? fechaCreate;
+  final String? vehPlaca;
+  final String? cliNombre;
   final double total;
   final List<OrdenItem> items;
 
@@ -13,9 +16,29 @@ class OrdenTrabajo {
     required this.vehId,
     required this.descripcion,
     required this.fechaIngreso,
+    this.fechaCreate,
+    this.vehPlaca,
+    this.cliNombre,
     required this.total,
     required this.items,
   });
+
+  factory OrdenTrabajo.fromJson(Map<String, dynamic> json) {
+    return OrdenTrabajo(
+      id: json['ot_id'].toString(),
+      empId: json['ot_emp_id'].toString(),
+      vehId: json['ot_veh_id'].toString(),
+      descripcion: json['ot_descripcion'] ?? '',
+      fechaIngreso: json['ot_fecha_ingreso'] ?? '',
+      fechaCreate: json['ot_fecha_create'],
+      vehPlaca: json['veh_placa'],
+      cliNombre: json['cli_nombre'],
+      total: double.tryParse(json['ot_total']?.toString() ?? '0') ?? 0.0,
+      items: json['items'] != null
+          ? (json['items'] as List).map((e) => OrdenItem.fromJson(e)).toList()
+          : [],
+    );
+  }
 
   Map<String, dynamic> toJson() {
     return {
@@ -30,6 +53,8 @@ class OrdenTrabajo {
 }
 
 class OrdenItem {
+  final String? id;
+  final String? otId;
   final String itemId;
   final double cantidad;
   final double precioUnitario;
@@ -38,6 +63,8 @@ class OrdenItem {
   final double total;
 
   OrdenItem({
+    this.id,
+    this.otId,
     required this.itemId,
     required this.cantidad,
     required this.precioUnitario,
@@ -45,6 +72,20 @@ class OrdenItem {
     required this.igv,
     required this.total,
   });
+
+  factory OrdenItem.fromJson(Map<String, dynamic> json) {
+    return OrdenItem(
+      id: json['oi_id']?.toString(),
+      otId: json['oi_ot_id']?.toString(),
+      itemId: json['oi_item_id'].toString(),
+      cantidad: double.tryParse(json['oi_cantidad']?.toString() ?? '0') ?? 0.0,
+      precioUnitario:
+          double.tryParse(json['oi_precio_unitario']?.toString() ?? '0') ?? 0.0,
+      subtotal: double.tryParse(json['oi_subtotal']?.toString() ?? '0') ?? 0.0,
+      igv: double.tryParse(json['oi_igv']?.toString() ?? '0') ?? 0.0,
+      total: double.tryParse(json['oi_total']?.toString() ?? '0') ?? 0.0,
+    );
+  }
 
   Map<String, dynamic> toJson() {
     return {

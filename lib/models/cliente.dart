@@ -2,7 +2,8 @@ class Cliente {
   final String id;
   final String empId;
   final String nombre;
-  final String documento;
+  final String tipoDocumento;
+  final String numeroDocumento;
   final String telefono;
   final String email;
   final String direccion;
@@ -12,7 +13,8 @@ class Cliente {
     required this.id,
     required this.empId,
     required this.nombre,
-    required this.documento,
+    required this.tipoDocumento,
+    required this.numeroDocumento,
     required this.telefono,
     required this.email,
     required this.direccion,
@@ -24,7 +26,8 @@ class Cliente {
       id: json['cli_id'].toString(),
       empId: json['cli_emp_id'].toString(),
       nombre: json['cli_nombre'] ?? '',
-      documento: json['cli_documento'] ?? '',
+      tipoDocumento: json['cli_tipo_documento'] ?? '',
+      numeroDocumento: json['cli_numero_documento'] ?? '',
       telefono: json['cli_telefono'] ?? '',
       email: json['cli_email'] ?? '',
       direccion: json['cli_direccion'] ?? '',
@@ -37,7 +40,8 @@ class Cliente {
       'cli_id': id,
       'cli_emp_id': empId,
       'cli_nombre': nombre,
-      'cli_documento': documento,
+      'cli_tipo_documento': tipoDocumento,
+      'cli_numero_documento': numeroDocumento,
       'cli_telefono': telefono,
       'cli_email': email,
       'cli_direccion': direccion,

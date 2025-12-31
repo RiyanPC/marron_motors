@@ -1,6 +1,6 @@
 class ApiConfig {
   static const String baseUrl =
-      'http://localhost/marron_motors/bd_marron_motors';
+      'http://192.168.18.25/marron_motors/bd_marron_motors';
 
   // Endpoints
   static const String empresas = '$baseUrl/empresas/listar.php';

@@ -55,7 +55,7 @@ class _ClientesPageState extends State<ClientesPage> {
                     leading: CircleAvatar(child: Text(cliente.nombre[0])),
                     title: Text(cliente.nombre),
                     subtitle: Text(
-                      '${cliente.documento} • ${cliente.telefono}',
+                      '${cliente.tipoDocumento}: ${cliente.numeroDocumento} • ${cliente.telefono}',
                     ),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () {
