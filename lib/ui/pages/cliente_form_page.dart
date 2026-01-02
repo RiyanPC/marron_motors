@@ -58,9 +58,20 @@ class _ClienteFormPageState extends State<ClienteFormPage> {
     );
 
     try {
-      final success = await _repository.saveCliente(cliente);
-      if (success) {
-        if (mounted) Navigator.pop(context, true);
+      final newId = await _repository.saveCliente(cliente);
+      if (newId != null) {
+        final savedCliente = Cliente(
+          id: newId,
+          empId: cliente.empId,
+          nombre: cliente.nombre,
+          tipoDocumento: cliente.tipoDocumento,
+          numeroDocumento: cliente.numeroDocumento,
+          telefono: cliente.telefono,
+          email: cliente.email,
+          direccion: cliente.direccion,
+          estado: cliente.estado,
+        );
+        if (mounted) Navigator.pop(context, savedCliente);
       } else {
         throw Exception('Error al guardar el cliente');
       }
@@ -111,6 +122,8 @@ class _ClienteFormPageState extends State<ClienteFormPage> {
                           )
                           .toList(),
                       onChanged: (v) => setState(() => _tipoDocumento = v!),
+                      validator: (v) =>
+                          v == null || v.isEmpty ? 'Requerido' : null,
                     ),
                   ),
                   const SizedBox(width: 16),

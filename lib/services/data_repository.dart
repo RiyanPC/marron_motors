@@ -57,12 +57,15 @@ class DataRepository {
     return [];
   }
 
-  Future<bool> saveCliente(Cliente cliente) async {
+  Future<String?> saveCliente(Cliente cliente) async {
     final endpoint = cliente.id == '0' || cliente.id.isEmpty
         ? ApiConfig.clientes.replaceFirst('listar.php', 'crear.php')
         : ApiConfig.clientesEditar;
     final response = await _apiService.post(endpoint, cliente.toJson());
-    return response['status'] == 'success';
+    if (response['status'] == 'success') {
+      return response['id']?.toString() ?? cliente.id;
+    }
+    return null;
   }
 
   Future<bool> saveVehiculo(Vehiculo vehiculo) async {

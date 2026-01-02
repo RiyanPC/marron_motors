@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../models/vehiculo.dart';
 import '../../models/cliente.dart';
 import '../../services/data_repository.dart';
+import '../widgets/cliente_selector_modal.dart';
 
 class VehiculoFormPage extends StatefulWidget {
   final Vehiculo? vehiculo;
@@ -30,8 +31,7 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
   late TextEditingController _vinController;
   late TextEditingController _fotoController;
 
-  List<Cliente> _clientes = [];
-  String? _selectedClienteId;
+  Cliente? _selectedCliente;
 
   @override
   void initState() {
@@ -43,22 +43,42 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
     _colorController = TextEditingController(text: widget.vehiculo?.color);
     _vinController = TextEditingController(text: widget.vehiculo?.vin);
     _fotoController = TextEditingController(text: widget.vehiculo?.foto);
-    _selectedClienteId = widget.vehiculo?.cliId;
-    _loadClientes();
+    _loadInitialData();
   }
 
-  Future<void> _loadClientes() async {
-    try {
-      final data = await _repository.getClientes('1');
-      setState(() {
-        _clientes = data;
-        _loadingClientes = false;
-        if (_selectedClienteId == null && _clientes.isNotEmpty) {
-          _selectedClienteId = _clientes.first.id;
-        }
-      });
-    } catch (e) {
+  Future<void> _loadInitialData() async {
+    if (widget.vehiculo != null) {
+      try {
+        final clientes = await _repository.getClientes('1');
+        setState(() {
+          _selectedCliente = clientes.firstWhere(
+            (c) => c.id == widget.vehiculo!.cliId,
+          );
+          _loadingClientes = false;
+        });
+      } catch (e) {
+        setState(() => _loadingClientes = false);
+      }
+    } else {
       setState(() => _loadingClientes = false);
+    }
+  }
+
+  void _openClienteSelector() async {
+    final result = await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) =>
+          ClienteSelectorModal(initialSelectedId: _selectedCliente?.id),
+    );
+
+    if (result is Cliente) {
+      setState(() {
+        _selectedCliente = result;
+      });
     }
   }
 
@@ -107,7 +127,7 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
-    if (_selectedClienteId == null) {
+    if (_selectedCliente == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Debe seleccionar un cliente')),
       );
@@ -117,7 +137,7 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
     setState(() => _saving = true);
     final vehiculo = Vehiculo(
       id: widget.vehiculo?.id ?? '0',
-      cliId: _selectedClienteId!,
+      cliId: _selectedCliente!.id,
       empId: widget.vehiculo?.empId ?? '1',
       placa: _placaController.text,
       marca: _marcaController.text,
@@ -163,21 +183,25 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    DropdownButtonFormField<String>(
-                      value: _selectedClienteId,
-                      decoration: const InputDecoration(
-                        labelText: 'Propietario / Cliente *',
+                    InkWell(
+                      onTap: _openClienteSelector,
+                      child: InputDecorator(
+                        decoration: const InputDecoration(
+                          labelText: 'Propietario / Cliente *',
+                          prefixIcon: Icon(Icons.person),
+                          suffixIcon: Icon(Icons.arrow_drop_down),
+                        ),
+                        child: Text(
+                          _selectedCliente != null
+                              ? '${_selectedCliente!.nombre} (${_selectedCliente!.numeroDocumento})'
+                              : 'Toca para seleccionar un cliente',
+                          style: TextStyle(
+                            color: _selectedCliente != null
+                                ? Colors.black
+                                : Colors.grey.shade600,
+                          ),
+                        ),
                       ),
-                      items: _clientes
-                          .map(
-                            (c) => DropdownMenuItem(
-                              value: c.id,
-                              child: Text('${c.nombre} (${c.numeroDocumento})'),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (v) => setState(() => _selectedClienteId = v),
-                      validator: (v) => v == null ? 'Requerido' : null,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
