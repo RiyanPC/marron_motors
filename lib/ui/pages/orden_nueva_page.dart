@@ -6,6 +6,7 @@ import '../../models/vehiculo.dart';
 import '../../models/cliente.dart';
 import '../../models/item.dart';
 import '../widgets/vehiculo_selector_modal.dart';
+import '../widgets/item_selector_modal.dart';
 
 class OrdenNuevaPage extends StatefulWidget {
   const OrdenNuevaPage({super.key});
@@ -56,18 +57,9 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
 
   double get _total => _selectedItems.fold(0, (sum, item) => sum + item.total);
 
-  void _addItem(Item item) {
+  void _addItem(OrdenItem ordenItem) {
     setState(() {
-      _selectedItems.add(
-        OrdenItem(
-          itemId: item.id,
-          cantidad: 1,
-          precioUnitario: item.precio,
-          subtotal: item.precio,
-          igv: item.precio * 0.18,
-          total: item.precio * 1.18,
-        ),
-      );
+      _selectedItems.add(ordenItem);
     });
   }
 
@@ -170,16 +162,47 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
                     'Items / Servicios',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  ..._selectedItems.map((oi) {
+                  ..._selectedItems.asMap().entries.map((entry) {
+                    final idx = entry.key;
+                    final oi = entry.value;
                     final item = _availableItems.firstWhere(
                       (i) => i.id == oi.itemId,
+                      orElse: () => Item(
+                        id: oi.itemId,
+                        empId: '',
+                        nombre: 'Item desconocido',
+                        descripcion: '',
+                        tipo: 'SERVICIO',
+                        precio: 0,
+                        codigoTributo: '10',
+                        estado: 'ACTIVO',
+                      ),
                     );
                     return ListTile(
                       title: Text(item.nombre),
                       subtitle: Text(
-                        'Cant: ${oi.cantidad} x S/ ${oi.precioUnitario}',
+                        'Cant: ${oi.cantidad} x S/ ${oi.precioUnitario.toStringAsFixed(2)}',
                       ),
-                      trailing: Text('S/ ${oi.total.toStringAsFixed(2)}'),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'S/ ${oi.total.toStringAsFixed(2)}',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.delete_outline,
+                              color: Colors.red,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _selectedItems.removeAt(idx);
+                              });
+                            },
+                          ),
+                        ],
+                      ),
                     );
                   }),
                   TextButton.icon(
@@ -294,23 +317,18 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
     );
   }
 
-  void _showItemSelector() {
-    showModalBottomSheet(
+  void _showItemSelector() async {
+    final result = await showModalBottomSheet(
       context: context,
-      builder: (_) => ListView.builder(
-        itemCount: _availableItems.length,
-        itemBuilder: (ctx, idx) {
-          final item = _availableItems[idx];
-          return ListTile(
-            title: Text(item.nombre),
-            subtitle: Text('S/ ${item.precio}'),
-            onTap: () {
-              _addItem(item);
-              Navigator.pop(ctx);
-            },
-          );
-        },
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
+      builder: (_) => const ItemSelectorModal(),
     );
+
+    if (result is OrdenItem) {
+      _addItem(result);
+    }
   }
 }
