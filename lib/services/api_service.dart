@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
 class ApiService {
   Future<Map<String, dynamic>> get(
@@ -41,6 +43,48 @@ class ApiService {
       }
     } catch (e) {
       print('POST Exception: $e');
+      throw Exception('Error de conexión: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> upload(
+    String url,
+    File imageFile, {
+    Map<String, String>? fields,
+  }) async {
+    try {
+      print('UPLOAD Request: $url');
+      final request = http.MultipartRequest('POST', Uri.parse(url));
+
+      if (fields != null) {
+        request.fields.addAll(fields);
+      }
+
+      final stream = http.ByteStream(imageFile.openRead());
+      final length = await imageFile.length();
+
+      final multipartFile = http.MultipartFile(
+        'image',
+        stream,
+        length,
+        filename: imageFile.path.split('/').last,
+        contentType: MediaType('image', 'jpeg'),
+      );
+
+      request.files.add(multipartFile);
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      print('UPLOAD Response (${response.statusCode}): ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('Error en la subida: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('UPLOAD Exception: $e');
       throw Exception('Error de conexión: $e');
     }
   }

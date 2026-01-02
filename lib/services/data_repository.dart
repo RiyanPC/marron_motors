@@ -1,3 +1,4 @@
+import 'dart:io';
 import '../core/api_config.dart';
 import '../models/cliente.dart';
 import '../models/vehiculo.dart';
@@ -86,5 +87,13 @@ class DataRepository {
       orden.toJson(),
     );
     return response['status'] == 'success';
+  }
+
+  Future<String?> uploadImage(File imageFile) async {
+    final response = await _apiService.upload(ApiConfig.uploadImage, imageFile);
+    if (response['status'] == 'success') {
+      return response['url'];
+    }
+    return null;
   }
 }

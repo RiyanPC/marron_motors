@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../models/vehiculo.dart';
 import '../../models/cliente.dart';
 import '../../services/data_repository.dart';
@@ -16,6 +18,9 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
   final _repository = DataRepository();
   bool _saving = false;
   bool _loadingClientes = true;
+  bool _uploadingImage = false;
+  File? _imageFile;
+  final ImagePicker _picker = ImagePicker();
 
   late TextEditingController _placaController;
   late TextEditingController _marcaController;
@@ -54,6 +59,42 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
       });
     } catch (e) {
       setState(() => _loadingClientes = false);
+    }
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    final XFile? pickedFile = await _picker.pickImage(
+      source: source,
+      imageQuality: 70,
+    );
+    if (pickedFile != null) {
+      setState(() => _imageFile = File(pickedFile.path));
+      _uploadImage();
+    }
+  }
+
+  Future<void> _uploadImage() async {
+    if (_imageFile == null) return;
+
+    setState(() => _uploadingImage = true);
+    try {
+      final url = await _repository.uploadImage(_imageFile!);
+      if (url != null) {
+        setState(() {
+          _fotoController.text = url;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Imagen subida correctamente')),
+        );
+      } else {
+        throw Exception('Error al subir la imagen');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+    } finally {
+      setState(() => _uploadingImage = false);
     }
   }
 
@@ -189,11 +230,90 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
                       ),
                     ),
                     const SizedBox(height: 16),
+                    const Text(
+                      'Foto del Vehículo',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    if (_fotoController.text.isNotEmpty)
+                      Stack(
+                        children: [
+                          Container(
+                            height: 200,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              image: DecorationImage(
+                                image: NetworkImage(_fotoController.text),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            top: 8,
+                            right: 8,
+                            child: CircleAvatar(
+                              backgroundColor: Colors.white,
+                              child: IconButton(
+                                icon: const Icon(
+                                  Icons.delete,
+                                  color: Colors.red,
+                                ),
+                                onPressed: () =>
+                                    setState(() => _fotoController.clear()),
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    else
+                      Container(
+                        height: 200,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade200,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade400),
+                        ),
+                        child: _uploadingImage
+                            ? const Center(child: CircularProgressIndicator())
+                            : Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    Icons.image,
+                                    size: 64,
+                                    color: Colors.grey,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      ElevatedButton.icon(
+                                        onPressed: () =>
+                                            _pickImage(ImageSource.camera),
+                                        icon: const Icon(Icons.camera_alt),
+                                        label: const Text('Cámara'),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      ElevatedButton.icon(
+                                        onPressed: () =>
+                                            _pickImage(ImageSource.gallery),
+                                        icon: const Icon(Icons.photo_library),
+                                        label: const Text('Galería'),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                      ),
+                    const SizedBox(height: 16),
                     TextFormField(
                       controller: _fotoController,
+                      readOnly: true,
                       decoration: const InputDecoration(
                         labelText: 'URL de la Foto',
-                        hintText: 'https://ejemplo.com/foto.jpg',
+                        hintText:
+                            'Se generará automáticamente al subir una foto',
                       ),
                     ),
                     const SizedBox(height: 32),
