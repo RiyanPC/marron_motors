@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../models/orden.dart';
 import '../../services/data_repository.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../core/api_config.dart';
+import 'comprobante_preview_page.dart';
 
 class OrdenesPage extends StatefulWidget {
   const OrdenesPage({super.key});
@@ -93,10 +93,14 @@ class _OrdenesPageState extends State<OrdenesPage>
   }
 
   Future<void> _verComprobante(String facId) async {
-    final url = Uri.parse('${ApiConfig.baseUrl}/facturas/ver.php?id=$facId');
-    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-      _showError('No se pudo abrir el comprobante');
-    }
+    final url = '${ApiConfig.baseUrl}/facturas/ver.php?id=$facId';
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) =>
+            ComprobantePreviewPage(url: url, title: 'Factura #$facId'),
+      ),
+    );
   }
 
   void _showError(String msg) {
