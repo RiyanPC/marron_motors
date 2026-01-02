@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/data_repository.dart';
 import '../../models/vehiculo.dart';
+import 'vehiculo_form_page.dart';
 
 class VehiculosPage extends StatefulWidget {
   const VehiculosPage({super.key});
@@ -39,6 +40,16 @@ class _VehiculosPageState extends State<VehiculosPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Vehículos')),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const VehiculoFormPage()),
+          );
+          if (result == true) _loadVehiculos();
+        },
+        child: const Icon(Icons.add),
+      ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _vehiculos.isEmpty
@@ -61,7 +72,19 @@ class _VehiculosPageState extends State<VehiculosPage> {
                     subtitle: Text(
                       '${veh.marca} ${veh.modelo} • ${veh.cliNombre}',
                     ),
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () async {
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                VehiculoFormPage(vehiculo: veh),
+                          ),
+                        );
+                        if (result == true) _loadVehiculos();
+                      },
+                    ),
                   ),
                 );
               },

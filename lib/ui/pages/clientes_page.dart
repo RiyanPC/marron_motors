@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/data_repository.dart';
 import '../../models/cliente.dart';
+import 'cliente_form_page.dart';
 
 class ClientesPage extends StatefulWidget {
   const ClientesPage({super.key});
@@ -41,6 +42,16 @@ class _ClientesPageState extends State<ClientesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Clientes')),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ClienteFormPage()),
+          );
+          if (result == true) _loadClientes();
+        },
+        child: const Icon(Icons.add),
+      ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _clientes.isEmpty
@@ -57,10 +68,19 @@ class _ClientesPageState extends State<ClientesPage> {
                     subtitle: Text(
                       '${cliente.tipoDocumento}: ${cliente.numeroDocumento} • ${cliente.telefono}',
                     ),
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                    onTap: () {
-                      // TODO: Detalle del cliente
-                    },
+                    trailing: IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () async {
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                ClienteFormPage(cliente: cliente),
+                          ),
+                        );
+                        if (result == true) _loadClientes();
+                      },
+                    ),
                   ),
                 );
               },

@@ -56,6 +56,30 @@ class DataRepository {
     return [];
   }
 
+  Future<bool> saveCliente(Cliente cliente) async {
+    final endpoint = cliente.id == '0' || cliente.id.isEmpty
+        ? ApiConfig.clientes.replaceFirst('listar.php', 'crear.php')
+        : ApiConfig.clientesEditar;
+    final response = await _apiService.post(endpoint, cliente.toJson());
+    return response['status'] == 'success';
+  }
+
+  Future<bool> saveVehiculo(Vehiculo vehiculo) async {
+    final endpoint = vehiculo.id == '0' || vehiculo.id.isEmpty
+        ? ApiConfig.vehiculos.replaceFirst('listar.php', 'crear.php')
+        : ApiConfig.vehiculosEditar;
+    final response = await _apiService.post(endpoint, vehiculo.toJson());
+    return response['status'] == 'success';
+  }
+
+  Future<bool> saveItem(Item item) async {
+    final endpoint = item.id == '0' || item.id.isEmpty
+        ? ApiConfig.itemsCrear
+        : ApiConfig.itemsEditar;
+    final response = await _apiService.post(endpoint, item.toJson());
+    return response['status'] == 'success';
+  }
+
   Future<bool> crearOrden(OrdenTrabajo orden) async {
     final response = await _apiService.post(
       ApiConfig.ordenesCrear,
