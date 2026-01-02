@@ -15,6 +15,7 @@ class _ClienteFormPageState extends State<ClienteFormPage> {
   final _formKey = GlobalKey<FormState>();
   final _repository = DataRepository();
   bool _saving = false;
+  bool _consultando = false;
 
   late TextEditingController _nombreController;
   late TextEditingController _numeroDocumentoController;
@@ -91,6 +92,42 @@ class _ClienteFormPageState extends State<ClienteFormPage> {
     }
   }
 
+  Future<void> _consultarDocumento() async {
+    final doc = _numeroDocumentoController.text;
+    if (_tipoDocumento == 'DNI' && doc.length != 8) return;
+    if (_tipoDocumento == 'RUC' && doc.length != 11) return;
+
+    setState(() => _consultando = true);
+    try {
+      final data = await _repository.consultaDocumento(_tipoDocumento, doc);
+      if (data != null) {
+        setState(() {
+          if (_tipoDocumento == 'DNI') {
+            _nombreController.text = data['nombre'] ?? '';
+          } else {
+            _nombreController.text = data['razonSocial'] ?? '';
+            _direccionController.text = data['direccion'] ?? '';
+            _ubigeoController.text = data['ubigeo'] ?? '';
+          }
+        });
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No se encontraron resultados')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Error en la consulta')));
+      }
+    } finally {
+      if (mounted) setState(() => _consultando = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.cliente != null;
@@ -144,6 +181,24 @@ class _ClienteFormPageState extends State<ClienteFormPage> {
                                 : _tipoDocumento == 'RUC'
                                 ? 11
                                 : 15}',
+                        suffixIcon: _consultando
+                            ? const Padding(
+                                padding: EdgeInsets.all(12),
+                                child: SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                              )
+                            : (_tipoDocumento == 'DNI' ||
+                                  _tipoDocumento == 'RUC')
+                            ? IconButton(
+                                icon: const Icon(Icons.search),
+                                onPressed: _consultarDocumento,
+                              )
+                            : null,
                       ),
                       keyboardType: TextInputType.number,
                       maxLength: _tipoDocumento == 'DNI'

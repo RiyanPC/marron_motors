@@ -131,4 +131,26 @@ class DataRepository {
     }
     return null;
   }
+
+  Future<Map<String, dynamic>?> consultaDocumento(
+    String tipo,
+    String num,
+  ) async {
+    final response = await _apiService.get(
+      ApiConfig.clientesConsulta,
+      params: {'tipo': tipo, 'num': num},
+    );
+    if (response['status'] == 'success') {
+      return response['data'];
+    }
+    return null;
+  }
+
+  Future<bool> actualizarEstadoOrden(String otId, String nuevoEstado) async {
+    final response = await _apiService.post(ApiConfig.ordenesActualizarEstado, {
+      'ot_id': otId,
+      'ot_estado': nuevoEstado,
+    });
+    return response['status'] == 'success';
+  }
 }

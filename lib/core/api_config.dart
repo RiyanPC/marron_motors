@@ -14,4 +14,7 @@ class ApiConfig {
   static const String itemsCrear = '$baseUrl/items/crear.php';
   static const String itemsEditar = '$baseUrl/items/editar.php';
   static const String uploadImage = '$baseUrl/uploads/upload_image.php';
+  static const String clientesConsulta = '$baseUrl/clientes/consulta_doc.php';
+  static const String ordenesActualizarEstado =
+      '$baseUrl/ordenes/actualizar_estado.php';
 }
