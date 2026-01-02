@@ -5,6 +5,7 @@ class Item {
   final String descripcion;
   final String tipo; // PRODUCTO / SERVICIO
   final double precio;
+  final String codigoTributo;
   final String estado;
 
   Item({
@@ -14,6 +15,7 @@ class Item {
     required this.descripcion,
     required this.tipo,
     required this.precio,
+    required this.codigoTributo,
     required this.estado,
   });
 
@@ -25,6 +27,7 @@ class Item {
       descripcion: json['item_descripcion'] ?? '',
       tipo: json['item_tipo'] ?? 'SERVICIO',
       precio: double.tryParse(json['item_precio']?.toString() ?? '0') ?? 0.0,
+      codigoTributo: json['item_codigo_tributo'] ?? '10',
       estado: json['item_estado'] ?? 'ACTIVO',
     );
   }
@@ -37,6 +40,7 @@ class Item {
       'item_descripcion': descripcion,
       'item_tipo': tipo,
       'item_precio': precio,
+      'item_codigo_tributo': codigoTributo,
       'item_estado': estado,
     };
   }

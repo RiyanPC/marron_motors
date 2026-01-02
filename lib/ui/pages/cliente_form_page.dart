@@ -20,6 +20,7 @@ class _ClienteFormPageState extends State<ClienteFormPage> {
   late TextEditingController _telefonoController;
   late TextEditingController _emailController;
   late TextEditingController _direccionController;
+  late TextEditingController _ubigeoController;
   String _tipoDocumento = 'DNI';
   String _estado = 'ACTIVO';
 
@@ -35,6 +36,7 @@ class _ClienteFormPageState extends State<ClienteFormPage> {
     _direccionController = TextEditingController(
       text: widget.cliente?.direccion,
     );
+    _ubigeoController = TextEditingController(text: widget.cliente?.ubigeo);
     if (widget.cliente != null) {
       _tipoDocumento = widget.cliente!.tipoDocumento;
       _estado = widget.cliente!.estado;
@@ -54,6 +56,7 @@ class _ClienteFormPageState extends State<ClienteFormPage> {
       telefono: _telefonoController.text,
       email: _emailController.text,
       direccion: _direccionController.text,
+      ubigeo: _ubigeoController.text,
       estado: _estado,
     );
 
@@ -69,6 +72,7 @@ class _ClienteFormPageState extends State<ClienteFormPage> {
           telefono: cliente.telefono,
           email: cliente.email,
           direccion: cliente.direccion,
+          ubigeo: cliente.ubigeo,
           estado: cliente.estado,
         );
         if (mounted) Navigator.pop(context, savedCliente);
@@ -156,6 +160,15 @@ class _ClienteFormPageState extends State<ClienteFormPage> {
               TextFormField(
                 controller: _direccionController,
                 decoration: const InputDecoration(labelText: 'Dirección'),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _ubigeoController,
+                decoration: const InputDecoration(
+                  labelText: 'Ubigeo (6 dígitos)',
+                  hintText: 'Ej: 150101',
+                ),
+                keyboardType: TextInputType.number,
               ),
               if (isEditing) ...[
                 const SizedBox(height: 16),

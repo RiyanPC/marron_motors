@@ -7,6 +7,7 @@ class Cliente {
   final String telefono;
   final String email;
   final String direccion;
+  final String ubigeo;
   final String estado;
 
   Cliente({
@@ -18,6 +19,7 @@ class Cliente {
     required this.telefono,
     required this.email,
     required this.direccion,
+    required this.ubigeo,
     required this.estado,
   });
 
@@ -31,6 +33,7 @@ class Cliente {
       telefono: json['cli_telefono'] ?? '',
       email: json['cli_email'] ?? '',
       direccion: json['cli_direccion'] ?? '',
+      ubigeo: json['cli_ubigeo'] ?? '',
       estado: json['cli_estado'] ?? 'ACTIVO',
     );
   }
@@ -45,6 +48,7 @@ class Cliente {
       'cli_telefono': telefono,
       'cli_email': email,
       'cli_direccion': direccion,
+      'cli_ubigeo': ubigeo,
       'cli_estado': estado,
     };
   }

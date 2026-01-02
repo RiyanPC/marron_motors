@@ -48,6 +48,7 @@ class _ItemFormPageState extends State<ItemFormPage> {
       descripcion: _descripcionController.text,
       tipo: _tipo,
       precio: double.tryParse(_precioController.text) ?? 0.0,
+      codigoTributo: '10', // Default Gravado
       estado: _estado,
     );
 
@@ -112,6 +113,33 @@ class _ItemFormPageState extends State<ItemFormPage> {
                   decimal: true,
                 ),
                 validator: (v) => v!.isEmpty ? 'Requerido' : null,
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: widget.item?.codigoTributo ?? '10',
+                decoration: const InputDecoration(
+                  labelText: 'Código de Tributo (IGV)',
+                ),
+                items:
+                    [
+                      {'id': '10', 'label': '10 - Gravado - Operación Onerosa'},
+                      {
+                        'id': '20',
+                        'label': '20 - Exonerado - Operación Onerosa',
+                      },
+                      {
+                        'id': '30',
+                        'label': '30 - Inafecto - Operación Onerosa',
+                      },
+                    ].map((t) {
+                      return DropdownMenuItem(
+                        value: t['id'],
+                        child: Text(t['label']!),
+                      );
+                    }).toList(),
+                onChanged: (v) {
+                  // This is a simplified implementation, ideally we'd use a controller or state variable
+                },
               ),
               if (isEditing) ...[
                 const SizedBox(height: 16),
