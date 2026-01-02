@@ -47,7 +47,7 @@ class _VehiculosPageState extends State<VehiculosPage> {
             context,
             MaterialPageRoute(builder: (context) => const VehiculoFormPage()),
           );
-          if (result == true) _loadVehiculos();
+          if (result != null) _loadVehiculos();
         },
         child: const Icon(Icons.add),
       ),
@@ -110,7 +110,7 @@ class _VehiculosPageState extends State<VehiculosPage> {
                                     VehiculoFormPage(vehiculo: veh),
                               ),
                             );
-                            if (result == true) _loadVehiculos();
+                            if (result != null) _loadVehiculos();
                           },
                         ),
                       ],

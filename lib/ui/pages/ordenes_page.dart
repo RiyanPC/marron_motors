@@ -3,6 +3,8 @@ import '../../models/orden.dart';
 import '../../services/data_repository.dart';
 import '../../core/api_config.dart';
 import 'comprobante_preview_page.dart';
+import 'orden_nueva_page.dart';
+import '../widgets/item_selector_modal.dart';
 
 class OrdenesPage extends StatefulWidget {
   const OrdenesPage({super.key});
@@ -103,6 +105,71 @@ class _OrdenesPageState extends State<OrdenesPage>
     );
   }
 
+  Future<void> _agregarTrabajo(OrdenTrabajo orden) async {
+    final result = await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => const ItemSelectorModal(),
+    );
+
+    if (result is OrdenItem) {
+      setState(() => _loading = true);
+      final success = await _repository.agregarItemsAOrden(orden.id!, [result]);
+      if (success) {
+        await _loadOrdenes();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Trabajo/Repuesto añadido con éxito')),
+        );
+      } else {
+        setState(() => _loading = false);
+        _showError('No se pudo añadir el item');
+      }
+    }
+  }
+
+  Future<bool> _showConfirmDialog(String title, String message) async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: Text(
+              title,
+              style: TextStyle(
+                color: Colors.blue.shade900,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: Text(message),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(
+                  'CANCELAR',
+                  style: TextStyle(color: Colors.grey.shade600),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue.shade800,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text('CONFIRMAR'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
+
   void _showError(String msg) {
     showDialog(
       context: context,
@@ -158,6 +225,21 @@ class _OrdenesPageState extends State<OrdenesPage>
                 _buildOrderList('FACTURADA'),
               ],
             ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const OrdenNuevaPage()),
+          );
+          if (result == true) {
+            _loadOrdenes();
+          }
+        },
+        icon: const Icon(Icons.add_circle_outline),
+        label: const Text('NUEVO INGRESO'),
+        backgroundColor: Colors.blue.shade800,
+        foregroundColor: Colors.white,
+      ),
     );
   }
 
@@ -410,15 +492,40 @@ class _OrdenesPageState extends State<OrdenesPage>
             'INICIAR TRABAJO',
             Icons.play_arrow_rounded,
             Colors.blue.shade800,
-            () => _updateStatus(ot, 'EN_PROCESO'),
+            () async {
+              final confirm = await _showConfirmDialog(
+                'Iniciar Trabajo',
+                '¿Confirmas que deseas pasar esta orden a estado "En Proceso"?',
+              );
+              if (confirm) {
+                _updateStatus(ot, 'EN_PROCESO');
+              }
+            },
           ),
-        if (ot.estado == 'EN_PROCESO')
+        if (ot.estado == 'EN_PROCESO') ...[
+          _buildActionButton(
+            'AÑADIR TRABAJO',
+            Icons.add_circle_outline,
+            Colors.blue.shade700,
+            () => _agregarTrabajo(ot),
+            isOutlined: true,
+          ),
+          const SizedBox(width: 8),
           _buildActionButton(
             'FINALIZAR',
             Icons.task_alt_rounded,
             Colors.orange.shade800,
-            () => _updateStatus(ot, 'FINALIZADA'),
+            () async {
+              final confirm = await _showConfirmDialog(
+                'Finalizar Trabajo',
+                '¿Confirmas que deseas pasar esta orden a estado "Finalizada"?',
+              );
+              if (confirm) {
+                _updateStatus(ot, 'FINALIZADA');
+              }
+            },
           ),
+        ],
         if (ot.estado == 'FINALIZADA') ...[
           _buildActionButton(
             'BOLETA',

@@ -49,7 +49,7 @@ class _ClientesPageState extends State<ClientesPage> {
             context,
             MaterialPageRoute(builder: (context) => const ClienteFormPage()),
           );
-          if (result == true) _loadClientes();
+          if (result != null) _loadClientes();
         },
         child: const Icon(Icons.add),
       ),
@@ -106,7 +106,7 @@ class _ClientesPageState extends State<ClientesPage> {
                                     ClienteFormPage(cliente: cliente),
                               ),
                             );
-                            if (result == true) _loadClientes();
+                            if (result != null) _loadClientes();
                           },
                         ),
                       ],

@@ -108,14 +108,6 @@ class DataRepository {
     return [];
   }
 
-  Future<Map<String, dynamic>> emitirFactura(String otId, String tipo) async {
-    final response = await _apiService.post(
-      '${ApiConfig.baseUrl}/facturas/emitir.php',
-      {'ot_id': otId, 'tipo_comprobante': tipo},
-    );
-    return response;
-  }
-
   Future<String?> uploadImage(
     File imageFile, {
     String folder = 'general',
@@ -152,5 +144,21 @@ class DataRepository {
       'ot_estado': nuevoEstado,
     });
     return response['status'] == 'success';
+  }
+
+  Future<bool> agregarItemsAOrden(String otId, List<OrdenItem> items) async {
+    final response = await _apiService.post(ApiConfig.ordenesAgregarItems, {
+      'ot_id': otId,
+      'items': items.map((i) => i.toJson()).toList(),
+    });
+    return response['status'] == 'success';
+  }
+
+  Future<Map<String, dynamic>> emitirFactura(String otId, String tipo) async {
+    final response = await _apiService.post(ApiConfig.facturasEmitir, {
+      'ot_id': otId,
+      'tipo_comprobante': tipo,
+    });
+    return response;
   }
 }

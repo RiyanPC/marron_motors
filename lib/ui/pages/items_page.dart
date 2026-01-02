@@ -44,7 +44,7 @@ class _ItemsPageState extends State<ItemsPage> {
             context,
             MaterialPageRoute(builder: (context) => const ItemFormPage()),
           );
-          if (result == true) _loadItems();
+          if (result != null) _loadItems();
         },
         child: const Icon(Icons.add),
       ),
@@ -103,7 +103,7 @@ class _ItemsPageState extends State<ItemsPage> {
                                 builder: (context) => ItemFormPage(item: item),
                               ),
                             );
-                            if (result == true) _loadItems();
+                            if (result != null) _loadItems();
                           },
                         ),
                       ],

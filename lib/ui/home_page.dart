@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'pages/clientes_page.dart';
 import 'pages/vehiculos_page.dart';
 import 'pages/items_page.dart';
-import 'pages/orden_nueva_page.dart';
 import 'pages/ordenes_page.dart';
 
 class HomePage extends StatelessWidget {
@@ -57,16 +56,6 @@ class HomePage extends StatelessWidget {
               () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const OrdenesPage()),
-              ),
-            ),
-            _buildMenuCard(
-              context,
-              'Nueva Orden',
-              Icons.add_task_rounded,
-              Colors.deepPurple,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const OrdenNuevaPage()),
               ),
             ),
           ],

@@ -4,9 +4,7 @@ import '../../services/data_repository.dart';
 import '../../models/orden.dart';
 import '../../models/vehiculo.dart';
 import '../../models/cliente.dart';
-import '../../models/item.dart';
 import '../widgets/vehiculo_selector_modal.dart';
-import '../widgets/item_selector_modal.dart';
 
 class OrdenNuevaPage extends StatefulWidget {
   const OrdenNuevaPage({super.key});
@@ -23,8 +21,6 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
   Cliente? _selectedCliente;
   late TextEditingController _descripcionController;
   List<Cliente> _clientes = [];
-  List<Item> _availableItems = [];
-  List<OrdenItem> _selectedItems = [];
 
   bool _loading = true;
 
@@ -43,24 +39,14 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
 
   Future<void> _loadData() async {
     try {
-      final items = await _repository.getItems('1');
       final clients = await _repository.getClientes('1');
       setState(() {
-        _availableItems = items;
         _clientes = clients;
         _loading = false;
       });
     } catch (e) {
       setState(() => _loading = false);
     }
-  }
-
-  double get _total => _selectedItems.fold(0, (sum, item) => sum + item.total);
-
-  void _addItem(OrdenItem ordenItem) {
-    setState(() {
-      _selectedItems.add(ordenItem);
-    });
   }
 
   Future<void> _submit() async {
@@ -73,16 +59,16 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
       descripcion: _descripcionController.text,
       fechaIngreso: DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
       estado: 'ABIERTA',
-      total: _total,
-      items: _selectedItems,
+      total: 0,
+      items: [],
     );
 
     try {
       final success = await _repository.crearOrden(orden);
       if (success) {
-        Navigator.pop(context);
+        Navigator.pop(context, true); // Retornamos true para refrescar la lista
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Orden creada correctamente')),
+          const SnackBar(content: Text('Ingreso registrado correctamente')),
         );
       }
     } catch (e) {
@@ -97,7 +83,7 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('Nueva Orden de Trabajo'),
+        title: const Text('Registrar Ingreso de Vehículo'),
         centerTitle: true,
       ),
       body: _loading
@@ -126,10 +112,6 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
                         ),
                         _buildProblemDescription(),
                         const SizedBox(height: 20),
-                        _buildSectionHeader(Icons.list_alt, 'RESUMEN DE ITEMS'),
-                        _buildItemsList(),
-                        const SizedBox(height: 12),
-                        _buildAddButton(),
                       ],
                     ),
                   ),
@@ -258,108 +240,7 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
     );
   }
 
-  Widget _buildItemsList() {
-    if (_selectedItems.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.symmetric(vertical: 40),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.shade200),
-        ),
-        child: Column(
-          children: [
-            Icon(Icons.receipt_long, size: 48, color: Colors.grey[300]),
-            const SizedBox(height: 12),
-            Text(
-              'No hay servicios añadidos aún',
-              style: TextStyle(color: Colors.grey[500]),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: ListView.separated(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: _selectedItems.length,
-        separatorBuilder: (_, __) => const Divider(height: 1, indent: 60),
-        itemBuilder: (context, index) {
-          final oi = _selectedItems[index];
-          final item = _availableItems.firstWhere(
-            (i) => i.id == oi.itemId,
-            orElse: () => _availableItems.first,
-          ); // Hack for now
-
-          return ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Colors.blue.shade50,
-              child: Icon(
-                item.tipo == 'SERVICIO'
-                    ? Icons.build_outlined
-                    : Icons.inventory_2_outlined,
-                size: 20,
-                color: Colors.blue.shade700,
-              ),
-            ),
-            title: Text(
-              item.nombre,
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-            ),
-            subtitle: Text(
-              '${oi.cantidad} x S/ ${oi.precioUnitario.toStringAsFixed(2)} ${oi.afectoIgv == 0 ? "(Sin IGV)" : ""}',
-              style: TextStyle(
-                fontSize: 12,
-                color: oi.afectoIgv == 0 ? Colors.orange : Colors.grey[600],
-              ),
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'S/ ${oi.total.toStringAsFixed(2)}',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(width: 4),
-                IconButton(
-                  icon: const Icon(
-                    Icons.remove_circle_outline,
-                    color: Colors.redAccent,
-                    size: 20,
-                  ),
-                  onPressed: () =>
-                      setState(() => _selectedItems.removeAt(index)),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildAddButton() {
-    return OutlinedButton.icon(
-      onPressed: _showItemSelector,
-      icon: const Icon(Icons.add_circle_outline),
-      label: const Text('AÑADIR SERVICIO O PRODUCTO'),
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        side: BorderSide(color: Colors.blue.shade700),
-        foregroundColor: Colors.blue.shade700,
-      ),
-    );
-  }
-
   Widget _buildBottomSummary() {
-    final subtotal = _selectedItems.fold(0.0, (sum, i) => sum + i.subtotal);
-    final igv = _selectedItems.fold(0.0, (sum, i) => sum + i.igv);
-
     return Container(
       padding: EdgeInsets.only(
         left: 24,
@@ -379,64 +260,26 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'SUBTOTAL: S/ ${subtotal.toStringAsFixed(2)}',
-                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                  ),
-                  Text(
-                    'IGV (18%): S/ ${igv.toStringAsFixed(2)}',
-                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                  ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  const Text(
-                    'TOTAL A PAGAR',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                  Text(
-                    'S/ ${_total.toStringAsFixed(2)}',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.blue.shade900,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton(
+            child: ElevatedButton.icon(
               onPressed: _submit,
+              icon: const Icon(Icons.check_circle_outline),
+              label: const Text(
+                'REGISTRAR INGRESO VEHÍCULO',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue.shade800,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 18),
+                padding: const EdgeInsets.symmetric(vertical: 20),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
                 elevation: 4,
                 shadowColor: Colors.blue.withOpacity(0.4),
-              ),
-              child: const Text(
-                'CREAR Y GUARDAR ORDEN',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
             ),
           ),
@@ -527,20 +370,5 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
         ],
       ),
     );
-  }
-
-  void _showItemSelector() async {
-    final result = await showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => const ItemSelectorModal(),
-    );
-
-    if (result is OrdenItem) {
-      _addItem(result);
-    }
   }
 }

@@ -17,4 +17,7 @@ class ApiConfig {
   static const String clientesConsulta = '$baseUrl/clientes/consulta_doc.php';
   static const String ordenesActualizarEstado =
       '$baseUrl/ordenes/actualizar_estado.php';
+  static const String ordenesAgregarItems =
+      '$baseUrl/ordenes/agregar_items.php';
+  static const String facturasEmitir = '$baseUrl/facturas/emitir.php';
 }
