@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../../services/data_repository.dart';
 import '../../models/orden.dart';
 import '../../models/vehiculo.dart';
+import '../../models/cliente.dart';
 import '../../models/item.dart';
 
 class OrdenNuevaPage extends StatefulWidget {
@@ -17,8 +18,11 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
   final _formKey = GlobalKey<FormState>();
 
   String? _selectedVehiculoId;
+  Vehiculo? _selectedVehiculo;
+  Cliente? _selectedCliente;
   String _descripcion = '';
   List<Vehiculo> _vehiculos = [];
+  List<Cliente> _clientes = [];
   List<Item> _availableItems = [];
   List<OrdenItem> _selectedItems = [];
 
@@ -34,9 +38,11 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
     try {
       final vehs = await _repository.getVehiculos('1');
       final items = await _repository.getItems('1');
+      final clients = await _repository.getClientes('1');
       setState(() {
         _vehiculos = vehs;
         _availableItems = items;
+        _clientes = clients;
         _loading = false;
       });
     } catch (e) {
@@ -111,9 +117,22 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
                           ),
                         )
                         .toList(),
-                    onChanged: (val) =>
-                        setState(() => _selectedVehiculoId = val),
+                    onChanged: (val) {
+                      setState(() {
+                        _selectedVehiculoId = val;
+                        _selectedVehiculo = _vehiculos.firstWhere(
+                          (v) => v.id == val,
+                        );
+                        _selectedCliente = _clientes.firstWhere(
+                          (c) => c.id == _selectedVehiculo?.cliId,
+                        );
+                      });
+                    },
                   ),
+                  if (_selectedVehiculo != null) ...[
+                    const SizedBox(height: 16),
+                    _buildInfoSection(),
+                  ],
                   const SizedBox(height: 16),
                   TextFormField(
                     decoration: const InputDecoration(
@@ -164,6 +183,90 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
                 ],
               ),
             ),
+    );
+  }
+
+  Widget _buildInfoSection() {
+    return Card(
+      elevation: 0,
+      color: Colors.grey.shade50,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade300),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.person, size: 18, color: Colors.blue.shade700),
+                const SizedBox(width: 8),
+                const Text(
+                  'Datos del Cliente',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            const Divider(),
+            _infoRow('Nombre:', _selectedCliente?.nombre ?? 'No encontrado'),
+            _infoRow(
+              '${_selectedCliente?.tipoDocumento ?? 'Doc'}:',
+              _selectedCliente?.numeroDocumento ?? '-',
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(
+                  Icons.directions_car,
+                  size: 18,
+                  color: Colors.blue.shade700,
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  'Datos del Vehículo',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            const Divider(),
+            _infoRow(
+              'Vehículo:',
+              '${_selectedVehiculo?.marca} ${_selectedVehiculo?.modelo}',
+            ),
+            _infoRow(
+              'Año/Color:',
+              '${_selectedVehiculo?.anio} / ${_selectedVehiculo?.color}',
+            ),
+            _infoRow('VIN/Chasis:', _selectedVehiculo?.vin ?? '-'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _infoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 80,
+            child: Text(
+              label,
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
