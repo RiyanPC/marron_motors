@@ -28,15 +28,27 @@ class VehiculoDetallePage extends StatelessWidget {
     return Center(
       child: Column(
         children: [
-          CircleAvatar(
-            radius: 40,
-            backgroundColor: Colors.orange.shade100,
-            child: const Icon(
-              Icons.directions_car_rounded,
-              size: 48,
-              color: Colors.orange,
-            ),
-          ),
+          vehiculo.foto.isNotEmpty
+              ? Container(
+                  height: 150,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    image: DecorationImage(
+                      image: NetworkImage(vehiculo.foto),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                )
+              : CircleAvatar(
+                  radius: 40,
+                  backgroundColor: Colors.orange.shade100,
+                  child: const Icon(
+                    Icons.directions_car_rounded,
+                    size: 48,
+                    color: Colors.orange,
+                  ),
+                ),
           const SizedBox(height: 16),
           Text(
             vehiculo.placa,

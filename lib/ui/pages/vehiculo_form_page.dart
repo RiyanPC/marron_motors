@@ -23,6 +23,7 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
   late TextEditingController _anioController;
   late TextEditingController _colorController;
   late TextEditingController _vinController;
+  late TextEditingController _fotoController;
 
   List<Cliente> _clientes = [];
   String? _selectedClienteId;
@@ -36,6 +37,7 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
     _anioController = TextEditingController(text: widget.vehiculo?.anio);
     _colorController = TextEditingController(text: widget.vehiculo?.color);
     _vinController = TextEditingController(text: widget.vehiculo?.vin);
+    _fotoController = TextEditingController(text: widget.vehiculo?.foto);
     _selectedClienteId = widget.vehiculo?.cliId;
     _loadClientes();
   }
@@ -75,6 +77,7 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
       anio: _anioController.text,
       color: _colorController.text,
       vin: _vinController.text,
+      foto: _fotoController.text,
     );
 
     try {
@@ -183,6 +186,14 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
                       controller: _vinController,
                       decoration: const InputDecoration(
                         labelText: 'VIN / Chasis / Motor',
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _fotoController,
+                      decoration: const InputDecoration(
+                        labelText: 'URL de la Foto',
+                        hintText: 'https://ejemplo.com/foto.jpg',
                       ),
                     ),
                     const SizedBox(height: 32),

@@ -8,6 +8,7 @@ class Vehiculo {
   final String anio;
   final String color;
   final String vin;
+  final String foto;
   final String cliNombre;
 
   Vehiculo({
@@ -20,6 +21,7 @@ class Vehiculo {
     required this.anio,
     required this.color,
     required this.vin,
+    this.foto = '',
     this.cliNombre = '',
   });
 
@@ -34,6 +36,7 @@ class Vehiculo {
       anio: json['veh_anio']?.toString() ?? '',
       color: json['veh_color'] ?? '',
       vin: json['veh_vin'] ?? '',
+      foto: json['veh_foto'] ?? '',
       cliNombre: json['cli_nombre'] ?? '',
     );
   }
@@ -49,6 +52,7 @@ class Vehiculo {
       'veh_anio': anio,
       'veh_color': color,
       'veh_vin': vin,
+      'veh_foto': foto,
     };
   }
 }
