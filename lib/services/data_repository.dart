@@ -154,6 +154,14 @@ class DataRepository {
     return response['status'] == 'success';
   }
 
+  Future<bool> eliminarItemDesdeOrden(String otId, String oiId) async {
+    final response = await _apiService.post(ApiConfig.ordenesEliminarItem, {
+      'ot_id': otId,
+      'oi_id': oiId,
+    });
+    return response['status'] == 'success';
+  }
+
   Future<Map<String, dynamic>> emitirFactura(String otId, String tipo) async {
     final response = await _apiService.post(ApiConfig.facturasEmitir, {
       'ot_id': otId,

@@ -62,6 +62,7 @@ class OrdenItem {
   final String? id;
   final String? otId;
   final String itemId;
+  final String? itemNombre;
   final double cantidad;
   final double precioUnitario;
   final double subtotal;
@@ -73,6 +74,7 @@ class OrdenItem {
     this.id,
     this.otId,
     required this.itemId,
+    this.itemNombre,
     required this.cantidad,
     required this.precioUnitario,
     required this.subtotal,
@@ -86,6 +88,7 @@ class OrdenItem {
       id: json['oi_id']?.toString(),
       otId: json['oi_ot_id']?.toString(),
       itemId: json['oi_item_id'].toString(),
+      itemNombre: json['item_nombre'],
       cantidad: double.tryParse(json['oi_cantidad']?.toString() ?? '0') ?? 0.0,
       precioUnitario:
           double.tryParse(json['oi_precio_unitario']?.toString() ?? '0') ?? 0.0,

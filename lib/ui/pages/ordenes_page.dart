@@ -130,6 +130,30 @@ class _OrdenesPageState extends State<OrdenesPage>
     }
   }
 
+  Future<void> _eliminarItem(OrdenTrabajo orden, OrdenItem item) async {
+    final confirm = await _showConfirmDialog(
+      'Eliminar Item',
+      '¿Deseas eliminar "${item.itemNombre}" de esta orden?',
+    );
+
+    if (confirm) {
+      setState(() => _loading = true);
+      final success = await _repository.eliminarItemDesdeOrden(
+        orden.id!,
+        item.id!,
+      );
+      if (success) {
+        await _loadOrdenes();
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Item eliminado')));
+      } else {
+        setState(() => _loading = false);
+        _showError('No se pudo eliminar el item');
+      }
+    }
+  }
+
   Future<bool> _showConfirmDialog(String title, String message) async {
     return await showDialog<bool>(
           context: context,
@@ -365,6 +389,54 @@ class _OrdenesPageState extends State<OrdenesPage>
                         ),
                       ],
                     ),
+                    if (ot.items.isNotEmpty) ...[
+                      const Divider(height: 24),
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: ot.items.length,
+                        itemBuilder: (context, i) {
+                          final item = ot.items[i];
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 4),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.check_circle,
+                                  size: 14,
+                                  color: Colors.green.shade600,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    item.itemNombre ?? 'Item ${i + 1}',
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                ),
+                                Text(
+                                  'x${item.cantidad.toInt()} S/ ${item.total.toStringAsFixed(2)}',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                if (ot.estado != 'FACTURADA')
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.delete_outline,
+                                      size: 16,
+                                      color: Colors.red,
+                                    ),
+                                    onPressed: () => _eliminarItem(ot, item),
+                                    constraints: const BoxConstraints(),
+                                    padding: const EdgeInsets.only(left: 8),
+                                  ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -527,6 +599,14 @@ class _OrdenesPageState extends State<OrdenesPage>
           ),
         ],
         if (ot.estado == 'FINALIZADA') ...[
+          _buildActionButton(
+            'AÑADIR TRABAJO',
+            Icons.add_circle_outline,
+            Colors.blue.shade700,
+            () => _agregarTrabajo(ot),
+            isOutlined: true,
+          ),
+          const SizedBox(width: 8),
           _buildActionButton(
             'BOLETA',
             Icons.receipt_outlined,
