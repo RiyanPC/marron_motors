@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../services/data_repository.dart';
 import '../../models/item.dart';
 import 'item_form_page.dart';
+import 'item_detalle_page.dart';
 
 class ItemsPage extends StatefulWidget {
   const ItemsPage({super.key});
@@ -56,6 +57,14 @@ class _ItemsPageState extends State<ItemsPage> {
                 final item = _items[index];
                 return Card(
                   child: ListTile(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ItemDetallePage(item: item),
+                        ),
+                      );
+                    },
                     title: Text(item.nombre),
                     subtitle: Text(item.descripcion),
                     trailing: Row(
@@ -69,6 +78,22 @@ class _ItemsPageState extends State<ItemsPage> {
                           ),
                         ),
                         const SizedBox(width: 8),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.visibility,
+                            color: Colors.blue,
+                            size: 20,
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    ItemDetallePage(item: item),
+                              ),
+                            );
+                          },
+                        ),
                         IconButton(
                           icon: const Icon(Icons.edit, size: 20),
                           onPressed: () async {

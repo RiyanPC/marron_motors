@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../services/data_repository.dart';
 import '../../models/cliente.dart';
 import 'cliente_form_page.dart';
+import 'cliente_detalle_page.dart';
 
 class ClientesPage extends StatefulWidget {
   const ClientesPage({super.key});
@@ -63,23 +64,52 @@ class _ClientesPageState extends State<ClientesPage> {
                 final cliente = _clientes[index];
                 return Card(
                   child: ListTile(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              ClienteDetallePage(cliente: cliente),
+                        ),
+                      );
+                    },
                     leading: CircleAvatar(child: Text(cliente.nombre[0])),
                     title: Text(cliente.nombre),
                     subtitle: Text(
                       '${cliente.tipoDocumento}: ${cliente.numeroDocumento} • ${cliente.telefono}',
                     ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () async {
-                        final result = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                ClienteFormPage(cliente: cliente),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(
+                            Icons.visibility,
+                            color: Colors.blue,
                           ),
-                        );
-                        if (result == true) _loadClientes();
-                      },
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    ClienteDetallePage(cliente: cliente),
+                              ),
+                            );
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: () async {
+                            final result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    ClienteFormPage(cliente: cliente),
+                              ),
+                            );
+                            if (result == true) _loadClientes();
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 );

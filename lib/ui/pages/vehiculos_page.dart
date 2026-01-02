@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../services/data_repository.dart';
 import '../../models/vehiculo.dart';
 import 'vehiculo_form_page.dart';
+import 'vehiculo_detalle_page.dart';
 
 class VehiculosPage extends StatefulWidget {
   const VehiculosPage({super.key});
@@ -61,6 +62,15 @@ class _VehiculosPageState extends State<VehiculosPage> {
                 final veh = _vehiculos[index];
                 return Card(
                   child: ListTile(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              VehiculoDetallePage(vehiculo: veh),
+                        ),
+                      );
+                    },
                     leading: const Icon(
                       Icons.directions_car,
                       color: Colors.blue,
@@ -72,18 +82,38 @@ class _VehiculosPageState extends State<VehiculosPage> {
                     subtitle: Text(
                       '${veh.marca} ${veh.modelo} • ${veh.cliNombre}',
                     ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () async {
-                        final result = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                VehiculoFormPage(vehiculo: veh),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(
+                            Icons.visibility,
+                            color: Colors.blue,
                           ),
-                        );
-                        if (result == true) _loadVehiculos();
-                      },
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    VehiculoDetallePage(vehiculo: veh),
+                              ),
+                            );
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: () async {
+                            final result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    VehiculoFormPage(vehiculo: veh),
+                              ),
+                            );
+                            if (result == true) _loadVehiculos();
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 );
