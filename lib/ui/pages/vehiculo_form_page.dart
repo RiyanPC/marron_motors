@@ -78,7 +78,14 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
 
     setState(() => _uploadingImage = true);
     try {
-      final url = await _repository.uploadImage(_imageFile!);
+      final placa = _placaController.text.isNotEmpty
+          ? _placaController.text
+          : 'vehiculo';
+      final url = await _repository.uploadImage(
+        _imageFile!,
+        folder: 'vehiculos',
+        name: placa,
+      );
       if (url != null) {
         setState(() {
           _fotoController.text = url;

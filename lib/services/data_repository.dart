@@ -89,8 +89,16 @@ class DataRepository {
     return response['status'] == 'success';
   }
 
-  Future<String?> uploadImage(File imageFile) async {
-    final response = await _apiService.upload(ApiConfig.uploadImage, imageFile);
+  Future<String?> uploadImage(
+    File imageFile, {
+    String folder = 'general',
+    String name = 'img',
+  }) async {
+    final response = await _apiService.upload(
+      ApiConfig.uploadImage,
+      imageFile,
+      fields: {'folder': folder, 'name': name},
+    );
     if (response['status'] == 'success') {
       return response['url'];
     }
