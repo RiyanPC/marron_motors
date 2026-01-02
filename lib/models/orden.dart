@@ -9,6 +9,7 @@ class OrdenTrabajo {
   final String? cliNombre;
   final String estado;
   final double total;
+  final String? facId;
   final List<OrdenItem> items;
 
   OrdenTrabajo({
@@ -22,6 +23,7 @@ class OrdenTrabajo {
     this.cliNombre,
     required this.estado,
     required this.total,
+    this.facId,
     required this.items,
   });
 
@@ -37,6 +39,7 @@ class OrdenTrabajo {
       cliNombre: json['cli_nombre'],
       estado: json['ot_estado'] ?? 'ABIERTA',
       total: double.tryParse(json['ot_total']?.toString() ?? '0') ?? 0.0,
+      facId: json['fac_id']?.toString(),
       items: json['items'] != null
           ? (json['items'] as List).map((e) => OrdenItem.fromJson(e)).toList()
           : [],
@@ -64,6 +67,7 @@ class OrdenItem {
   final double subtotal;
   final double igv;
   final double total;
+  final int afectoIgv;
 
   OrdenItem({
     this.id,
@@ -74,6 +78,7 @@ class OrdenItem {
     required this.subtotal,
     required this.igv,
     required this.total,
+    this.afectoIgv = 1,
   });
 
   factory OrdenItem.fromJson(Map<String, dynamic> json) {
@@ -87,6 +92,7 @@ class OrdenItem {
       subtotal: double.tryParse(json['oi_subtotal']?.toString() ?? '0') ?? 0.0,
       igv: double.tryParse(json['oi_igv']?.toString() ?? '0') ?? 0.0,
       total: double.tryParse(json['oi_total']?.toString() ?? '0') ?? 0.0,
+      afectoIgv: int.tryParse(json['oi_afecto_igv']?.toString() ?? '1') ?? 1,
     );
   }
 
@@ -98,6 +104,7 @@ class OrdenItem {
       'oi_subtotal': subtotal,
       'oi_igv': igv,
       'oi_total': total,
+      'oi_afecto_igv': afectoIgv,
     };
   }
 }

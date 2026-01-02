@@ -16,6 +16,7 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
   final _searchController = TextEditingController();
   final _cantidadController = TextEditingController(text: '1');
   final _precioController = TextEditingController();
+  bool _afectoIgv = true;
 
   List<Item> _allItems = [];
   List<Item> _filteredItems = [];
@@ -101,7 +102,7 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
     }
 
     final subtotal = cant * precio;
-    final igv = subtotal * 0.18;
+    final igv = _afectoIgv ? subtotal * 0.18 : 0.0;
     final total = subtotal + igv;
 
     final ordenItem = OrdenItem(
@@ -111,6 +112,7 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
       subtotal: subtotal,
       igv: igv,
       total: total,
+      afectoIgv: _afectoIgv ? 1 : 0,
     );
 
     Navigator.pop(context, ordenItem);
@@ -242,7 +244,21 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
+            SwitchListTile(
+              title: const Text('Aplicar IGV (18%)'),
+              subtitle: Text(
+                _afectoIgv ? 'Operación Gravada' : 'Operación Exonerada',
+              ),
+              value: _afectoIgv,
+              onChanged: (val) => setState(() => _afectoIgv = val),
+              secondary: Icon(
+                _afectoIgv ? Icons.receipt : Icons.money_off,
+                color: _afectoIgv ? Colors.blue : Colors.grey,
+              ),
+              dense: true,
+            ),
+            const SizedBox(height: 12),
             ElevatedButton(
               onPressed: _confirmSelection,
               style: ElevatedButton.styleFrom(

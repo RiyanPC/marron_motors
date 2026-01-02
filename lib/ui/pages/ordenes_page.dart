@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../models/orden.dart';
 import '../../services/data_repository.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../core/api_config.dart';
 
 class OrdenesPage extends StatefulWidget {
   const OrdenesPage({super.key});
@@ -56,6 +58,13 @@ class _OrdenesPageState extends State<OrdenesPage> {
     } catch (e) {
       Navigator.pop(context);
       _showError(e.toString());
+    }
+  }
+
+  Future<void> _verComprobante(String facId) async {
+    final url = Uri.parse('${ApiConfig.baseUrl}/facturas/ver.php?id=$facId');
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      _showError('No se pudo abrir el comprobante');
     }
   }
 
@@ -149,11 +158,24 @@ class _OrdenesPageState extends State<OrdenesPage> {
                                 ],
                               )
                             else
-                              const Center(
-                                child: Chip(
-                                  label: Text('COMPROBANTE EMITIDO'),
-                                  backgroundColor: Colors.green,
-                                  labelStyle: TextStyle(color: Colors.white),
+                              Center(
+                                child: Column(
+                                  children: [
+                                    const Chip(
+                                      label: Text('COMPROBANTE EMITIDO'),
+                                      backgroundColor: Colors.green,
+                                      labelStyle: TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    if (ot.facId != null)
+                                      TextButton.icon(
+                                        onPressed: () =>
+                                            _verComprobante(ot.facId!),
+                                        icon: const Icon(Icons.visibility),
+                                        label: const Text('VER COMPROBANTE'),
+                                      ),
+                                  ],
                                 ),
                               ),
                           ],

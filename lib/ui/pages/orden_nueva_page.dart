@@ -95,142 +95,353 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Nueva Orden')),
+      backgroundColor: Colors.grey[100],
+      appBar: AppBar(
+        title: const Text('Nueva Orden de Trabajo'),
+        centerTitle: true,
+      ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : Form(
               key: _formKey,
-              child: ListView(
-                padding: const EdgeInsets.all(16),
+              child: Column(
                 children: [
-                  InkWell(
-                    onTap: () async {
-                      final result = await showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.vertical(
-                            top: Radius.circular(20),
-                          ),
+                  Expanded(
+                    child: ListView(
+                      padding: const EdgeInsets.all(16),
+                      children: [
+                        _buildSectionHeader(
+                          Icons.person_pin,
+                          'CLIENTE Y VEHÍCULO',
                         ),
-                        builder: (context) => VehiculoSelectorModal(
-                          initialSelectedId: _selectedVehiculo?.id,
-                        ),
-                      );
-
-                      if (result is Vehiculo) {
-                        setState(() {
-                          _selectedVehiculo = result;
-                          _selectedCliente = _clientes.firstWhere(
-                            (c) => c.id == _selectedVehiculo?.cliId,
-                            orElse: () => _selectedCliente!, // Fallback
-                          );
-                        });
-                      }
-                    },
-                    child: InputDecorator(
-                      decoration: const InputDecoration(
-                        labelText: 'Vehículo *',
-                        prefixIcon: Icon(Icons.directions_car),
-                        suffixIcon: Icon(Icons.arrow_drop_down),
-                      ),
-                      child: Text(
-                        _selectedVehiculo != null
-                            ? '${_selectedVehiculo!.placa} - ${_selectedVehiculo!.marca} ${_selectedVehiculo!.modelo}'
-                            : 'Toca para seleccionar un vehículo',
-                        style: TextStyle(
-                          color: _selectedVehiculo != null
-                              ? Colors.black
-                              : Colors.grey.shade600,
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (_selectedVehiculo != null) ...[
-                    const SizedBox(height: 16),
-                    _buildInfoSection(),
-                  ],
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _descripcionController,
-                    decoration: const InputDecoration(
-                      labelText: 'Descripción del problema',
-                    ),
-                    maxLines: 3,
-                  ),
-                  const Divider(height: 32),
-                  const Text(
-                    'Items / Servicios',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  ..._selectedItems.asMap().entries.map((entry) {
-                    final idx = entry.key;
-                    final oi = entry.value;
-                    final item = _availableItems.firstWhere(
-                      (i) => i.id == oi.itemId,
-                      orElse: () => Item(
-                        id: oi.itemId,
-                        empId: '',
-                        nombre: 'Item desconocido',
-                        descripcion: '',
-                        tipo: 'SERVICIO',
-                        precio: 0,
-                        codigoTributo: '10',
-                        estado: 'ACTIVO',
-                      ),
-                    );
-                    return ListTile(
-                      title: Text(item.nombre),
-                      subtitle: Text(
-                        'Cant: ${oi.cantidad} x S/ ${oi.precioUnitario.toStringAsFixed(2)}',
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'S/ ${oi.total.toStringAsFixed(2)}',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.delete_outline,
-                              color: Colors.red,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _selectedItems.removeAt(idx);
-                              });
-                            },
-                          ),
+                        _buildVehiculoSelector(),
+                        if (_selectedVehiculo != null) ...[
+                          const SizedBox(height: 12),
+                          _buildInfoSection(),
                         ],
-                      ),
-                    );
-                  }),
-                  TextButton.icon(
-                    onPressed: () => _showItemSelector(),
-                    icon: const Icon(Icons.add),
-                    label: const Text('Añadir Item'),
-                  ),
-                  const Divider(),
-                  Text(
-                    'Total con IGV: S/ ${_total.toStringAsFixed(2)}',
-                    textAlign: TextAlign.right,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                        const SizedBox(height: 20),
+                        _buildSectionHeader(
+                          Icons.description,
+                          'DETALLES DEL SERVICIO',
+                        ),
+                        _buildProblemDescription(),
+                        const SizedBox(height: 20),
+                        _buildSectionHeader(Icons.list_alt, 'RESUMEN DE ITEMS'),
+                        _buildItemsList(),
+                        const SizedBox(height: 12),
+                        _buildAddButton(),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: _submit,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                    child: const Text('CREAR ORDEN'),
-                  ),
+                  _buildBottomSummary(),
                 ],
               ),
             ),
+    );
+  }
+
+  Widget _buildSectionHeader(IconData icon, String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12, left: 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: Colors.blue.shade800),
+          const SizedBox(width: 8),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.blue.shade900,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVehiculoSelector() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: InkWell(
+        onTap: () async {
+          final result = await showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            builder: (context) =>
+                VehiculoSelectorModal(initialSelectedId: _selectedVehiculo?.id),
+          );
+
+          if (result is Vehiculo) {
+            setState(() {
+              _selectedVehiculo = result;
+              _selectedCliente = _clientes.firstWhere(
+                (c) => c.id == _selectedVehiculo?.cliId,
+                orElse: () => _selectedCliente!, // Fallback
+              );
+            });
+          }
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(Icons.directions_car, color: Colors.blue.shade700),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _selectedVehiculo != null
+                          ? _selectedVehiculo!.placa
+                          : 'Seleccionar Vehículo',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: _selectedVehiculo != null
+                            ? Colors.black
+                            : Colors.grey[600],
+                      ),
+                    ),
+                    if (_selectedVehiculo != null)
+                      Text(
+                        '${_selectedVehiculo!.marca} ${_selectedVehiculo!.modelo}',
+                        style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                      )
+                    else
+                      const Text(
+                        'Toca para buscar placa o vehículo',
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                  ],
+                ),
+              ),
+              Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProblemDescription() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: TextFormField(
+          controller: _descripcionController,
+          maxLines: 4,
+          decoration: InputDecoration(
+            hintText: 'Describe el problema o el mantenimiento a realizar...',
+            hintStyle: TextStyle(fontSize: 14, color: Colors.grey[500]),
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.all(12),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildItemsList() {
+    if (_selectedItems.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.symmetric(vertical: 40),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Column(
+          children: [
+            Icon(Icons.receipt_long, size: 48, color: Colors.grey[300]),
+            const SizedBox(height: 12),
+            Text(
+              'No hay servicios añadidos aún',
+              style: TextStyle(color: Colors.grey[500]),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: _selectedItems.length,
+        separatorBuilder: (_, __) => const Divider(height: 1, indent: 60),
+        itemBuilder: (context, index) {
+          final oi = _selectedItems[index];
+          final item = _availableItems.firstWhere(
+            (i) => i.id == oi.itemId,
+            orElse: () => _availableItems.first,
+          ); // Hack for now
+
+          return ListTile(
+            leading: CircleAvatar(
+              backgroundColor: Colors.blue.shade50,
+              child: Icon(
+                item.tipo == 'SERVICIO'
+                    ? Icons.build_outlined
+                    : Icons.inventory_2_outlined,
+                size: 20,
+                color: Colors.blue.shade700,
+              ),
+            ),
+            title: Text(
+              item.nombre,
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+            ),
+            subtitle: Text(
+              '${oi.cantidad} x S/ ${oi.precioUnitario.toStringAsFixed(2)} ${oi.afectoIgv == 0 ? "(Sin IGV)" : ""}',
+              style: TextStyle(
+                fontSize: 12,
+                color: oi.afectoIgv == 0 ? Colors.orange : Colors.grey[600],
+              ),
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'S/ ${oi.total.toStringAsFixed(2)}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(width: 4),
+                IconButton(
+                  icon: const Icon(
+                    Icons.remove_circle_outline,
+                    color: Colors.redAccent,
+                    size: 20,
+                  ),
+                  onPressed: () =>
+                      setState(() => _selectedItems.removeAt(index)),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildAddButton() {
+    return OutlinedButton.icon(
+      onPressed: _showItemSelector,
+      icon: const Icon(Icons.add_circle_outline),
+      label: const Text('AÑADIR SERVICIO O PRODUCTO'),
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        side: BorderSide(color: Colors.blue.shade700),
+        foregroundColor: Colors.blue.shade700,
+      ),
+    );
+  }
+
+  Widget _buildBottomSummary() {
+    final subtotal = _selectedItems.fold(0.0, (sum, i) => sum + i.subtotal);
+    final igv = _selectedItems.fold(0.0, (sum, i) => sum + i.igv);
+
+    return Container(
+      padding: EdgeInsets.only(
+        left: 24,
+        right: 24,
+        bottom: MediaQuery.of(context).padding.bottom + 16,
+        top: 20,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
+        ],
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'SUBTOTAL: S/ ${subtotal.toStringAsFixed(2)}',
+                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                  ),
+                  Text(
+                    'IGV (18%): S/ ${igv.toStringAsFixed(2)}',
+                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                  ),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  const Text(
+                    'TOTAL A PAGAR',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  Text(
+                    'S/ ${_total.toStringAsFixed(2)}',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.blue.shade900,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _submit,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue.shade800,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 18),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                elevation: 4,
+                shadowColor: Colors.blue.withOpacity(0.4),
+              ),
+              child: const Text(
+                'CREAR Y GUARDAR ORDEN',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
