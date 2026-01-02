@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../models/cliente.dart';
 
 class ClienteDetallePage extends StatelessWidget {
   final Cliente cliente;
 
   const ClienteDetallePage({super.key, required this.cliente});
+
+  Future<void> _makeCall(String phoneNumber) async {
+    final Uri launchUri = Uri(scheme: 'tel', path: phoneNumber);
+    if (await canLaunchUrl(launchUri)) {
+      await launchUrl(launchUri);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +40,7 @@ class ClienteDetallePage extends StatelessWidget {
             radius: 40,
             backgroundColor: Colors.blue.shade100,
             child: Text(
-              cliente.nombre[0].toUpperCase(),
+              cliente.nombre.isNotEmpty ? cliente.nombre[0].toUpperCase() : 'C',
               style: const TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
@@ -89,6 +97,8 @@ class ClienteDetallePage extends StatelessWidget {
               Icons.phone_android_rounded,
               'Teléfono',
               cliente.telefono,
+              onAction: () => _makeCall(cliente.telefono),
+              actionIcon: Icons.call,
             ),
             const Divider(),
             _buildInfoRow(
@@ -108,7 +118,13 @@ class ClienteDetallePage extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String label, String value) {
+  Widget _buildInfoRow(
+    IconData icon,
+    String label,
+    String value, {
+    VoidCallback? onAction,
+    IconData? actionIcon,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12.0),
       child: Row(
@@ -135,6 +151,14 @@ class ClienteDetallePage extends StatelessWidget {
               ],
             ),
           ),
+          if (onAction != null && value.isNotEmpty)
+            IconButton(
+              icon: Icon(
+                actionIcon ?? Icons.chevron_right,
+                color: Colors.green,
+              ),
+              onPressed: onAction,
+            ),
         ],
       ),
     );
