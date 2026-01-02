@@ -72,6 +72,7 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
       vehId: _selectedVehiculo?.id ?? '',
       descripcion: _descripcionController.text,
       fechaIngreso: DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
+      estado: 'ABIERTA',
       total: _total,
       items: _selectedItems,
     );

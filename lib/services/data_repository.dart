@@ -95,6 +95,27 @@ class DataRepository {
     return response['status'] == 'success';
   }
 
+  Future<List<OrdenTrabajo>> getOrdenes(String empId) async {
+    final response = await _apiService.get(
+      ApiConfig.ordenes, // Make sure this exists in ApiConfig
+      params: {'emp_id': empId},
+    );
+    if (response['status'] == 'success') {
+      return (response['data'] as List)
+          .map((e) => OrdenTrabajo.fromJson(e))
+          .toList();
+    }
+    return [];
+  }
+
+  Future<Map<String, dynamic>> emitirFactura(String otId, String tipo) async {
+    final response = await _apiService.post(
+      '${ApiConfig.baseUrl}/facturas/emitir.php',
+      {'ot_id': otId, 'tipo_comprobante': tipo},
+    );
+    return response;
+  }
+
   Future<String?> uploadImage(
     File imageFile, {
     String folder = 'general',

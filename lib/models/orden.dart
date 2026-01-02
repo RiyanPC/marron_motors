@@ -7,6 +7,7 @@ class OrdenTrabajo {
   final String? fechaCreate;
   final String? vehPlaca;
   final String? cliNombre;
+  final String estado;
   final double total;
   final List<OrdenItem> items;
 
@@ -19,6 +20,7 @@ class OrdenTrabajo {
     this.fechaCreate,
     this.vehPlaca,
     this.cliNombre,
+    required this.estado,
     required this.total,
     required this.items,
   });
@@ -33,6 +35,7 @@ class OrdenTrabajo {
       fechaCreate: json['ot_fecha_create'],
       vehPlaca: json['veh_placa'],
       cliNombre: json['cli_nombre'],
+      estado: json['ot_estado'] ?? 'ABIERTA',
       total: double.tryParse(json['ot_total']?.toString() ?? '0') ?? 0.0,
       items: json['items'] != null
           ? (json['items'] as List).map((e) => OrdenItem.fromJson(e)).toList()

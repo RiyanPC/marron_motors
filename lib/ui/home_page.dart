@@ -3,6 +3,7 @@ import 'pages/clientes_page.dart';
 import 'pages/vehiculos_page.dart';
 import 'pages/items_page.dart';
 import 'pages/orden_nueva_page.dart';
+import 'pages/ordenes_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -50,9 +51,19 @@ class HomePage extends StatelessWidget {
             ),
             _buildMenuCard(
               context,
+              'Órdenes',
+              Icons.assignment_rounded,
+              Colors.purple,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const OrdenesPage()),
+              ),
+            ),
+            _buildMenuCard(
+              context,
               'Nueva Orden',
               Icons.add_task_rounded,
-              Colors.purple,
+              Colors.deepPurple,
               () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const OrdenNuevaPage()),

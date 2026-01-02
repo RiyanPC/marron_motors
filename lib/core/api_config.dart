@@ -7,6 +7,7 @@ class ApiConfig {
   static const String clientes = '$baseUrl/clientes/listar.php';
   static const String vehiculos = '$baseUrl/vehiculos/listar.php';
   static const String items = '$baseUrl/items/listar.php';
+  static const String ordenes = '$baseUrl/ordenes/listar.php';
   static const String ordenesCrear = '$baseUrl/ordenes/crear.php';
   static const String clientesEditar = '$baseUrl/clientes/editar.php';
   static const String vehiculosEditar = '$baseUrl/vehiculos/editar.php';
