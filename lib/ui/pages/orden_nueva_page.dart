@@ -5,6 +5,7 @@ import '../../models/orden.dart';
 import '../../models/vehiculo.dart';
 import '../../models/cliente.dart';
 import '../../models/item.dart';
+import '../widgets/vehiculo_selector_modal.dart';
 
 class OrdenNuevaPage extends StatefulWidget {
   const OrdenNuevaPage({super.key});
@@ -17,11 +18,9 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
   final DataRepository _repository = DataRepository();
   final _formKey = GlobalKey<FormState>();
 
-  String? _selectedVehiculoId;
   Vehiculo? _selectedVehiculo;
   Cliente? _selectedCliente;
-  String _descripcion = '';
-  List<Vehiculo> _vehiculos = [];
+  late TextEditingController _descripcionController;
   List<Cliente> _clientes = [];
   List<Item> _availableItems = [];
   List<OrdenItem> _selectedItems = [];
@@ -31,16 +30,21 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
   @override
   void initState() {
     super.initState();
+    _descripcionController = TextEditingController();
     _loadData();
+  }
+
+  @override
+  void dispose() {
+    _descripcionController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadData() async {
     try {
-      final vehs = await _repository.getVehiculos('1');
       final items = await _repository.getItems('1');
       final clients = await _repository.getClientes('1');
       setState(() {
-        _vehiculos = vehs;
         _availableItems = items;
         _clientes = clients;
         _loading = false;
@@ -68,14 +72,13 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
   }
 
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate() || _selectedVehiculoId == null)
-      return;
+    if (!_formKey.currentState!.validate() || _selectedVehiculo == null) return;
     _formKey.currentState!.save();
 
     final orden = OrdenTrabajo(
       empId: '1',
-      vehId: _selectedVehiculoId!,
-      descripcion: _descripcion,
+      vehId: _selectedVehiculo?.id ?? '',
+      descripcion: _descripcionController.text,
       fechaIngreso: DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
       total: _total,
       items: _selectedItems,
@@ -107,27 +110,48 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  DropdownButtonFormField<String>(
-                    decoration: const InputDecoration(labelText: 'Vehículo'),
-                    items: _vehiculos
-                        .map(
-                          (v) => DropdownMenuItem(
-                            value: v.id,
-                            child: Text('${v.placa} - ${v.marca}'),
+                  InkWell(
+                    onTap: () async {
+                      final result = await showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(20),
                           ),
-                        )
-                        .toList(),
-                    onChanged: (val) {
-                      setState(() {
-                        _selectedVehiculoId = val;
-                        _selectedVehiculo = _vehiculos.firstWhere(
-                          (v) => v.id == val,
-                        );
-                        _selectedCliente = _clientes.firstWhere(
-                          (c) => c.id == _selectedVehiculo?.cliId,
-                        );
-                      });
+                        ),
+                        builder: (context) => VehiculoSelectorModal(
+                          initialSelectedId: _selectedVehiculo?.id,
+                        ),
+                      );
+
+                      if (result is Vehiculo) {
+                        setState(() {
+                          _selectedVehiculo = result;
+                          _selectedCliente = _clientes.firstWhere(
+                            (c) => c.id == _selectedVehiculo?.cliId,
+                            orElse: () => _selectedCliente!, // Fallback
+                          );
+                        });
+                      }
                     },
+                    child: InputDecorator(
+                      decoration: const InputDecoration(
+                        labelText: 'Vehículo *',
+                        prefixIcon: Icon(Icons.directions_car),
+                        suffixIcon: Icon(Icons.arrow_drop_down),
+                      ),
+                      child: Text(
+                        _selectedVehiculo != null
+                            ? '${_selectedVehiculo!.placa} - ${_selectedVehiculo!.marca} ${_selectedVehiculo!.modelo}'
+                            : 'Toca para seleccionar un vehículo',
+                        style: TextStyle(
+                          color: _selectedVehiculo != null
+                              ? Colors.black
+                              : Colors.grey.shade600,
+                        ),
+                      ),
+                    ),
                   ),
                   if (_selectedVehiculo != null) ...[
                     const SizedBox(height: 16),
@@ -135,11 +159,11 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
                   ],
                   const SizedBox(height: 16),
                   TextFormField(
+                    controller: _descripcionController,
                     decoration: const InputDecoration(
                       labelText: 'Descripción del problema',
                     ),
                     maxLines: 3,
-                    onSaved: (val) => _descripcion = val ?? '',
                   ),
                   const Divider(height: 32),
                   const Text(

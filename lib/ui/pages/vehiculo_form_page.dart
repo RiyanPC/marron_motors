@@ -149,9 +149,21 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
     );
 
     try {
-      final success = await _repository.saveVehiculo(vehiculo);
-      if (success) {
-        if (mounted) Navigator.pop(context, true);
+      final newId = await _repository.saveVehiculo(vehiculo);
+      if (newId != null) {
+        final savedVehiculo = Vehiculo(
+          id: newId,
+          cliId: vehiculo.cliId,
+          empId: vehiculo.empId,
+          placa: vehiculo.placa,
+          marca: vehiculo.marca,
+          modelo: vehiculo.modelo,
+          anio: vehiculo.anio,
+          color: vehiculo.color,
+          vin: vehiculo.vin,
+          foto: vehiculo.foto,
+        );
+        if (mounted) Navigator.pop(context, savedVehiculo);
       } else {
         throw Exception('Error al guardar el vehículo');
       }
