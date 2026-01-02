@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../models/cliente.dart';
 import '../../services/data_repository.dart';
 
@@ -135,11 +136,33 @@ class _ClienteFormPageState extends State<ClienteFormPage> {
                     flex: 2,
                     child: TextFormField(
                       controller: _numeroDocumentoController,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Número de Documento *',
+                        counterText:
+                            '${_numeroDocumentoController.text.length} / ${_tipoDocumento == 'DNI'
+                                ? 8
+                                : _tipoDocumento == 'RUC'
+                                ? 11
+                                : 15}',
                       ),
                       keyboardType: TextInputType.number,
-                      validator: (v) => v!.isEmpty ? 'Requerido' : null,
+                      maxLength: _tipoDocumento == 'DNI'
+                          ? 8
+                          : _tipoDocumento == 'RUC'
+                          ? 11
+                          : 15,
+                      onChanged: (v) => setState(() {}),
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      validator: (v) {
+                        if (v == null || v.isEmpty) return 'Requerido';
+                        if (_tipoDocumento == 'DNI' && v.length != 8) {
+                          return 'DNI debe tener 8 dígitos';
+                        }
+                        if (_tipoDocumento == 'RUC' && v.length != 11) {
+                          return 'RUC debe tener 11 dígitos';
+                        }
+                        return null;
+                      },
                     ),
                   ),
                 ],
