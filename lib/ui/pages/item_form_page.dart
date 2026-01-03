@@ -86,9 +86,18 @@ class _ItemFormPageState extends State<ItemFormPage> {
               DropdownButtonFormField<String>(
                 value: _tipo,
                 decoration: const InputDecoration(labelText: 'Tipo de Item *'),
-                items: ['SERVICIO', 'REPUESTO']
-                    .map((t) => DropdownMenuItem(value: t, child: Text(t)))
-                    .toList(),
+                items:
+                    [
+                          {'val': 'SERVICIO', 'label': 'SERVICIO'},
+                          {'val': 'PRODUCTO', 'label': 'ITEM'},
+                        ]
+                        .map(
+                          (t) => DropdownMenuItem(
+                            value: t['val'],
+                            child: Text(t['label']!),
+                          ),
+                        )
+                        .toList(),
                 onChanged: (v) => setState(() => _tipo = v!),
               ),
               const SizedBox(height: 16),

@@ -22,7 +22,7 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
   List<Item> _filteredItems = [];
   bool _loading = true;
   Item? _selectedItem;
-  String _tipoFiltro = 'TODOS'; // TODOS, SERVICIO, REPUESTO
+  String _tipoFiltro = 'TODOS'; // TODOS, SERVICIO, PRODUCTO
 
   @override
   void initState() {
@@ -162,7 +162,7 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
               const SizedBox(width: 8),
               _filterChip('SERVICIO'),
               const SizedBox(width: 8),
-              _filterChip('REPUESTO', label: 'BIEN / REPUESTO'),
+              _filterChip('PRODUCTO', label: 'ITEMS'),
             ],
           ),
           const SizedBox(height: 12),
