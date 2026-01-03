@@ -21,5 +21,7 @@ class ApiConfig {
       '$baseUrl/ordenes/agregar_items.php';
   static const String ordenesEliminarItem =
       '$baseUrl/ordenes/eliminar_item.php';
+  static const String ordenesActualizarFoto =
+      '$baseUrl/ordenes/actualizar_foto.php';
   static const String facturasEmitir = '$baseUrl/facturas/emitir.php';
 }

@@ -169,4 +169,12 @@ class DataRepository {
     });
     return response;
   }
+
+  Future<bool> actualizarFotoOrden(String otId, String fotoUrl) async {
+    final response = await _apiService.post(ApiConfig.ordenesActualizarFoto, {
+      'ot_id': otId,
+      'ot_foto': fotoUrl,
+    });
+    return response['status'] == 'success';
+  }
 }

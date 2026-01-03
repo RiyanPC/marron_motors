@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../models/orden.dart';
 import '../../services/data_repository.dart';
 import '../../core/api_config.dart';
@@ -151,13 +153,72 @@ class _OrdenesPageState extends State<OrdenesPage>
       );
       if (success) {
         await _loadOrdenes();
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Item eliminado')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Item eliminado correctamente')),
+        );
       } else {
         setState(() => _loading = false);
         _showError('No se pudo eliminar el item');
       }
+    }
+  }
+
+  Future<void> _pickAndUploadFoto(OrdenTrabajo ot) async {
+    final picker = ImagePicker();
+    final ImageSource? source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Cámara'),
+              onTap: () => Navigator.pop(context, ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Galería'),
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (source == null) return;
+
+    final XFile? pickedFile = await picker.pickImage(
+      source: source,
+      imageQuality: 70,
+    );
+    if (pickedFile == null) return;
+
+    setState(() => _loading = true);
+    try {
+      final String? url = await _repository.uploadImage(
+        File(pickedFile.path),
+        folder: 'ordenes',
+        name: 'ot_${ot.id}',
+      );
+
+      if (url != null) {
+        final success = await _repository.actualizarFotoOrden(ot.id!, url);
+        if (success) {
+          _loadOrdenes();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Foto subida correctamente')),
+          );
+        } else {
+          _showError('No se pudo actualizar la foto en la base de datos');
+        }
+      } else {
+        _showError('Error al subir la imagen al servidor');
+      }
+    } catch (e) {
+      _showError('Error: $e');
+    } finally {
+      setState(() => _loading = false);
     }
   }
 
@@ -187,7 +248,7 @@ class _OrdenesPageState extends State<OrdenesPage>
               ElevatedButton(
                 onPressed: () => Navigator.pop(context, true),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue.shade800,
+                  backgroundColor: Colors.blue.shade900,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -201,7 +262,7 @@ class _OrdenesPageState extends State<OrdenesPage>
         false;
   }
 
-  void _showError(String msg) {
+  void _showError(String message) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -213,18 +274,18 @@ class _OrdenesPageState extends State<OrdenesPage>
             fontWeight: FontWeight.bold,
           ),
         ),
-        content: Text(msg),
+        content: Text(message),
         actions: [
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue.shade800,
+              backgroundColor: Colors.blue.shade900,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: const Text('CERRAR'),
+            child: const Text('ENTENDIDO'),
           ),
         ],
       ),
@@ -237,27 +298,21 @@ class _OrdenesPageState extends State<OrdenesPage>
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
         title: const Text('Gestión de Órdenes'),
-        centerTitle: true,
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
-          labelColor: Colors.blue.shade900,
-          unselectedLabelColor: Colors.grey,
-          indicatorColor: Colors.blue.shade900,
-          labelStyle: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-          ),
+          indicatorColor: Colors.white,
+          indicatorWeight: 3,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          labelStyle: const TextStyle(fontWeight: FontWeight.bold),
           tabs: const [
-            Tab(text: 'PENDIENTES', icon: Icon(Icons.pending_actions)),
-            Tab(text: 'EN PROCESO', icon: Icon(Icons.build_circle)),
-            Tab(text: 'FINALIZADAS', icon: Icon(Icons.check_circle)),
-            Tab(text: 'FACTURADAS', icon: Icon(Icons.receipt_long)),
+            Tab(text: 'ABIERTAS', icon: Icon(Icons.door_front_door_outlined)),
+            Tab(text: 'EN PROCESO', icon: Icon(Icons.build_circle_outlined)),
+            Tab(text: 'FINALIZADAS', icon: Icon(Icons.task_alt_rounded)),
+            Tab(text: 'FACTURADAS', icon: Icon(Icons.receipt_long_rounded)),
           ],
         ),
-        actions: [
-          IconButton(onPressed: _loadOrdenes, icon: const Icon(Icons.refresh)),
-        ],
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
@@ -276,13 +331,11 @@ class _OrdenesPageState extends State<OrdenesPage>
             context,
             MaterialPageRoute(builder: (_) => const OrdenNuevaPage()),
           );
-          if (result == true) {
-            _loadOrdenes();
-          }
+          if (result != null) _loadOrdenes();
         },
-        icon: const Icon(Icons.add_circle_outline),
-        label: const Text('NUEVO INGRESO'),
-        backgroundColor: Colors.blue.shade800,
+        icon: const Icon(Icons.add),
+        label: const Text('NUEVA ORDEN'),
+        backgroundColor: Colors.blue.shade900,
         foregroundColor: Colors.white,
       ),
     );
@@ -296,7 +349,7 @@ class _OrdenesPageState extends State<OrdenesPage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.inbox_outlined, size: 80, color: Colors.grey[300]),
+            Icon(Icons.assignment_outlined, size: 64, color: Colors.grey[300]),
             const SizedBox(height: 16),
             Text(
               'No hay registros en esta sección',
@@ -458,30 +511,69 @@ class _OrdenesPageState extends State<OrdenesPage>
                         },
                       ),
                     ],
+                    if (ot.foto != null && ot.foto!.isNotEmpty) ...[
+                      const Divider(height: 24),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          ot.foto!,
+                          height: 150,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(Icons.broken_image, size: 50),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            size: 12,
+                            color: Colors.grey[600],
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Imagen referencial para identificar la orden',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Colors.grey[600],
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),
+              // Conditional Warning for Empty Finalized Orders
               if (ot.estado == 'FINALIZADA' && ot.items.isEmpty)
                 Container(
-                  width: double.infinity,
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
                     vertical: 8,
+                    horizontal: 12,
                   ),
-                  color: Colors.amber.shade50,
+                  decoration: BoxDecoration(
+                    color: Colors.amber.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.amber.shade200),
+                  ),
                   child: Row(
                     children: [
                       Icon(
                         Icons.warning_amber_rounded,
-                        size: 16,
-                        color: Colors.amber.shade900,
+                        color: Colors.amber.shade800,
+                        size: 20,
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Añade trabajos antes de facturar',
+                          'Añade trabajos antes de emitir comprobante',
                           style: TextStyle(
-                            fontSize: 11,
+                            fontSize: 12,
                             color: Colors.amber.shade900,
                             fontWeight: FontWeight.bold,
                           ),
@@ -490,19 +582,10 @@ class _OrdenesPageState extends State<OrdenesPage>
                     ],
                   ),
                 ),
-              // Action Footer
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
-                  borderRadius: const BorderRadius.vertical(
-                    bottom: Radius.circular(12),
-                  ),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 10,
-                ),
-                child: _buildActionButtons(ot),
+              // Actions Section
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: _buildActions(ot),
               ),
             ],
           ),
@@ -511,44 +594,12 @@ class _OrdenesPageState extends State<OrdenesPage>
     );
   }
 
-  Widget _buildStatusPill(String status) {
-    final color = _getStatusColor(status);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.5), width: 1),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            status.replaceAll('_', ' '),
-            style: TextStyle(
-              color: color,
-              fontSize: 10,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 0.5,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildDetailRow(IconData icon, String label, String value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 16, color: Colors.blueGrey.shade400),
-        const SizedBox(width: 10),
+        Icon(icon, size: 16, color: Colors.blue.shade700),
+        const SizedBox(width: 8),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -557,17 +608,17 @@ class _OrdenesPageState extends State<OrdenesPage>
                 label,
                 style: TextStyle(
                   fontSize: 10,
-                  color: Colors.blueGrey.shade300,
                   fontWeight: FontWeight.bold,
-                  letterSpacing: 0.8,
+                  color: Colors.grey[600],
+                  letterSpacing: 0.5,
                 ),
               ),
               Text(
                 value,
                 style: const TextStyle(
                   fontSize: 13,
-                  color: Colors.black87,
                   fontWeight: FontWeight.w500,
+                  color: Colors.black87,
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -579,23 +630,44 @@ class _OrdenesPageState extends State<OrdenesPage>
     );
   }
 
-  Widget _buildActionButtons(OrdenTrabajo ot) {
+  Widget _buildStatusPill(String status) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: _getStatusColor(status).withOpacity(0.12),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: _getStatusColor(status).withOpacity(0.3)),
+      ),
+      child: Text(
+        status,
+        style: TextStyle(
+          color: _getStatusColor(status),
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActions(OrdenTrabajo ot) {
     if (ot.estado == 'FACTURADA') {
       return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text(
-            'ORDEN COMPLETADA',
+          Icon(Icons.check_circle, color: Colors.green.shade600, size: 16),
+          const SizedBox(width: 8),
+          Text(
+            'ORDEN COMPLETADA Y FACTURADA',
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.bold,
-              color: Colors.green,
+              color: Colors.green.shade700,
             ),
           ),
           if (ot.facId != null)
             TextButton.icon(
               onPressed: () => _verComprobante(ot.facId!),
-              icon: const Icon(Icons.file_present_rounded, size: 18),
+              icon: const Icon(Icons.visibility_outlined, size: 16),
               label: const Text(
                 'VER DOCUMENTO',
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
@@ -626,33 +698,46 @@ class _OrdenesPageState extends State<OrdenesPage>
             },
           ),
         if (ot.estado == 'EN_PROCESO')
-          Row(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                child: _buildActionButton(
-                  'AÑADIR TRABAJO',
-                  Icons.add_circle_outline,
-                  Colors.blue.shade700,
-                  () => _agregarTrabajo(ot),
-                  isOutlined: true,
-                ),
+              _buildActionButton(
+                'SUBIR FOTO',
+                Icons.add_a_photo_outlined,
+                Colors.teal.shade700,
+                () => _pickAndUploadFoto(ot),
+                isOutlined: true,
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _buildActionButton(
-                  'FINALIZAR',
-                  Icons.task_alt_rounded,
-                  Colors.orange.shade800,
-                  () async {
-                    final confirm = await _showConfirmDialog(
-                      'Finalizar Trabajo',
-                      '¿Confirmas que deseas pasar esta orden a estado "Finalizada"?',
-                    );
-                    if (confirm) {
-                      _updateStatus(ot, 'FINALIZADA');
-                    }
-                  },
-                ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildActionButton(
+                      'AÑADIR TRABAJO',
+                      Icons.add_circle_outline,
+                      Colors.blue.shade700,
+                      () => _agregarTrabajo(ot),
+                      isOutlined: true,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _buildActionButton(
+                      'FINALIZAR',
+                      Icons.task_alt_rounded,
+                      Colors.orange.shade800,
+                      () async {
+                        final confirm = await _showConfirmDialog(
+                          'Finalizar Trabajo',
+                          '¿Confirmas que deseas pasar esta orden a estado "Finalizada"?',
+                        );
+                        if (confirm) {
+                          _updateStatus(ot, 'FINALIZADA');
+                        }
+                      },
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
