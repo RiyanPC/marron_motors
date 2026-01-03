@@ -3,6 +3,7 @@ import 'pages/clientes_page.dart';
 import 'pages/vehiculos_page.dart';
 import 'pages/items_page.dart';
 import 'pages/ordenes_page.dart';
+import 'pages/facturacion_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -50,12 +51,22 @@ class HomePage extends StatelessWidget {
             ),
             _buildMenuCard(
               context,
-              'Órdenes',
-              Icons.assignment_rounded,
+              'Gestión Taller',
+              Icons.home_repair_service_rounded,
               Colors.purple,
               () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const OrdenesPage()),
+              ),
+            ),
+            _buildMenuCard(
+              context,
+              'Facturación',
+              Icons.receipt_long_rounded,
+              Colors.blueGrey,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const FacturacionPage()),
               ),
             ),
           ],

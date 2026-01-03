@@ -6,7 +6,16 @@ class OrdenTrabajo {
   final String fechaIngreso;
   final String? fechaCreate;
   final String? vehPlaca;
+  final String? vehMarca;
+  final String? vehModelo;
+  final int? vehAnio;
+  final String? vehVin;
   final String? cliNombre;
+  final String? cliTelefono;
+  final String? cliEmail;
+  final String? cliDireccion;
+  final String? cliDocumento;
+  final String? cliTipoDocumento;
   final String estado;
   final double total;
   final String? facId;
@@ -21,7 +30,16 @@ class OrdenTrabajo {
     required this.fechaIngreso,
     this.fechaCreate,
     this.vehPlaca,
+    this.vehMarca,
+    this.vehModelo,
+    this.vehAnio,
+    this.vehVin,
     this.cliNombre,
+    this.cliTelefono,
+    this.cliEmail,
+    this.cliDireccion,
+    this.cliDocumento,
+    this.cliTipoDocumento,
     required this.estado,
     required this.total,
     this.facId,
@@ -38,7 +56,16 @@ class OrdenTrabajo {
       fechaIngreso: json['ot_fecha_ingreso'] ?? '',
       fechaCreate: json['ot_fecha_create'],
       vehPlaca: json['veh_placa'],
+      vehMarca: json['veh_marca'],
+      vehModelo: json['veh_modelo'],
+      vehAnio: int.tryParse(json['veh_anio']?.toString() ?? ''),
+      vehVin: json['veh_vin'],
       cliNombre: json['cli_nombre'],
+      cliTelefono: json['cli_telefono'],
+      cliEmail: json['cli_email'],
+      cliDireccion: json['cli_direccion'],
+      cliDocumento: json['cli_numero_documento'],
+      cliTipoDocumento: json['cli_tipo_documento'],
       estado: json['ot_estado'] ?? 'ABIERTA',
       total: double.tryParse(json['ot_total']?.toString() ?? '0') ?? 0.0,
       facId: json['fac_id']?.toString(),
