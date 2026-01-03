@@ -1,11 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../models/cliente.dart';
+import '../../models/vehiculo.dart';
+import '../../services/data_repository.dart';
+import 'vehiculo_detalle_page.dart';
 
-class ClienteDetallePage extends StatelessWidget {
+class ClienteDetallePage extends StatefulWidget {
   final Cliente cliente;
-
   const ClienteDetallePage({super.key, required this.cliente});
+
+  @override
+  State<ClienteDetallePage> createState() => _ClienteDetallePageState();
+}
+
+class _ClienteDetallePageState extends State<ClienteDetallePage> {
+  final DataRepository _repository = DataRepository();
+  List<Vehiculo> _vehiculos = [];
+  bool _loadingVehicles = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadVehiculos();
+  }
+
+  Future<void> _loadVehiculos() async {
+    try {
+      final allVehiculos = await _repository.getVehiculos(widget.cliente.empId);
+      if (mounted) {
+        setState(() {
+          _vehiculos =
+              allVehiculos.where((v) => v.cliId == widget.cliente.id).toList();
+          _loadingVehicles = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _loadingVehicles = false);
+    }
+  }
 
   Future<void> _makeCall(String phoneNumber) async {
     final Uri launchUri = Uri(scheme: 'tel', path: phoneNumber);
@@ -17,58 +49,105 @@ class ClienteDetallePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Detalle del Cliente'), elevation: 0),
+      backgroundColor: Colors.grey[50],
+      appBar: AppBar(
+        title: const Text('Perfil del Cliente'),
+        elevation: 0,
+        backgroundColor: const Color(0xFF0D47A1),
+        foregroundColor: Colors.white,
+      ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(),
-            const SizedBox(height: 24),
-            _buildInfoCard(context),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionHeader(Icons.info_outline, 'DATOS DE CONTACTO'),
+                  _buildContactCard(),
+                  const SizedBox(height: 24),
+                  _buildSectionHeader(Icons.directions_car,
+                      'VEHÍCULOS (${_vehiculos.length})'),
+                  _buildVehiclesSection(),
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
+  Widget _buildSectionHeader(IconData icon, String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12, left: 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: const Color(0xFF0D47A1)),
+          const SizedBox(width: 8),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF0D47A1),
+              letterSpacing: 0.8,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildHeader() {
-    return Center(
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.only(bottom: 32, top: 20),
+      decoration: const BoxDecoration(
+        color: Color(0xFF0D47A1),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
+      ),
       child: Column(
         children: [
           CircleAvatar(
-            radius: 40,
-            backgroundColor: Colors.blue.shade100,
+            radius: 50,
+            backgroundColor: Colors.white.withOpacity(0.2),
             child: Text(
-              cliente.nombre.isNotEmpty ? cliente.nombre[0].toUpperCase() : 'C',
+              widget.cliente.nombre.isNotEmpty
+                  ? widget.cliente.nombre[0].toUpperCase()
+                  : 'C',
               style: const TextStyle(
-                fontSize: 32,
+                fontSize: 40,
                 fontWeight: FontWeight.bold,
-                color: Colors.blue,
+                color: Colors.white,
               ),
             ),
           ),
           const SizedBox(height: 16),
           Text(
-            cliente.nombre,
+            widget.cliente.nombre,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             decoration: BoxDecoration(
-              color: cliente.estado == 'ACTIVO'
-                  ? Colors.green.shade100
-                  : Colors.red.shade100,
-              borderRadius: BorderRadius.circular(20),
+              color: widget.cliente.estado == 'ACTIVO'
+                  ? Colors.green.shade400
+                  : Colors.red.shade400,
+              borderRadius: BorderRadius.circular(30),
             ),
             child: Text(
-              cliente.estado,
-              style: TextStyle(
-                color: cliente.estado == 'ACTIVO'
-                    ? Colors.green.shade800
-                    : Colors.red.shade800,
+              widget.cliente.estado,
+              style: const TextStyle(
+                color: Colors.white,
                 fontWeight: FontWeight.bold,
                 fontSize: 12,
               ),
@@ -79,40 +158,156 @@ class ClienteDetallePage extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoCard(BuildContext context) {
+  Widget _buildContactCard() {
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             _buildInfoRow(
               Icons.badge_outlined,
-              'Documento',
-              '${cliente.tipoDocumento}: ${cliente.numeroDocumento}',
+              'Documento Identidad',
+              '${widget.cliente.tipoDocumento}: ${widget.cliente.numeroDocumento}',
             ),
             const Divider(),
             _buildInfoRow(
               Icons.phone_android_rounded,
-              'Teléfono',
-              cliente.telefono,
-              onAction: () => _makeCall(cliente.telefono),
+              'Teléfono Principal',
+              widget.cliente.telefono,
+              onPressed: () => _makeCall(widget.cliente.telefono),
               actionIcon: Icons.call,
+              actionColor: Colors.green,
             ),
             const Divider(),
             _buildInfoRow(
               Icons.email_outlined,
-              'Email',
-              cliente.email.isEmpty ? 'No registrado' : cliente.email,
+              'Correo Electrónico',
+              widget.cliente.email.isEmpty
+                  ? 'No registrado'
+                  : widget.cliente.email,
             ),
             const Divider(),
             _buildInfoRow(
               Icons.location_on_outlined,
-              'Dirección',
-              cliente.direccion.isEmpty ? 'No registrada' : cliente.direccion,
+              'Dirección Registrada',
+              widget.cliente.direccion.isEmpty
+                  ? 'No registrada'
+                  : widget.cliente.direccion,
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVehiclesSection() {
+    if (_loadingVehicles) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(20.0),
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (_vehiculos.isEmpty) {
+      return Card(
+        elevation: 0,
+        color: Colors.blue.withOpacity(0.05),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: const Padding(
+          padding: EdgeInsets.all(20.0),
+          child: Center(
+            child: Text(
+              'Este cliente aún no tiene vehículos registrados.',
+              style: TextStyle(color: Colors.blueGrey, fontSize: 13),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: _vehiculos.map((v) => _buildVehicleCard(v)).toList(),
+    );
+  }
+
+  Widget _buildVehicleCard(Vehiculo vehiculo) {
+    return Card(
+      elevation: 0,
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => VehiculoDetallePage(vehiculo: vehiculo),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0D47A1).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  image: vehiculo.foto.isNotEmpty
+                      ? DecorationImage(
+                          image: NetworkImage(vehiculo.foto),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
+                ),
+                child: vehiculo.foto.isEmpty
+                    ? const Icon(Icons.directions_car,
+                        color: Color(0xFF0D47A1), size: 30)
+                    : null,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      vehiculo.placa,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF0D47A1),
+                      ),
+                    ),
+                    Text(
+                      '${vehiculo.marca} ${vehiculo.modelo}',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    Text(
+                      'Color: ${vehiculo.color} • Año: ${vehiculo.anio}',
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
+            ],
+          ),
         ),
       ),
     );
@@ -122,15 +317,22 @@ class ClienteDetallePage extends StatelessWidget {
     IconData icon,
     String label,
     String value, {
-    VoidCallback? onAction,
+    VoidCallback? onPressed,
     IconData? actionIcon,
+    Color? actionColor,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12.0),
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: Colors.blue, size: 24),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0D47A1).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: const Color(0xFF0D47A1), size: 18),
+          ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -138,26 +340,24 @@ class ClienteDetallePage extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  style: TextStyle(fontSize: 11, color: Colors.grey[600]),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
                   value,
                   style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
                   ),
                 ),
               ],
             ),
           ),
-          if (onAction != null && value.isNotEmpty)
+          if (onPressed != null && value.isNotEmpty)
             IconButton(
-              icon: Icon(
-                actionIcon ?? Icons.chevron_right,
-                color: Colors.green,
-              ),
-              onPressed: onAction,
+              onPressed: onPressed,
+              icon: Icon(actionIcon, color: actionColor ?? Colors.blue),
             ),
         ],
       ),
