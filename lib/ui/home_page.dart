@@ -6,6 +6,7 @@ import 'pages/ordenes_page.dart';
 import 'pages/facturacion_page.dart';
 import 'pages/dashboard_page.dart';
 import 'pages/configuracion_page.dart';
+import 'widgets/app_drawer.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -14,6 +15,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Marron Motors'), centerTitle: true),
+      drawer: const AppDrawer(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: GridView.count(

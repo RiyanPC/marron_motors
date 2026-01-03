@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/data_repository.dart';
 import '../../models/dashboard_stats.dart';
+import '../widgets/app_drawer.dart';
 import 'orden_nueva_page.dart';
 import 'orden_detalle_page.dart';
 import 'clientes_page.dart';
@@ -41,6 +42,7 @@ class _DashboardPageState extends State<DashboardPage> {
           IconButton(icon: const Icon(Icons.refresh), onPressed: _loadStats),
         ],
       ),
+      drawer: const AppDrawer(),
       body: RefreshIndicator(
         onRefresh: _loadStats,
         child: _isLoading
