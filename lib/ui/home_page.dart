@@ -25,9 +25,17 @@ class HomePage extends StatelessWidget {
           children: [
             _buildMenuCard(
               context,
+              'Dashboard',
+              Icons.dashboard_rounded,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const DashboardPage()),
+              ),
+            ),
+            _buildMenuCard(
+              context,
               'Clientes',
               Icons.people_alt_rounded,
-              Colors.blue,
               () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const ClientesPage()),
@@ -37,7 +45,6 @@ class HomePage extends StatelessWidget {
               context,
               'Vehículos',
               Icons.directions_car_rounded,
-              Colors.orange,
               () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const VehiculosPage()),
@@ -45,19 +52,8 @@ class HomePage extends StatelessWidget {
             ),
             _buildMenuCard(
               context,
-              'Servicios/Items',
-              Icons.inventory_2_rounded,
-              Colors.green,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ItemsPage()),
-              ),
-            ),
-            _buildMenuCard(
-              context,
               'Órdenes',
               Icons.home_repair_service_rounded,
-              Colors.purple,
               () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const OrdenesPage()),
@@ -65,32 +61,29 @@ class HomePage extends StatelessWidget {
             ),
             _buildMenuCard(
               context,
-              'Dashboard',
-              Icons.dashboard_rounded,
-              Colors.indigo,
+              'Servicios/Items',
+              Icons.inventory_2_rounded,
               () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const DashboardPage()),
-              ),
-            ),
-            _buildMenuCard(
-              context,
-              'Configuración',
-              Icons.settings_suggest_rounded,
-              Colors.blueGrey,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ConfiguracionPage()),
+                MaterialPageRoute(builder: (_) => const ItemsPage()),
               ),
             ),
             _buildMenuCard(
               context,
               'Facturación',
               Icons.receipt_long_rounded,
-              Colors.blueGrey,
               () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const FacturacionPage()),
+              ),
+            ),
+            _buildMenuCard(
+              context,
+              'Configuración',
+              Icons.settings_suggest_rounded,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ConfiguracionPage()),
               ),
             ),
           ],
@@ -103,24 +96,49 @@ class HomePage extends StatelessWidget {
     BuildContext context,
     String title,
     IconData icon,
-    Color color,
     VoidCallback onTap,
   ) {
     return Card(
-      elevation: 4,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 48, color: color),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              colors: [Colors.white, Colors.blue.shade50.withOpacity(0.3)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-          ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0D47A1).withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, size: 36, color: const Color(0xFF0D47A1)),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1A237E),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

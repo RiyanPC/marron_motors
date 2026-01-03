@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  static const Color primaryColor = Color(
-    0xFF6C2D82,
-  ); // Marron/Purple from Marron Motors
+  static const Color primaryColor = Color(0xFF0D47A1); // Deep Blue from request
   static const Color accentColor = Color(0xFFD4AF37); // Gold/Secondary
 
   static ThemeData get lightTheme {
