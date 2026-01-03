@@ -118,7 +118,7 @@ class _DashboardPageState extends State<DashboardPage> {
           title: 'Clientes Nuevos',
           value: _stats!.clientesNuevosMes.toString(),
           icon: Icons.person_add,
-          color: Colors.blue,
+          color: const Color(0xFF0D47A1),
         ),
         _buildKpiCard(
           title: 'Ganancias Mes',
@@ -261,7 +261,7 @@ class _DashboardPageState extends State<DashboardPage> {
       case 'En Proceso':
         return Colors.orange;
       case 'Finalizado':
-        return Colors.blue;
+        return const Color(0xFF0D47A1);
       case 'Entregado':
         return Colors.green;
       default:

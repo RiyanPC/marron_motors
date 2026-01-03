@@ -163,7 +163,7 @@ class _OrdenesPageState extends State<OrdenesPage>
             title: Text(
               title,
               style: TextStyle(
-                color: Colors.blue.shade900,
+                color: const Color(0xFF0D47A1),
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -179,7 +179,7 @@ class _OrdenesPageState extends State<OrdenesPage>
               ElevatedButton(
                 onPressed: () => Navigator.pop(context, true),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue.shade900,
+                  backgroundColor: const Color(0xFF0D47A1),
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -210,7 +210,7 @@ class _OrdenesPageState extends State<OrdenesPage>
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue.shade900,
+              backgroundColor: const Color(0xFF0D47A1),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -264,7 +264,7 @@ class _OrdenesPageState extends State<OrdenesPage>
         },
         icon: const Icon(Icons.add),
         label: const Text('NUEVA ORDEN'),
-        backgroundColor: Colors.blue.shade900,
+        backgroundColor: const Color(0xFF0D47A1),
         foregroundColor: Colors.white,
       ),
     );
@@ -397,7 +397,7 @@ class _OrdenesPageState extends State<OrdenesPage>
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: Colors.blue.shade900,
+                              color: const Color(0xFF0D47A1),
                             ),
                           ),
                         ),
@@ -423,7 +423,7 @@ class _OrdenesPageState extends State<OrdenesPage>
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 16, color: Colors.blue.shade700),
+        Icon(icon, size: 16, color: const Color(0xFF0D47A1)),
         const SizedBox(width: 8),
         Expanded(
           child: Column(
@@ -483,7 +483,7 @@ class _OrdenesPageState extends State<OrdenesPage>
           _buildActionButton(
             'INICIAR TRABAJO',
             Icons.play_arrow_rounded,
-            Colors.blue.shade800,
+            const Color(0xFF0D47A1),
             () async {
               final confirm = await _showConfirmDialog(
                 'Iniciar Trabajo',
@@ -512,7 +512,7 @@ class _OrdenesPageState extends State<OrdenesPage>
                     child: _buildActionButton(
                       'AÑADIR TRABAJO',
                       Icons.add_circle_outline,
-                      Colors.blue.shade700,
+                      const Color(0xFF1565C0),
                       () => _agregarTrabajo(ot),
                       isOutlined: true,
                     ),
@@ -597,7 +597,7 @@ class _OrdenesPageState extends State<OrdenesPage>
       case 'ABIERTA':
         return Colors.grey;
       case 'EN_PROCESO':
-        return Colors.blue;
+        return const Color(0xFF0D47A1);
       case 'FINALIZADA':
         return Colors.orange;
       case 'FACTURADA':

@@ -153,7 +153,7 @@ class _FacturacionPageState extends State<FacturacionPage>
                 ? null
                 : () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue.shade900,
+              backgroundColor: const Color(0xFF0D47A1),
               foregroundColor: Colors.white,
             ),
             child: const Text('EMITIR AHORA'),
@@ -318,7 +318,7 @@ class _FacturacionPageState extends State<FacturacionPage>
               ElevatedButton(
                 onPressed: () => Navigator.pop(context, true),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueGrey.shade900,
+                  backgroundColor: const Color(0xFF0D47A1),
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -349,7 +349,7 @@ class _FacturacionPageState extends State<FacturacionPage>
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blueGrey.shade900,
+              backgroundColor: const Color(0xFF0D47A1),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -368,7 +368,7 @@ class _FacturacionPageState extends State<FacturacionPage>
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
         title: const Text('Facturación y Cobros'),
-        backgroundColor: Colors.blueGrey.shade800,
+        backgroundColor: const Color(0xFF0D47A1),
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.white,
@@ -454,7 +454,7 @@ class _FacturacionPageState extends State<FacturacionPage>
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.blueGrey.shade800,
+                        color: const Color(0xFF0D47A1),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
@@ -514,7 +514,7 @@ class _FacturacionPageState extends State<FacturacionPage>
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: Colors.blueGrey.shade800,
+                              color: const Color(0xFF0D47A1),
                             ),
                           ),
                         ),
@@ -623,7 +623,7 @@ class _FacturacionPageState extends State<FacturacionPage>
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 16, color: Colors.blueGrey.shade700),
+        Icon(icon, size: 16, color: const Color(0xFF0D47A1).withOpacity(0.7)),
         const SizedBox(width: 8),
         Expanded(
           child: Column(
@@ -713,7 +713,7 @@ class _FacturacionPageState extends State<FacturacionPage>
                 child: _buildActionButton(
                   'BOLETA',
                   Icons.receipt_outlined,
-                  Colors.blueGrey.shade700,
+                  const Color(0xFF1565C0),
                   () => _confirmarYEmitir(ot, 'BOLETA'),
                   isOutlined: true,
                 ),
@@ -723,7 +723,7 @@ class _FacturacionPageState extends State<FacturacionPage>
                 child: _buildActionButton(
                   'FACTURAR',
                   Icons.description_rounded,
-                  Colors.blue.shade900,
+                  const Color(0xFF0D47A1),
                   () => _confirmarYEmitir(ot, 'FACTURA'),
                 ),
               ),
@@ -733,7 +733,7 @@ class _FacturacionPageState extends State<FacturacionPage>
           _buildActionButton(
             'AJUSTAR TRABAJO',
             Icons.edit_note_rounded,
-            Colors.blueGrey.shade600,
+            const Color(0xFF1976D2),
             () => _agregarTrabajo(ot),
             isOutlined: true,
           ),

@@ -12,7 +12,7 @@ class OrdenDetallePage extends StatelessWidget {
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
         title: Text('Orden #${orden.id}'),
-        backgroundColor: Colors.blue.shade900,
+        backgroundColor: const Color(0xFF0D47A1),
         foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
@@ -192,7 +192,7 @@ class OrdenDetallePage extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blue.shade900,
+                  color: const Color(0xFF0D47A1),
                   letterSpacing: 0.5,
                 ),
               ),
@@ -284,7 +284,7 @@ class OrdenDetallePage extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.w900,
                 fontSize: 16,
-                color: Colors.blue.shade900,
+                color: const Color(0xFF0D47A1),
               ),
             ),
           ],
@@ -298,7 +298,7 @@ class OrdenDetallePage extends StatelessWidget {
       case 'ABIERTA':
         return Colors.grey;
       case 'EN_PROCESO':
-        return Colors.blue;
+        return const Color(0xFF0D47A1);
       case 'FINALIZADA':
         return Colors.orange;
       case 'FACTURADA':

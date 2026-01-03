@@ -88,7 +88,7 @@ class _VehiculosPageState extends State<VehiculosPage> {
                         IconButton(
                           icon: const Icon(
                             Icons.visibility,
-                            color: Colors.blue,
+                            color: const Color(0xFF0D47A1),
                           ),
                           onPressed: () {
                             Navigator.push(

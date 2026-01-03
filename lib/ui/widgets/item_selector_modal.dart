@@ -190,7 +190,9 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
                       final isSelected = _selectedItem?.id == item.id;
                       return Card(
                         elevation: isSelected ? 4 : 1,
-                        color: isSelected ? Colors.blue.shade50 : null,
+                        color: isSelected
+                            ? const Color(0xFF0D47A1).withOpacity(0.1)
+                            : null,
                         child: ListTile(
                           title: Text(item.nombre),
                           subtitle: Text('Precio ref: S/ ${item.precio}'),
@@ -254,7 +256,7 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
               onChanged: (val) => setState(() => _afectoIgv = val),
               secondary: Icon(
                 _afectoIgv ? Icons.receipt : Icons.money_off,
-                color: _afectoIgv ? Colors.blue : Colors.grey,
+                color: _afectoIgv ? const Color(0xFF0D47A1) : Colors.grey,
               ),
               dense: true,
             ),
@@ -263,7 +265,7 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
               onPressed: _confirmSelection,
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                backgroundColor: Colors.blue.shade700,
+                backgroundColor: const Color(0xFF0D47A1),
                 foregroundColor: Colors.white,
               ),
               child: const Text('AÑADIR A LA ORDEN'),
