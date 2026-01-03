@@ -178,14 +178,17 @@ class _ClienteFormPageState extends State<ClienteFormPage> {
                   child: Column(
                     children: [
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
                             flex: 1,
                             child: DropdownButtonFormField<String>(
                               value: _tipoDocumento,
+                              isExpanded: true,
                               decoration: const InputDecoration(
                                 labelText: 'Tipo Doc.',
-                                prefixIcon: Icon(Icons.description_outlined),
+                                helperText:
+                                    '', // Reserve space for height alignment
                               ),
                               items: ['DNI', 'RUC', 'CE']
                                   .map(

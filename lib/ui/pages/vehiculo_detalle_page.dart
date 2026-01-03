@@ -9,31 +9,84 @@ class VehiculoDetallePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Detalle del Vehículo'), elevation: 0),
+      backgroundColor: Colors.grey[50],
+      appBar: AppBar(
+        title: const Text('Detalle del Vehículo'),
+        elevation: 0,
+        backgroundColor: const Color(0xFF0D47A1),
+        foregroundColor: Colors.white,
+      ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(),
-            const SizedBox(height: 24),
-            _buildInfoCard(context),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionHeader(
+                    Icons.info_outline,
+                    'ESPECIFICACIONES TÉCNICAS',
+                  ),
+                  _buildInfoCard(),
+                  const SizedBox(height: 24),
+                  _buildSectionHeader(Icons.history, 'HISTORIAL RECIENTE'),
+                  _buildEmptyHistory(),
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
+  Widget _buildSectionHeader(IconData icon, String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12, left: 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: const Color(0xFF0D47A1)),
+          const SizedBox(width: 8),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF0D47A1),
+              letterSpacing: 0.8,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildHeader() {
-    return Center(
+    return Container(
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        color: Color(0xFF0D47A1),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
+      ),
       child: Column(
         children: [
+          const SizedBox(height: 20),
           vehiculo.foto.isNotEmpty
               ? Container(
-                  height: 150,
+                  height: 180,
                   width: double.infinity,
+                  margin: const EdgeInsets.symmetric(horizontal: 24),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
                     image: DecorationImage(
                       image: NetworkImage(vehiculo.foto),
                       fit: BoxFit.cover,
@@ -41,63 +94,71 @@ class VehiculoDetallePage extends StatelessWidget {
                   ),
                 )
               : CircleAvatar(
-                  radius: 40,
-                  backgroundColor: Colors.orange.shade100,
+                  radius: 60,
+                  backgroundColor: Colors.white.withOpacity(0.2),
                   child: const Icon(
                     Icons.directions_car_rounded,
-                    size: 48,
-                    color: Colors.orange,
+                    size: 70,
+                    color: Colors.white,
                   ),
                 ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           Text(
             vehiculo.placa,
             style: const TextStyle(
-              fontSize: 28,
+              fontSize: 32,
               fontWeight: FontWeight.bold,
-              letterSpacing: 2,
+              color: Colors.white,
+              letterSpacing: 3,
             ),
           ),
-          const SizedBox(height: 4),
           Text(
             '${vehiculo.marca} ${vehiculo.modelo}',
-            style: TextStyle(fontSize: 18, color: Colors.grey.shade700),
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.white.withOpacity(0.9),
+              fontWeight: FontWeight.w500,
+            ),
           ),
+          const SizedBox(height: 32),
         ],
       ),
     );
   }
 
-  Widget _buildInfoCard(BuildContext context) {
+  Widget _buildInfoCard() {
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             _buildInfoRow(
-              Icons.person_outline,
-              'Propietario',
+              Icons.person_pin_outlined,
+              'Propietario Registrado',
               vehiculo.cliNombre,
             ),
             const Divider(),
             _buildInfoRow(
-              Icons.calendar_today_outlined,
-              'Año',
-              vehiculo.anio.isEmpty ? 'No registrado' : vehiculo.anio,
+              Icons.calendar_month_outlined,
+              'Año de Fabricación',
+              vehiculo.anio.isEmpty ? 'No especificado' : vehiculo.anio,
             ),
             const Divider(),
             _buildInfoRow(
               Icons.palette_outlined,
-              'Color',
-              vehiculo.color.isEmpty ? 'No registrado' : vehiculo.color,
+              'Color de la Unidad',
+              vehiculo.color.isEmpty ? 'No especificado' : vehiculo.color,
             ),
             const Divider(),
             _buildInfoRow(
               Icons.fingerprint_rounded,
-              'VIN / Motor',
-              vehiculo.vin.isEmpty ? 'No registrado' : vehiculo.vin,
+              'Número de VIN / Chasis',
+              vehiculo.vin.isEmpty ? 'No especificado' : vehiculo.vin,
             ),
           ],
         ),
@@ -107,11 +168,17 @@ class VehiculoDetallePage extends StatelessWidget {
 
   Widget _buildInfoRow(IconData icon, String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12.0),
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: Colors.orange, size: 24),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0D47A1).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: const Color(0xFF0D47A1), size: 20),
+          ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -119,18 +186,42 @@ class VehiculoDetallePage extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  style: TextStyle(fontSize: 11, color: Colors.grey[600]),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
                   value,
                   style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
                   ),
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyHistory() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.blue.withOpacity(0.03),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.blue.withOpacity(0.05)),
+      ),
+      child: const Column(
+        children: [
+          Icon(Icons.history_toggle_off, color: Colors.blueGrey, size: 32),
+          SizedBox(height: 12),
+          Text(
+            'No hay órdenes de servicio registradas recientemente para este vehículo.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.blueGrey, fontSize: 13),
           ),
         ],
       ),
