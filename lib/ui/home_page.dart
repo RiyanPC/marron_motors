@@ -4,6 +4,8 @@ import 'pages/vehiculos_page.dart';
 import 'pages/items_page.dart';
 import 'pages/ordenes_page.dart';
 import 'pages/facturacion_page.dart';
+import 'pages/dashboard_page.dart';
+import 'pages/configuracion_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -51,12 +53,32 @@ class HomePage extends StatelessWidget {
             ),
             _buildMenuCard(
               context,
-              'Gestión Taller',
+              'Órdenes',
               Icons.home_repair_service_rounded,
               Colors.purple,
               () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const OrdenesPage()),
+              ),
+            ),
+            _buildMenuCard(
+              context,
+              'Dashboard',
+              Icons.dashboard_rounded,
+              Colors.indigo,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const DashboardPage()),
+              ),
+            ),
+            _buildMenuCard(
+              context,
+              'Configuración',
+              Icons.settings_suggest_rounded,
+              Colors.blueGrey,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ConfiguracionPage()),
               ),
             ),
             _buildMenuCard(

@@ -5,6 +5,8 @@ import '../models/vehiculo.dart';
 import '../models/item.dart';
 import '../models/empresa.dart';
 import '../models/orden.dart';
+import '../models/configuracion.dart';
+import '../models/dashboard_stats.dart';
 import 'api_service.dart';
 
 class DataRepository {
@@ -175,6 +177,31 @@ class DataRepository {
       'ot_id': otId,
       'ot_foto': fotoUrl,
     });
+    return response['status'] == 'success';
+  }
+
+  // Dashboard & Configuración
+  Future<DashboardStats?> getDashboardStats() async {
+    final response = await _apiService.get(ApiConfig.dashboardStats);
+    if (response['status'] == 'success') {
+      return DashboardStats.fromJson(response['data']);
+    }
+    return null;
+  }
+
+  Future<Configuracion?> getConfig() async {
+    final response = await _apiService.get(ApiConfig.configObtener);
+    if (response['status'] == 'success') {
+      return Configuracion.fromJson(response['data']);
+    }
+    return null;
+  }
+
+  Future<bool> saveConfig(Configuracion config) async {
+    final response = await _apiService.post(
+      ApiConfig.configActualizar,
+      config.toJson(),
+    );
     return response['status'] == 'success';
   }
 }

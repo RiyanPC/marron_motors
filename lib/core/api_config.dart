@@ -1,6 +1,9 @@
 class ApiConfig {
-  static const String baseUrl =
-      'http://192.168.18.25/marron_motors/bd_marron_motors';
+  static const bool useLocal = false; // Cambia a true para desarrollo local
+
+  static const String baseUrl = useLocal
+      ? 'http://192.168.18.25/marron_motors/bd_marron_motors'
+      : 'https://api-marron-motors.up.railway.app';
 
   // Endpoints
   static const String empresas = '$baseUrl/empresas/listar.php';
@@ -24,4 +27,12 @@ class ApiConfig {
   static const String ordenesActualizarFoto =
       '$baseUrl/ordenes/actualizar_foto.php';
   static const String facturasEmitir = '$baseUrl/facturas/emitir.php';
+
+  // Dashboard & Configuración
+  static const String dashboardStats =
+      '$baseUrl/dashboard/obtener_estadisticas.php';
+  static const String configObtener =
+      '$baseUrl/configuracion/obtener_config.php';
+  static const String configActualizar =
+      '$baseUrl/configuracion/actualizar_config.php';
 }
