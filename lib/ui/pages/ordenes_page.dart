@@ -65,6 +65,13 @@ class _OrdenesPageState extends State<OrdenesPage>
   }
 
   Future<void> _emitirFactura(OrdenTrabajo orden, String tipo) async {
+    if (orden.items.isEmpty) {
+      _showError(
+        'No se puede emitir un comprobante sin ítems de trabajo. Por favor, añada servicios o repuestos primero.',
+      );
+      return;
+    }
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -198,11 +205,25 @@ class _OrdenesPageState extends State<OrdenesPage>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Aviso'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'Aviso',
+          style: TextStyle(
+            color: Colors.blue.shade900,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         content: Text(msg),
         actions: [
-          TextButton(
+          ElevatedButton(
             onPressed: () => Navigator.pop(context),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue.shade800,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
             child: const Text('CERRAR'),
           ),
         ],
@@ -440,6 +461,35 @@ class _OrdenesPageState extends State<OrdenesPage>
                   ],
                 ),
               ),
+              if (ot.estado == 'FINALIZADA' && ot.items.isEmpty)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  color: Colors.amber.shade50,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.warning_amber_rounded,
+                        size: 16,
+                        color: Colors.amber.shade900,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Añade trabajos antes de facturar',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.amber.shade900,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               // Action Footer
               Container(
                 decoration: BoxDecoration(
@@ -556,8 +606,9 @@ class _OrdenesPageState extends State<OrdenesPage>
       );
     }
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
       children: [
         if (ot.estado == 'ABIERTA')
           _buildActionButton(
@@ -574,52 +625,67 @@ class _OrdenesPageState extends State<OrdenesPage>
               }
             },
           ),
-        if (ot.estado == 'EN_PROCESO') ...[
-          _buildActionButton(
-            'AÑADIR TRABAJO',
-            Icons.add_circle_outline,
-            Colors.blue.shade700,
-            () => _agregarTrabajo(ot),
-            isOutlined: true,
+        if (ot.estado == 'EN_PROCESO')
+          Row(
+            children: [
+              Expanded(
+                child: _buildActionButton(
+                  'AÑADIR TRABAJO',
+                  Icons.add_circle_outline,
+                  Colors.blue.shade700,
+                  () => _agregarTrabajo(ot),
+                  isOutlined: true,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildActionButton(
+                  'FINALIZAR',
+                  Icons.task_alt_rounded,
+                  Colors.orange.shade800,
+                  () async {
+                    final confirm = await _showConfirmDialog(
+                      'Finalizar Trabajo',
+                      '¿Confirmas que deseas pasar esta orden a estado "Finalizada"?',
+                    );
+                    if (confirm) {
+                      _updateStatus(ot, 'FINALIZADA');
+                    }
+                  },
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
-          _buildActionButton(
-            'FINALIZAR',
-            Icons.task_alt_rounded,
-            Colors.orange.shade800,
-            () async {
-              final confirm = await _showConfirmDialog(
-                'Finalizar Trabajo',
-                '¿Confirmas que deseas pasar esta orden a estado "Finalizada"?',
-              );
-              if (confirm) {
-                _updateStatus(ot, 'FINALIZADA');
-              }
-            },
-          ),
-        ],
         if (ot.estado == 'FINALIZADA') ...[
+          Row(
+            children: [
+              Expanded(
+                child: _buildActionButton(
+                  'BOLETA',
+                  Icons.receipt_outlined,
+                  Colors.blueGrey.shade700,
+                  () => _emitirFactura(ot, 'BOLETA'),
+                  isOutlined: true,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildActionButton(
+                  'FACTURAR',
+                  Icons.description_rounded,
+                  Colors.blue.shade900,
+                  () => _emitirFactura(ot, 'FACTURA'),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
           _buildActionButton(
             'AÑADIR TRABAJO',
             Icons.add_circle_outline,
             Colors.blue.shade700,
             () => _agregarTrabajo(ot),
             isOutlined: true,
-          ),
-          const SizedBox(width: 8),
-          _buildActionButton(
-            'BOLETA',
-            Icons.receipt_outlined,
-            Colors.blueGrey.shade700,
-            () => _emitirFactura(ot, 'BOLETA'),
-            isOutlined: true,
-          ),
-          const SizedBox(width: 8),
-          _buildActionButton(
-            'FACTURAR',
-            Icons.description_rounded,
-            Colors.blue.shade900,
-            () => _emitirFactura(ot, 'FACTURA'),
           ),
         ],
       ],
