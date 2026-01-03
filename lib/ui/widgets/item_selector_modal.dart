@@ -16,7 +16,7 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
   final _searchController = TextEditingController();
   final _cantidadController = TextEditingController(text: '1');
   final _precioController = TextEditingController();
-  bool _afectoIgv = true;
+  bool _afectoIgv = false;
 
   List<Item> _allItems = [];
   List<Item> _filteredItems = [];

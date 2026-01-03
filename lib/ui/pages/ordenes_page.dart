@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../models/orden.dart';
 import '../../services/data_repository.dart';
 import 'orden_nueva_page.dart';
+import 'orden_detalle_page.dart';
 import '../widgets/item_selector_modal.dart';
 
 class OrdenesPage extends StatefulWidget {
@@ -91,29 +92,7 @@ class _OrdenesPageState extends State<OrdenesPage>
     }
   }
 
-  Future<void> _eliminarItem(OrdenTrabajo orden, OrdenItem item) async {
-    final confirm = await _showConfirmDialog(
-      'Eliminar Item',
-      '¿Deseas eliminar "${item.itemNombre}" de esta orden?',
-    );
-
-    if (confirm) {
-      setState(() => _loading = true);
-      final success = await _repository.eliminarItemDesdeOrden(
-        orden.id!,
-        item.id!,
-      );
-      if (success) {
-        await _loadOrdenes();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Item eliminado correctamente')),
-        );
-      } else {
-        setState(() => _loading = false);
-        _showError('No se pudo eliminar el item');
-      }
-    }
-  }
+  // Removed _eliminarItem as finalized item management moved to dedicated views/modules
 
   Future<void> _pickAndUploadFoto(OrdenTrabajo ot) async {
     final picker = ImagePicker();
@@ -381,55 +360,12 @@ class _OrdenesPageState extends State<OrdenesPage>
                       'CLIENTE',
                       ot.cliNombre ?? 'No asignado',
                     ),
-                    if (ot.estado == 'FINALIZADA' ||
-                        ot.estado == 'FACTURADA') ...[
-                      const SizedBox(height: 8),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 24),
-                        child: Column(
-                          children: [
-                            if (ot.cliDocumento != null)
-                              _buildSubDetailRow(
-                                Icons.badge_outlined,
-                                'Documento: ${ot.cliDocumento}',
-                              ),
-                            if (ot.cliTelefono != null)
-                              _buildSubDetailRow(
-                                Icons.phone_android,
-                                'Tel: ${ot.cliTelefono}',
-                              ),
-                            if (ot.cliEmail != null)
-                              _buildSubDetailRow(
-                                Icons.email_outlined,
-                                'Email: ${ot.cliEmail}',
-                              ),
-                            if (ot.cliDireccion != null)
-                              _buildSubDetailRow(
-                                Icons.location_on_outlined,
-                                'Dir: ${ot.cliDireccion}',
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
                     const SizedBox(height: 12),
                     _buildDetailRow(
                       Icons.directions_car_filled_outlined,
                       'VEHÍCULO',
-                      '${ot.vehPlaca} ${ot.vehMarca ?? ''} ${ot.vehModelo ?? ''} ${ot.vehAnio ?? ''}'
-                          .trim(),
+                      ot.vehPlaca ?? 'S/P',
                     ),
-                    if (ot.estado == 'FINALIZADA' ||
-                        ot.estado == 'FACTURADA') ...[
-                      if (ot.vehVin != null && ot.vehVin!.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(left: 24, top: 4),
-                          child: _buildSubDetailRow(
-                            Icons.fingerprint,
-                            'VIN: ${ot.vehVin}',
-                          ),
-                        ),
-                    ],
                     const SizedBox(height: 12),
                     _buildDetailRow(
                       Icons.build_circle_outlined,
@@ -467,88 +403,6 @@ class _OrdenesPageState extends State<OrdenesPage>
                         ),
                       ],
                     ),
-                    if (ot.items.isNotEmpty) ...[
-                      const Divider(height: 24),
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: ot.items.length,
-                        itemBuilder: (context, i) {
-                          final item = ot.items[i];
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 4),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.check_circle,
-                                  size: 14,
-                                  color: Colors.green.shade600,
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    item.itemNombre ?? 'Item ${i + 1}',
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                ),
-                                Text(
-                                  'x${item.cantidad.toInt()} S/ ${item.total.toStringAsFixed(2)}',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                if (ot.estado != 'FACTURADA')
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.delete_outline,
-                                      size: 16,
-                                      color: Colors.red,
-                                    ),
-                                    onPressed: () => _eliminarItem(ot, item),
-                                    constraints: const BoxConstraints(),
-                                    padding: const EdgeInsets.only(left: 8),
-                                  ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                    if (ot.foto != null && ot.foto!.isNotEmpty) ...[
-                      const Divider(height: 24),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          ot.foto!,
-                          height: 150,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              const Icon(Icons.broken_image, size: 50),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.info_outline,
-                            size: 12,
-                            color: Colors.grey[600],
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Imagen referencial para identificar la orden',
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Colors.grey[600],
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
                   ],
                 ),
               ),
@@ -562,24 +416,6 @@ class _OrdenesPageState extends State<OrdenesPage>
           ),
         );
       },
-    );
-  }
-
-  Widget _buildSubDetailRow(IconData icon, String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 2),
-      child: Row(
-        children: [
-          Icon(icon, size: 12, color: Colors.grey[500]),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Text(
-              text,
-              style: TextStyle(fontSize: 11, color: Colors.grey[700]),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -701,6 +537,16 @@ class _OrdenesPageState extends State<OrdenesPage>
                 ],
               ),
             ],
+          ),
+        if (ot.estado == 'FINALIZADA' || ot.estado == 'FACTURADA')
+          _buildActionButton(
+            'VER DETALLE',
+            Icons.visibility_outlined,
+            Colors.blueGrey.shade700,
+            () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => OrdenDetallePage(orden: ot)),
+            ),
           ),
       ],
     );

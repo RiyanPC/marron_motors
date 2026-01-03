@@ -41,19 +41,166 @@ class _FacturacionPageState extends State<FacturacionPage>
         _loading = false;
       });
     } catch (e) {
-      setState(() => _loading = false);
-      _showError('Error al cargar órdenes para facturación: $e');
+      if (mounted) {
+        setState(() => _loading = false);
+        _showError('Error al cargar órdenes para facturación: $e');
+      }
     }
   }
 
-  Future<void> _emitirFactura(OrdenTrabajo orden, String tipo) async {
+  List<String> _validateOrderForBilling(OrdenTrabajo orden, String tipo) {
+    List<String> errors = [];
     if (orden.items.isEmpty) {
-      _showError(
-        'No se puede emitir un comprobante sin ítems de trabajo. Por favor, añada servicios o repuestos primero.',
-      );
-      return;
+      errors.add('La orden no tiene items.');
+    }
+    if (orden.cliNombre == null || orden.cliNombre!.isEmpty) {
+      errors.add('Nombre del cliente es requerido.');
     }
 
+    final doc = orden.cliDocumento ?? '';
+    if (tipo == 'BOLETA') {
+      if (doc.length != 8 && doc.length != 11 && doc.isNotEmpty) {
+        // SUNAT accepts DNI(8) or RUC(11) in BOLETA, but usually it's DNI.
+      }
+      if (orden.total >= 700 && doc.isEmpty) {
+        errors.add('Monto >= 700 requiere identificación (DNI).');
+      }
+    } else if (tipo == 'FACTURA') {
+      if (doc.length != 11) {
+        errors.add('RUC debe tener 11 dígitos.');
+      }
+      if (orden.cliDireccion == null || orden.cliDireccion!.isEmpty) {
+        errors.add('Dirección es requerida para Factura.');
+      }
+    }
+    return errors;
+  }
+
+  Future<void> _confirmarYEmitir(OrdenTrabajo orden, String tipo) async {
+    final errors = _validateOrderForBilling(orden, tipo);
+
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Confirmar $tipo'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (errors.isNotEmpty) ...[
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.red.shade200),
+                  ),
+                  child: Column(
+                    children: errors
+                        .map(
+                          (e) => Row(
+                            children: [
+                              const Icon(
+                                Icons.error_outline,
+                                size: 14,
+                                color: Colors.red,
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  e,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+              _buildSummaryHeader('DATOS DEL CLIENTE'),
+              _buildSummaryRow('Nombre', orden.cliNombre ?? 'N/A'),
+              _buildSummaryRow(
+                tipo == 'FACTURA' ? 'RUC' : 'DNI',
+                orden.cliDocumento ?? 'N/A',
+              ),
+              if (tipo == 'FACTURA')
+                _buildSummaryRow('Dir', orden.cliDireccion ?? 'N/A'),
+              const Divider(height: 24),
+              _buildSummaryHeader('RESUMEN DE VENTA'),
+              _buildSummaryRow('Total Items', orden.items.length.toString()),
+              _buildSummaryRow(
+                'TOTAL A PAGAR',
+                'S/ ${orden.total.toStringAsFixed(2)}',
+                isBold: true,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('CANCELAR'),
+          ),
+          ElevatedButton(
+            onPressed: errors.isNotEmpty
+                ? null
+                : () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue.shade900,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('EMITIR AHORA'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      _emitirFactura(orden, tipo);
+    }
+  }
+
+  Widget _buildSummaryHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+          color: Colors.grey.shade600,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSummaryRow(String label, String value, {bool isBold = false}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: const TextStyle(fontSize: 13)),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _emitirFactura(OrdenTrabajo orden, String tipo) async {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -62,23 +209,25 @@ class _FacturacionPageState extends State<FacturacionPage>
 
     try {
       final res = await _repository.emitirFactura(orden.id!, tipo);
-      Navigator.pop(context); // Close loading
+      if (mounted) Navigator.pop(context); // Close loading
 
       if (res['status'] == 'success') {
         _loadOrdenes();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Comprobante ${res['data']['serie']}-${res['data']['numero']} aceptado',
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Comprobante ${res['data']['serie']}-${res['data']['numero']} aceptado',
+              ),
+              backgroundColor: Colors.green,
             ),
-            backgroundColor: Colors.green,
-          ),
-        );
+          );
+        }
       } else {
         _showError(res['message'] ?? 'Error desconocido');
       }
     } catch (e) {
-      Navigator.pop(context);
+      if (mounted) Navigator.pop(context);
       _showError(e.toString());
     }
   }
@@ -419,40 +568,6 @@ class _FacturacionPageState extends State<FacturacionPage>
                         },
                       ),
                     ],
-                    if (ot.foto != null && ot.foto!.isNotEmpty) ...[
-                      const Divider(height: 24),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          ot.foto!,
-                          height: 150,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              const Icon(Icons.broken_image, size: 50),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.info_outline,
-                            size: 12,
-                            color: Colors.grey[600],
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Imagen referencial para identificar la orden',
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Colors.grey[600],
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
                   ],
                 ),
               ),
@@ -490,6 +605,8 @@ class _FacturacionPageState extends State<FacturacionPage>
                     ],
                   ),
                 ),
+              // Validation Warnings
+              ..._buildValidationWarnings(ot),
               // Actions Section
               Padding(
                 padding: const EdgeInsets.all(16),
@@ -597,7 +714,7 @@ class _FacturacionPageState extends State<FacturacionPage>
                   'BOLETA',
                   Icons.receipt_outlined,
                   Colors.blueGrey.shade700,
-                  () => _emitirFactura(ot, 'BOLETA'),
+                  () => _confirmarYEmitir(ot, 'BOLETA'),
                   isOutlined: true,
                 ),
               ),
@@ -607,7 +724,7 @@ class _FacturacionPageState extends State<FacturacionPage>
                   'FACTURAR',
                   Icons.description_rounded,
                   Colors.blue.shade900,
-                  () => _emitirFactura(ot, 'FACTURA'),
+                  () => _confirmarYEmitir(ot, 'FACTURA'),
                 ),
               ),
             ],
@@ -663,6 +780,64 @@ class _FacturacionPageState extends State<FacturacionPage>
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         elevation: 0,
+      ),
+    );
+  }
+
+  List<Widget> _buildValidationWarnings(OrdenTrabajo ot) {
+    if (ot.estado != 'FINALIZADA') return [];
+
+    List<Widget> warnings = [];
+
+    if (ot.items.isEmpty) {
+      warnings.add(_warningBox('Requiere añadir trabajos para facturar'));
+    }
+
+    // Check for general missing data
+    if (ot.cliNombre == null || ot.cliNombre!.isEmpty) {
+      warnings.add(_warningBox('Falta nombre del cliente'));
+    }
+
+    final doc = ot.cliDocumento ?? '';
+    if (doc.isEmpty) {
+      warnings.add(_warningBox('Falta Documento (DNI/RUC)'));
+    } else if (doc.length != 8 && doc.length != 11) {
+      warnings.add(
+        _warningBox('Documento debe ser 8 dígitos (DNI) o 11 (RUC)'),
+      );
+    }
+
+    return warnings;
+  }
+
+  Widget _warningBox(String message) {
+    return Container(
+      margin: const EdgeInsets.only(left: 16, right: 16, top: 8),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.amber.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.amber.shade200),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.warning_amber_rounded,
+            color: Colors.amber.shade800,
+            size: 18,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(
+                fontSize: 11,
+                color: Colors.amber.shade900,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
