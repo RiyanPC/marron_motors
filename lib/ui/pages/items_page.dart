@@ -53,9 +53,11 @@ class _ItemsPageState extends State<ItemsPage>
         centerTitle: true,
         bottom: TabBar(
           controller: _tabController,
-          labelColor: Theme.of(context).colorScheme.primary,
-          unselectedLabelColor: Colors.grey,
-          indicatorColor: Theme.of(context).colorScheme.primary,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: Colors.white,
+          indicatorWeight: 3,
+          labelStyle: const TextStyle(fontWeight: FontWeight.bold),
           tabs: const [
             Tab(text: 'SERVICIOS', icon: Icon(Icons.handyman_outlined)),
             Tab(text: 'ITEMS', icon: Icon(Icons.inventory_2_outlined)),

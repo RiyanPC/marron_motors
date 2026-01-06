@@ -22,6 +22,7 @@ class _OrdenesPageState extends State<OrdenesPage>
   late TabController _tabController;
   DateTime? _fechaInicio;
   DateTime? _fechaFin;
+  String? _activeFilter;
 
   @override
   void initState() {
@@ -80,6 +81,7 @@ class _OrdenesPageState extends State<OrdenesPage>
     setState(() {
       _fechaInicio = inicio;
       _fechaFin = fin;
+      _activeFilter = tipo;
     });
     _loadOrdenes();
   }
@@ -98,6 +100,7 @@ class _OrdenesPageState extends State<OrdenesPage>
       setState(() {
         _fechaInicio = picked.start;
         _fechaFin = picked.end;
+        _activeFilter = 'especificar';
       });
       _loadOrdenes();
     }
@@ -107,6 +110,7 @@ class _OrdenesPageState extends State<OrdenesPage>
     setState(() {
       _fechaInicio = null;
       _fechaFin = null;
+      _activeFilter = null;
     });
     _loadOrdenes();
   }
@@ -422,6 +426,7 @@ class _OrdenesPageState extends State<OrdenesPage>
               label: 'Hoy',
               icon: Icons.today,
               onTap: () => _aplicarFiltroRapido('hoy'),
+              isSelected: _activeFilter == 'hoy',
             ),
           ),
           const SizedBox(width: 8),
@@ -430,6 +435,7 @@ class _OrdenesPageState extends State<OrdenesPage>
               label: '7 días',
               icon: Icons.date_range,
               onTap: () => _aplicarFiltroRapido('7dias'),
+              isSelected: _activeFilter == '7dias',
             ),
           ),
           const SizedBox(width: 8),
@@ -438,6 +444,7 @@ class _OrdenesPageState extends State<OrdenesPage>
               label: 'Mes',
               icon: Icons.calendar_month,
               onTap: () => _aplicarFiltroRapido('mes'),
+              isSelected: _activeFilter == 'mes',
             ),
           ),
           const SizedBox(width: 8),
@@ -446,7 +453,7 @@ class _OrdenesPageState extends State<OrdenesPage>
               label: 'Especificar',
               icon: Icons.edit_calendar,
               onTap: _mostrarFiltroFechas,
-              isOutlined: true,
+              isSelected: _activeFilter == 'especificar',
             ),
           ),
         ],
@@ -458,16 +465,16 @@ class _OrdenesPageState extends State<OrdenesPage>
     required String label,
     required IconData icon,
     required VoidCallback onTap,
-    bool isOutlined = false,
+    bool isSelected = false,
   }) {
-    if (isOutlined) {
+    if (!isSelected) {
       return OutlinedButton(
         onPressed: onTap,
         style: OutlinedButton.styleFrom(
           foregroundColor: Theme.of(context).colorScheme.primary,
           side: BorderSide(
-            color: Theme.of(context).colorScheme.primary,
-            width: 1.5,
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+            width: 1,
           ),
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
