@@ -5,6 +5,7 @@ import '../../models/orden.dart';
 import '../../services/data_repository.dart';
 import 'orden_nueva_page.dart';
 import 'orden_detalle_page.dart';
+import 'facturacion_page.dart';
 import '../widgets/item_selector_modal.dart';
 
 class OrdenesPage extends StatefulWidget {
@@ -855,6 +856,21 @@ class _OrdenesPageState extends State<OrdenesPage>
                 children: [
                   Expanded(
                     child: _buildActionButton(
+                      'VER ITEMS',
+                      Icons.list_alt_rounded,
+                      Colors.indigo.shade700,
+                      () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => OrdenDetallePage(orden: ot),
+                        ),
+                      ),
+                      isOutlined: true,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _buildActionButton(
                       'AÑADIR TRABAJO',
                       Icons.add_circle_outline,
                       const Color(0xFF1565C0),
@@ -862,28 +878,52 @@ class _OrdenesPageState extends State<OrdenesPage>
                       isOutlined: true,
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _buildActionButton(
-                      'FINALIZAR',
-                      Icons.task_alt_rounded,
-                      Colors.orange.shade800,
-                      () async {
-                        final confirm = await _showConfirmDialog(
-                          'Finalizar Trabajo',
-                          '¿Confirmas que deseas finalizar el trabajo? La orden pasará al módulo de FACTURACIÓN.',
-                        );
-                        if (confirm) {
-                          _updateStatus(ot, 'FINALIZADA');
-                        }
-                      },
-                    ),
-                  ),
                 ],
+              ),
+              const SizedBox(height: 8),
+              _buildActionButton(
+                'FINALIZAR',
+                Icons.task_alt_rounded,
+                Colors.orange.shade800,
+                () async {
+                  final confirm = await _showConfirmDialog(
+                    'Finalizar Trabajo',
+                    '¿Confirmas que deseas finalizar el trabajo? La orden pasará al módulo de FACTURACIÓN.',
+                  );
+                  if (confirm) {
+                    _updateStatus(ot, 'FINALIZADA');
+                  }
+                },
               ),
             ],
           ),
-        if (ot.estado == 'FINALIZADA' || ot.estado == 'FACTURADA')
+        if (ot.estado == 'FINALIZADA')
+          Column(
+            children: [
+              _buildActionButton(
+                'VER DETALLE',
+                Icons.visibility_outlined,
+                const Color.fromARGB(255, 57, 146, 173),
+                () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => OrdenDetallePage(orden: ot),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              _buildActionButton(
+                'EMITIR',
+                Icons.receipt_long_rounded,
+                Colors.green.shade700,
+                () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const FacturacionPage()),
+                ),
+              ),
+            ],
+          ),
+        if (ot.estado == 'FACTURADA')
           _buildActionButton(
             'VER DETALLE',
             Icons.visibility_outlined,

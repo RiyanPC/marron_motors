@@ -60,8 +60,65 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
         filled: true,
-        fillColor: Colors.grey[50],
+        fillColor: Colors.grey[50], // Background remains neutral
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: accentColor, width: 2),
+        ),
+        labelStyle: TextStyle(
+          color: primaryColor,
+        ), // Label remains primary or neutral
+        floatingLabelStyle: TextStyle(
+          color: accentColor,
+        ), // Floating label highlights with accent
       ),
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: accentColor,
+        selectionColor: accentColor.withOpacity(0.4),
+        selectionHandleColor: accentColor,
+      ),
+      toggleButtonsTheme: ToggleButtonsThemeData(
+        selectedColor: Colors.white,
+        fillColor: accentColor,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      checkboxTheme: CheckboxThemeData(
+        fillColor: MaterialStateProperty.resolveWith<Color>((states) {
+          if (states.contains(MaterialState.selected)) {
+            return accentColor;
+          }
+          return Colors.grey.shade600;
+        }),
+      ),
+      radioTheme: RadioThemeData(
+        fillColor: MaterialStateProperty.resolveWith<Color>((states) {
+          if (states.contains(MaterialState.selected)) {
+            return accentColor;
+          }
+          return Colors.grey.shade600;
+        }),
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor: MaterialStateProperty.resolveWith<Color>((states) {
+          if (states.contains(MaterialState.selected)) {
+            return accentColor;
+          }
+          return Colors.grey.shade400;
+        }),
+        trackColor: MaterialStateProperty.resolveWith<Color>((states) {
+          if (states.contains(MaterialState.selected)) {
+            return accentColor.withOpacity(0.5);
+          }
+          return Colors.grey.shade200;
+        }),
+      ),
+      sliderTheme: SliderThemeData(
+        activeTrackColor: accentColor,
+        inactiveTrackColor: accentColor.withOpacity(0.3),
+        thumbColor: accentColor,
+        overlayColor: accentColor.withOpacity(0.2),
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(color: accentColor),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: accentColor,
         foregroundColor: Colors.white,

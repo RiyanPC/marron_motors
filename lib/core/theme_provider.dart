@@ -46,6 +46,7 @@ class ThemeProvider extends ChangeNotifier {
     Color? customPrimary,
     Color? customAccent,
   }) async {
+    print('DEBUG: setTheme called with $themeName');
     _currentThemeName = themeName;
 
     if (themeName == 'Personalizado') {
