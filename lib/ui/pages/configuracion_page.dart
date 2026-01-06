@@ -114,7 +114,7 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
                     _customAccentColor = pickerColor;
                   }
                 });
-                await _applyTheme();
+                // await _applyTheme(); // Removed: Only apply on save
                 if (mounted) Navigator.of(context).pop();
               },
               child: const Text('SELECCIONAR'),
@@ -141,6 +141,9 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
       );
 
       final success = await _repository.saveConfig(newConfig);
+
+      // Apply theme changes
+      await _applyTheme();
 
       // Guardar preferencias de interfaz
       final prefs = await SharedPreferences.getInstance();
@@ -293,7 +296,7 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
                           setState(() {
                             _selectedTheme = value!;
                           });
-                          await _applyTheme();
+                          // await _applyTheme(); // Removed: Only apply on save
                         },
                       );
                     }),
@@ -335,7 +338,7 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
                         setState(() {
                           _selectedTheme = value!;
                         });
-                        await _applyTheme();
+                        // await _applyTheme(); // Removed: Only apply on save
                       },
                     ),
                     // Selectores de color personalizado (solo visible si es tema personalizado)
