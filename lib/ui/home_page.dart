@@ -52,9 +52,24 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('Marron Motors'),
-        centerTitle: false,
+        title: const Text(
+          'Marron Motors',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.white),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF0D47A1), Color(0xFF1976D2)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -92,19 +107,27 @@ class _HomePageState extends State<HomePage> {
                           _buildKpiGrid(),
                           const SizedBox(height: 32),
                           Text(
-                            'Acciones Rápidas',
-                            style: Theme.of(context).textTheme.titleLarge
-                                ?.copyWith(fontWeight: FontWeight.bold),
+                            'ACCIONES RÁPIDAS',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                            ),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 12),
                           _buildQuickActions(context),
                           const SizedBox(height: 32),
                           Text(
-                            'Gestión',
-                            style: Theme.of(context).textTheme.titleLarge
-                                ?.copyWith(fontWeight: FontWeight.bold),
+                            'GESTIÓN',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                            ),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 12),
                           _buildManagementGrid(context),
                           const SizedBox(height: 32),
                           if (_stats!.ordenesRecientes.isNotEmpty) ...[
@@ -112,9 +135,13 @@ class _HomePageState extends State<HomePage> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  'Actividad Reciente',
-                                  style: Theme.of(context).textTheme.titleLarge
-                                      ?.copyWith(fontWeight: FontWeight.bold),
+                                  'ACTIVIDAD RECIENTE',
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1,
+                                  ),
                                 ),
                                 TextButton(
                                   onPressed: () {
@@ -143,26 +170,74 @@ class _HomePageState extends State<HomePage> {
             MaterialPageRoute(builder: (_) => const OrdenNuevaPage()),
           );
         },
-        label: const Text('Nueva Orden'),
+        label: const Text('NUEVA ORDEN'),
         icon: const Icon(Icons.add),
+        backgroundColor: const Color(0xFF0D47A1),
+        foregroundColor: Colors.white,
       ),
     );
   }
 
   Widget _buildWelcomeSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Text(
-          'Hola, Bienvenido',
-          style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Hola, Bienvenido',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Panel General',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w900,
+                color: Color(0xFF0D47A1),
+                letterSpacing: -0.5,
+              ),
+            ),
+          ],
         ),
-        const Text(
-          'Panel General',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF1A237E),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+            border: Border.all(color: Colors.grey.shade200),
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const EstadisticasPage()),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: const Icon(
+                  Icons.bar_chart_rounded,
+                  color: Color(0xFF0D47A1),
+                  size: 28,
+                ),
+              ),
+            ),
           ),
         ),
       ],
@@ -170,49 +245,29 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildKpiGrid() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Row(
-          children: [
-            Expanded(
-              child: _buildKpiCard(
-                title: 'Activas',
-                value: _stats!.ordenesActivas.toString(),
-                icon: Icons.engineering,
-                color: Colors.orange,
-                small: true,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildKpiCard(
-                title: 'Ganancias',
-                value:
-                    'S/ ${_stats!.gananciasMes.toStringAsFixed(0)}', // Truncate decimals for space
-                icon: Icons.payments,
-                color: Colors.green,
-                small: true,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Material(
-              color: Colors.grey.shade100,
-              shape: const CircleBorder(),
-              child: IconButton(
-                icon: const Icon(Icons.arrow_forward_ios_rounded, size: 20),
-                color: Colors.grey.shade700,
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const EstadisticasPage()),
-                  );
-                },
-                tooltip: 'Ver Estadísticas',
-              ),
-            ),
-          ],
-        );
-      },
+    return Row(
+      children: [
+        Expanded(
+          child: _buildKpiCard(
+            title: 'Activas',
+            value: _stats!.ordenesActivas.toString(),
+            icon: Icons.engineering,
+            color: Colors.orange,
+            small: true,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildKpiCard(
+            title: 'Ganancias',
+            value:
+                'S/ ${_stats!.gananciasMes.toStringAsFixed(0)}', // Truncate decimals for space
+            icon: Icons.payments,
+            color: Colors.green,
+            small: true,
+          ),
+        ),
+      ],
     );
   }
 
@@ -224,18 +279,18 @@ class _HomePageState extends State<HomePage> {
     bool small = false,
   }) {
     return Container(
-      padding: EdgeInsets.all(small ? 12 : 20),
+      padding: EdgeInsets.all(small ? 14 : 20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.black.withOpacity(0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(color: Colors.grey.shade200),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -243,12 +298,12 @@ class _HomePageState extends State<HomePage> {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(6),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: color.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, color: color, size: small ? 20 : 24),
+                child: Icon(icon, color: color, size: 24),
               ),
               if (!small) ...[
                 const SizedBox(width: 12),
@@ -263,16 +318,20 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
           const SizedBox(height: 12),
-          if (small)
-            Text(
-              value,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: Colors.black87,
             ),
+          ),
           Text(
             title,
             style: TextStyle(
-              fontSize: small ? 12 : 14,
+              fontSize: 12,
               color: Colors.grey[600],
+              fontWeight: FontWeight.w600,
             ),
             overflow: TextOverflow.ellipsis,
           ),
@@ -287,9 +346,9 @@ class _HomePageState extends State<HomePage> {
         Expanded(
           child: _buildActionButton(
             context,
-            'Órdenes',
+            'Taller',
             Icons.home_repair_service,
-            Colors.indigo.shade600,
+            const Color(0xFF0D47A1), // System Blue
             () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const OrdenesPage()),
@@ -302,7 +361,7 @@ class _HomePageState extends State<HomePage> {
             context,
             'Facturación',
             Icons.receipt_long,
-            Colors.teal.shade600,
+            Colors.teal.shade700,
             () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const FacturacionPage()),
@@ -320,7 +379,7 @@ class _HomePageState extends State<HomePage> {
       crossAxisCount: 3,
       crossAxisSpacing: 12,
       mainAxisSpacing: 12,
-      childAspectRatio: 1.0,
+      childAspectRatio: 1.1,
       children: [
         _buildMiniCard(
           context,
@@ -360,27 +419,47 @@ class _HomePageState extends State<HomePage> {
     Color color,
     VoidCallback onTap,
   ) {
-    return Material(
-      color: color.withOpacity(0.1),
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: color),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: TextStyle(
-                  color: color.withOpacity(0.9),
-                  fontWeight: FontWeight.bold,
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, color: color, size: 28),
                 ),
-              ),
-            ],
+                const SizedBox(height: 8),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -393,30 +472,39 @@ class _HomePageState extends State<HomePage> {
     IconData icon,
     VoidCallback onTap,
   ) {
-    return Card(
-      elevation: 0,
-      color: Colors.grey[50],
-      shape: RoundedRectangleBorder(
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: Colors.grey.shade200),
       ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: Colors.grey[700], size: 28),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              style: TextStyle(
-                color: Colors.grey[800],
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: Colors.grey[700], size: 26),
+              const SizedBox(height: 8),
+              Text(
+                title,
+                style: TextStyle(
+                  color: Colors.grey[800],
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -425,42 +513,59 @@ class _HomePageState extends State<HomePage> {
   Widget _buildRecentOrders() {
     return Column(
       children: _stats!.ordenesRecientes.map((orden) {
-        return Card(
-          elevation: 0,
-          shape: RoundedRectangleBorder(
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
             borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: Colors.grey.shade200),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+            border: Border.all(color: Colors.grey.shade200),
           ),
-          margin: const EdgeInsets.only(bottom: 8),
           child: ListTile(
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
-              vertical: 4,
+              vertical: 8,
             ),
-            leading: CircleAvatar(
-              backgroundColor: _getStatusColor(orden.estado).withOpacity(0.1),
-              child: Icon(
-                Icons.car_repair,
-                color: _getStatusColor(orden.estado),
-                size: 20,
+            leading: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0D47A1),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                orden.vehPlaca ?? 'S/P',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
               ),
             ),
             title: Text(
-              '${orden.vehPlaca} - ${orden.cliNombre}',
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+              orden.cliNombre ?? 'Cliente',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             ),
-            subtitle: Text(
-              orden.estado,
-              style: TextStyle(
-                color: _getStatusColor(orden.estado),
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
+            subtitle: Padding(
+              padding: const EdgeInsets.only(top: 4.0),
+              child: Row(children: [_getStatusPill(orden.estado)]),
+            ),
+            trailing: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(8),
               ),
-            ),
-            trailing: const Icon(
-              Icons.chevron_right,
-              size: 20,
-              color: Colors.grey,
+              child: const Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 14,
+                color: Colors.grey,
+              ),
             ),
             onTap: () {
               Navigator.push(
@@ -473,6 +578,26 @@ class _HomePageState extends State<HomePage> {
           ),
         );
       }).toList(),
+    );
+  }
+
+  Widget _getStatusPill(String status) {
+    Color color = _getStatusColor(status);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Text(
+        status,
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
     );
   }
 
