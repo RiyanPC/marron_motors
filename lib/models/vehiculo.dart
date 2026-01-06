@@ -1,3 +1,5 @@
+import '../core/api_config.dart';
+
 class Vehiculo {
   final String id;
   final String cliId;
@@ -36,9 +38,20 @@ class Vehiculo {
       anio: json['veh_anio']?.toString() ?? '',
       color: json['veh_color'] ?? '',
       vin: json['veh_vin'] ?? '',
-      foto: json['veh_foto'] ?? '',
+      foto: _fixUrl(json['veh_foto'] ?? ''),
       cliNombre: json['cli_nombre'] ?? '',
     );
+  }
+
+  static String _fixUrl(String url) {
+    if (url.isEmpty) return url;
+    if (url.contains('192.168.') || url.contains('localhost')) {
+      if (url.contains('/uploads/')) {
+        final path = url.split('/uploads/').last;
+        return '${ApiConfig.baseUrl}/uploads/$path';
+      }
+    }
+    return url;
   }
 
   Map<String, dynamic> toJson() {

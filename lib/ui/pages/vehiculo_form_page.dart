@@ -83,6 +83,8 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
   }
 
   Future<void> _pickImage(ImageSource source) async {
+    if (_uploadingImage) return;
+
     final XFile? pickedFile = await _picker.pickImage(
       source: source,
       imageQuality: 70,
