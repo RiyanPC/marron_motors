@@ -87,6 +87,56 @@ class OrdenTrabajo {
       'items': items.map((e) => e.toJson()).toList(),
     };
   }
+
+  OrdenTrabajo copyWith({
+    String? id,
+    String? empId,
+    String? vehId,
+    String? descripcion,
+    String? fechaIngreso,
+    String? fechaCreate,
+    String? vehPlaca,
+    String? vehMarca,
+    String? vehModelo,
+    int? vehAnio,
+    String? vehVin,
+    String? cliNombre,
+    String? cliTelefono,
+    String? cliEmail,
+    String? cliDireccion,
+    String? cliDocumento,
+    String? cliTipoDocumento,
+    String? estado,
+    double? total,
+    String? facId,
+    String? foto,
+    List<OrdenItem>? items,
+  }) {
+    return OrdenTrabajo(
+      id: id ?? this.id,
+      empId: empId ?? this.empId,
+      vehId: vehId ?? this.vehId,
+      descripcion: descripcion ?? this.descripcion,
+      fechaIngreso: fechaIngreso ?? this.fechaIngreso,
+      fechaCreate: fechaCreate ?? this.fechaCreate,
+      vehPlaca: vehPlaca ?? this.vehPlaca,
+      vehMarca: vehMarca ?? this.vehMarca,
+      vehModelo: vehModelo ?? this.vehModelo,
+      vehAnio: vehAnio ?? this.vehAnio,
+      vehVin: vehVin ?? this.vehVin,
+      cliNombre: cliNombre ?? this.cliNombre,
+      cliTelefono: cliTelefono ?? this.cliTelefono,
+      cliEmail: cliEmail ?? this.cliEmail,
+      cliDireccion: cliDireccion ?? this.cliDireccion,
+      cliDocumento: cliDocumento ?? this.cliDocumento,
+      cliTipoDocumento: cliTipoDocumento ?? this.cliTipoDocumento,
+      estado: estado ?? this.estado,
+      total: total ?? this.total,
+      facId: facId ?? this.facId,
+      foto: foto ?? this.foto,
+      items: items ?? this.items,
+    );
+  }
 }
 
 class OrdenItem {

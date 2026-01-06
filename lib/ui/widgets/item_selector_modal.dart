@@ -107,6 +107,7 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
 
     final ordenItem = OrdenItem(
       itemId: _selectedItem!.id,
+      itemNombre: _selectedItem!.nombre, // Set itemNombre explicitly
       cantidad: cant,
       precioUnitario: precio,
       subtotal: subtotal,

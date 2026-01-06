@@ -23,6 +23,7 @@ class _OrdenesPageState extends State<OrdenesPage>
   DateTime? _fechaInicio;
   DateTime? _fechaFin;
   String? _activeFilter;
+  String? _highlightedOrderId;
 
   @override
   void initState() {
@@ -149,15 +150,48 @@ class _OrdenesPageState extends State<OrdenesPage>
     );
 
     if (result is OrdenItem) {
-      setState(() => _loading = true);
+      // Show processing dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator()),
+      );
+
       final success = await _repository.agregarItemsAOrden(orden.id!, [result]);
+
+      // Close processing dialog
+      if (mounted) Navigator.pop(context);
+
       if (success) {
-        await _loadOrdenes();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Trabajo/Repuesto añadido con éxito')),
+        // Manually update local state to avoid reload (Optimistic UI)
+        final newTotal = orden.total + result.total;
+        final updatedItems = List<OrdenItem>.from(orden.items)..add(result);
+
+        final updatedOrden = orden.copyWith(
+          total: newTotal,
+          items: updatedItems,
+        );
+
+        final index = _ordenes.indexWhere((o) => o.id == orden.id);
+        if (index != -1) {
+          setState(() {
+            _ordenes[index] = updatedOrden;
+            _highlightedOrderId = orden.id;
+          });
+
+          // Clear highlight after 2 seconds
+          Future.delayed(const Duration(seconds: 2), () {
+            if (mounted) {
+              setState(() => _highlightedOrderId = null);
+            }
+          });
+        }
+
+        await _showSuccessDialog(
+          'Agregado Correctamente',
+          'Se ha añadido "${result.itemNombre}" a la orden.',
         );
       } else {
-        setState(() => _loading = false);
         _showError('No se pudo añadir el item');
       }
     }
@@ -262,6 +296,69 @@ class _OrdenesPageState extends State<OrdenesPage>
           ),
         ) ??
         false;
+  }
+
+  Future<void> _showSuccessDialog(String title, String message) async {
+    return showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.check_circle_rounded,
+                  size: 48,
+                  color: Colors.green.shade600,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: const Text(
+                    'ENTENDIDO',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   void _showError(String message) {
@@ -552,7 +649,9 @@ class _OrdenesPageState extends State<OrdenesPage>
         return Container(
           margin: const EdgeInsets.only(bottom: 16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: _highlightedOrderId == ot.id
+                ? Colors.green.shade50
+                : Colors.white,
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
