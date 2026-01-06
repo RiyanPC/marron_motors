@@ -18,7 +18,10 @@ class AppDrawer extends StatelessWidget {
           DrawerHeader(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF0D47A1), Color(0xFF1976D2)],
+                colors: [
+                  Theme.of(context).colorScheme.primary,
+                  Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -31,7 +34,7 @@ class AppDrawer extends StatelessWidget {
                   child: Icon(
                     Icons.engineering,
                     size: 35,
-                    color: Color(0xFF0D47A1),
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -132,7 +135,7 @@ class AppDrawer extends StatelessWidget {
     VoidCallback onTap,
   ) {
     return ListTile(
-      leading: Icon(icon, color: const Color(0xFF0D47A1)),
+      leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
       title: Text(
         label,
         style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),

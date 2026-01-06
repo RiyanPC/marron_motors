@@ -85,7 +85,7 @@ class _VehiculosPageState extends State<VehiculosPage> {
       appBar: AppBar(
         title: const Text('Inventario de Vehículos'),
         elevation: 0,
-        backgroundColor: const Color(0xFF0D47A1),
+        backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -96,7 +96,7 @@ class _VehiculosPageState extends State<VehiculosPage> {
           );
           if (result != null) _loadVehiculos();
         },
-        backgroundColor: const Color(0xFF0D47A1),
+        backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add_road),
         label: const Text('NUEVO VEHÍCULO'),
@@ -105,8 +105,8 @@ class _VehiculosPageState extends State<VehiculosPage> {
         children: [
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              color: Color(0xFF0D47A1),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary,
               borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
             ),
             child: TextField(
@@ -133,7 +133,7 @@ class _VehiculosPageState extends State<VehiculosPage> {
                 ? _buildEmptyState()
                 : RefreshIndicator(
                     onRefresh: _loadVehiculos,
-                    color: const Color(0xFF0D47A1),
+                    color: Theme.of(context).colorScheme.primary,
                     child: ListView.builder(
                       padding: const EdgeInsets.all(16),
                       itemCount: _filteredVehiculos.length,
@@ -207,7 +207,7 @@ class _VehiculosPageState extends State<VehiculosPage> {
                 width: 70,
                 height: 70,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0D47A1).withOpacity(0.1),
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                   image: veh.foto.isNotEmpty
                       ? DecorationImage(
@@ -217,9 +217,9 @@ class _VehiculosPageState extends State<VehiculosPage> {
                       : null,
                 ),
                 child: veh.foto.isEmpty
-                    ? const Icon(
+                    ? Icon(
                         Icons.directions_car,
-                        color: Color(0xFF0D47A1),
+                        color: Theme.of(context).colorScheme.primary,
                         size: 32,
                       )
                     : null,
@@ -231,10 +231,10 @@ class _VehiculosPageState extends State<VehiculosPage> {
                   children: [
                     Text(
                       veh.placa,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF0D47A1),
+                        color: Theme.of(context).colorScheme.primary,
                         letterSpacing: 1,
                       ),
                     ),

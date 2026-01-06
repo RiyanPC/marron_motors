@@ -133,14 +133,14 @@ class _ClienteFormPageState extends State<ClienteFormPage> {
       padding: const EdgeInsets.only(bottom: 12, left: 4, top: 8),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: const Color(0xFF0D47A1)),
+          Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
           const SizedBox(width: 8),
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF0D47A1),
+              color: Theme.of(context).colorScheme.primary,
               letterSpacing: 0.5,
             ),
           ),
@@ -233,7 +233,9 @@ class _ClienteFormPageState extends State<ClienteFormPage> {
                                           _tipoDocumento == 'RUC')
                                     ? IconButton(
                                         icon: const Icon(Icons.search),
-                                        color: const Color(0xFF0D47A1),
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
                                         onPressed: _consultarDocumento,
                                       )
                                     : null,
@@ -382,7 +384,7 @@ class _ClienteFormPageState extends State<ClienteFormPage> {
                 onPressed: _saving ? null : _save,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 18),
-                  backgroundColor: const Color(0xFF0D47A1),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),

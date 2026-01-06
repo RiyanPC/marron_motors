@@ -41,9 +41,12 @@ class _EstadisticasPageState extends State<EstadisticasPage> {
         ),
         centerTitle: true,
         flexibleSpace: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color(0xFF0D47A1), Color(0xFF1976D2)],
+              colors: [
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.primary.withOpacity(0.8),
+              ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -104,7 +107,7 @@ class _EstadisticasPageState extends State<EstadisticasPage> {
           'Clientes Nuevos (Mes)',
           _stats!.clientesNuevosMes.toString(),
           Icons.person_add,
-          Colors.blue,
+          Theme.of(context).colorScheme.primary,
         ),
         const SizedBox(height: 12),
         _buildKpiCard(
@@ -234,7 +237,7 @@ class _EstadisticasPageState extends State<EstadisticasPage> {
                   ),
                 ),
                 PieChartSectionData(
-                  color: const Color(0xFF0D47A1),
+                  color: Theme.of(context).colorScheme.primary,
                   value: enProceso.toDouble(),
                   title: '$enProceso',
                   radius: 60,
@@ -265,7 +268,10 @@ class _EstadisticasPageState extends State<EstadisticasPage> {
           children: [
             _buildLegendItem(Colors.grey, 'Abiertas'),
             const SizedBox(width: 16),
-            _buildLegendItem(const Color(0xFF0D47A1), 'En Proceso'),
+            _buildLegendItem(
+              Theme.of(context).colorScheme.primary,
+              'En Proceso',
+            ),
             const SizedBox(width: 16),
             _buildLegendItem(Colors.green, 'Finalizadas'),
           ],
@@ -390,7 +396,7 @@ class _EstadisticasPageState extends State<EstadisticasPage> {
                   toY: item.amount,
                   color: index == history.length - 1
                       ? Colors.green
-                      : Colors.blue,
+                      : Theme.of(context).colorScheme.primary,
                   width: 20,
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(6),

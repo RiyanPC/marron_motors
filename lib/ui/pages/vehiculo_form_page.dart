@@ -185,14 +185,14 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
       padding: const EdgeInsets.only(bottom: 12, left: 4, top: 8),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: const Color(0xFF0D47A1)),
+          Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
           const SizedBox(width: 8),
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF0D47A1),
+              color: Theme.of(context).colorScheme.primary,
               letterSpacing: 0.5,
             ),
           ),
@@ -210,7 +210,7 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
       appBar: AppBar(
         title: Text(isEditing ? 'Editar Vehículo' : 'Nuevo Vehículo'),
         elevation: 0,
-        backgroundColor: const Color(0xFF0D47A1),
+        backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
       ),
       body: _loadingClientes
@@ -422,10 +422,14 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
                               Container(
                                 height: 180,
                                 decoration: BoxDecoration(
-                                  color: Colors.blue.withOpacity(0.05),
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.primary.withOpacity(0.05),
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
-                                    color: Colors.blue.withOpacity(0.1),
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary.withOpacity(0.1),
                                   ),
                                 ),
                                 child: _uploadingImage
@@ -439,15 +443,18 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
                                           Icon(
                                             Icons.add_a_photo_outlined,
                                             size: 48,
-                                            color: const Color(
-                                              0xFF0D47A1,
-                                            ).withOpacity(0.5),
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary
+                                                .withOpacity(0.5),
                                           ),
                                           const SizedBox(height: 12),
-                                          const Text(
+                                          Text(
                                             'Selecciona una foto del vehículo',
                                             style: TextStyle(
-                                              color: Color(0xFF0D47A1),
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.primary,
                                               fontSize: 13,
                                             ),
                                           ),
@@ -485,7 +492,7 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
                       onPressed: _saving ? null : _save,
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 18),
-                        backgroundColor: const Color(0xFF0D47A1),
+                        backgroundColor: Theme.of(context).colorScheme.primary,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -530,8 +537,8 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
       icon: Icon(icon, size: 18),
       label: Text(label, style: const TextStyle(fontSize: 12)),
       style: OutlinedButton.styleFrom(
-        foregroundColor: const Color(0xFF0D47A1),
-        side: const BorderSide(color: Color(0xFF0D47A1)),
+        foregroundColor: Theme.of(context).colorScheme.primary,
+        side: BorderSide(color: Theme.of(context).colorScheme.primary),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );

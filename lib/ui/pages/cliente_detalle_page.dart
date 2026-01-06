@@ -29,8 +29,9 @@ class _ClienteDetallePageState extends State<ClienteDetallePage> {
       final allVehiculos = await _repository.getVehiculos(widget.cliente.empId);
       if (mounted) {
         setState(() {
-          _vehiculos =
-              allVehiculos.where((v) => v.cliId == widget.cliente.id).toList();
+          _vehiculos = allVehiculos
+              .where((v) => v.cliId == widget.cliente.id)
+              .toList();
           _loadingVehicles = false;
         });
       }
@@ -53,7 +54,7 @@ class _ClienteDetallePageState extends State<ClienteDetallePage> {
       appBar: AppBar(
         title: const Text('Perfil del Cliente'),
         elevation: 0,
-        backgroundColor: const Color(0xFF0D47A1),
+        backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
@@ -68,8 +69,10 @@ class _ClienteDetallePageState extends State<ClienteDetallePage> {
                   _buildSectionHeader(Icons.info_outline, 'DATOS DE CONTACTO'),
                   _buildContactCard(),
                   const SizedBox(height: 24),
-                  _buildSectionHeader(Icons.directions_car,
-                      'VEHÍCULOS (${_vehiculos.length})'),
+                  _buildSectionHeader(
+                    Icons.directions_car,
+                    'VEHÍCULOS (${_vehiculos.length})',
+                  ),
                   _buildVehiclesSection(),
                 ],
               ),
@@ -85,14 +88,14 @@ class _ClienteDetallePageState extends State<ClienteDetallePage> {
       padding: const EdgeInsets.only(bottom: 12, left: 4),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: const Color(0xFF0D47A1)),
+          Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
           const SizedBox(width: 8),
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF0D47A1),
+              color: Theme.of(context).colorScheme.primary,
               letterSpacing: 0.8,
             ),
           ),
@@ -105,8 +108,8 @@ class _ClienteDetallePageState extends State<ClienteDetallePage> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.only(bottom: 32, top: 20),
-      decoration: const BoxDecoration(
-        color: Color(0xFF0D47A1),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primary,
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
       ),
       child: Column(
@@ -218,7 +221,7 @@ class _ClienteDetallePageState extends State<ClienteDetallePage> {
     if (_vehiculos.isEmpty) {
       return Card(
         elevation: 0,
-        color: Colors.blue.withOpacity(0.05),
+        color: Theme.of(context).colorScheme.primary.withOpacity(0.05),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: const Padding(
           padding: EdgeInsets.all(20.0),
@@ -264,7 +267,7 @@ class _ClienteDetallePageState extends State<ClienteDetallePage> {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0D47A1).withOpacity(0.1),
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                   image: vehiculo.foto.isNotEmpty
                       ? DecorationImage(
@@ -274,8 +277,11 @@ class _ClienteDetallePageState extends State<ClienteDetallePage> {
                       : null,
                 ),
                 child: vehiculo.foto.isEmpty
-                    ? const Icon(Icons.directions_car,
-                        color: Color(0xFF0D47A1), size: 30)
+                    ? Icon(
+                        Icons.directions_car,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: 30,
+                      )
                     : null,
               ),
               const SizedBox(width: 16),
@@ -285,10 +291,10 @@ class _ClienteDetallePageState extends State<ClienteDetallePage> {
                   children: [
                     Text(
                       vehiculo.placa,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF0D47A1),
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                     Text(
@@ -328,10 +334,14 @@ class _ClienteDetallePageState extends State<ClienteDetallePage> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFF0D47A1).withOpacity(0.1),
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: const Color(0xFF0D47A1), size: 18),
+            child: Icon(
+              icon,
+              color: Theme.of(context).colorScheme.primary,
+              size: 18,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(

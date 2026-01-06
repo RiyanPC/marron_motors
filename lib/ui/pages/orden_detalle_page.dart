@@ -12,7 +12,7 @@ class OrdenDetallePage extends StatelessWidget {
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
         title: Text('Orden #${orden.id}'),
-        backgroundColor: const Color(0xFF0D47A1),
+        backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
@@ -20,9 +20,10 @@ class OrdenDetallePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _buildStatusHeader(),
+            _buildStatusHeader(context),
             const SizedBox(height: 16),
             _buildSection(
+              context: context,
               title: 'DATOS DEL CLIENTE',
               icon: Icons.person_rounded,
               child: Column(
@@ -37,6 +38,7 @@ class OrdenDetallePage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             _buildSection(
+              context: context,
               title: 'DATOS DEL VEHÍCULO',
               icon: Icons.directions_car_filled_rounded,
               child: Column(
@@ -57,6 +59,7 @@ class OrdenDetallePage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             _buildSection(
+              context: context,
               title: 'SERVICIO SOLICITADO',
               icon: Icons.description_rounded,
               child: Text(
@@ -66,13 +69,15 @@ class OrdenDetallePage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             _buildSection(
+              context: context,
               title: 'DETALLE DE TRABAJOS',
               icon: Icons.list_alt_rounded,
-              child: _buildItemsList(),
+              child: _buildItemsList(context),
             ),
             if (orden.foto != null && orden.foto!.isNotEmpty) ...[
               const SizedBox(height: 16),
               _buildSection(
+                context: context,
                 title: 'EVIDENCIA FOTOGRÁFICA',
                 icon: Icons.camera_alt_rounded,
                 child: Column(
@@ -107,7 +112,7 @@ class OrdenDetallePage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusHeader() {
+  Widget _buildStatusHeader(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -137,7 +142,7 @@ class OrdenDetallePage extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w900,
-                  color: _getStatusColor(orden.estado),
+                  color: _getStatusColor(context, orden.estado),
                 ),
               ),
             ],
@@ -169,6 +174,7 @@ class OrdenDetallePage extends StatelessWidget {
   }
 
   Widget _buildSection({
+    required BuildContext context,
     required String title,
     required IconData icon,
     required Widget child,
@@ -185,14 +191,18 @@ class OrdenDetallePage extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, size: 20, color: Colors.blue.shade900),
+              Icon(
+                icon,
+                size: 20,
+                color: Theme.of(context).colorScheme.primary,
+              ),
               const SizedBox(width: 8),
               Text(
                 title,
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
-                  color: const Color(0xFF0D47A1),
+                  color: Theme.of(context).colorScheme.primary,
                   letterSpacing: 0.5,
                 ),
               ),
@@ -233,7 +243,7 @@ class OrdenDetallePage extends StatelessWidget {
     );
   }
 
-  Widget _buildItemsList() {
+  Widget _buildItemsList(BuildContext context) {
     if (orden.items.isEmpty) {
       return const Text(
         'No se han registrado trabajos ni repuestos.',
@@ -284,7 +294,7 @@ class OrdenDetallePage extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.w900,
                 fontSize: 16,
-                color: const Color(0xFF0D47A1),
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
           ],
@@ -293,12 +303,12 @@ class OrdenDetallePage extends StatelessWidget {
     );
   }
 
-  Color _getStatusColor(String status) {
+  Color _getStatusColor(BuildContext context, String status) {
     switch (status) {
       case 'ABIERTA':
         return Colors.grey;
       case 'EN_PROCESO':
-        return const Color(0xFF0D47A1);
+        return Theme.of(context).colorScheme.primary;
       case 'FINALIZADA':
         return Colors.orange;
       case 'FACTURADA':

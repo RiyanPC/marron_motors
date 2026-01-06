@@ -230,7 +230,7 @@ class _OrdenesPageState extends State<OrdenesPage>
             title: Text(
               title,
               style: TextStyle(
-                color: const Color(0xFF0D47A1),
+                color: Theme.of(context).colorScheme.primary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -246,7 +246,7 @@ class _OrdenesPageState extends State<OrdenesPage>
               ElevatedButton(
                 onPressed: () => Navigator.pop(context, true),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0D47A1),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -268,7 +268,7 @@ class _OrdenesPageState extends State<OrdenesPage>
         title: Text(
           'Aviso',
           style: TextStyle(
-            color: Colors.blue.shade900,
+            color: Theme.of(context).colorScheme.primary,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -277,7 +277,7 @@ class _OrdenesPageState extends State<OrdenesPage>
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF0D47A1),
+              backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -396,7 +396,7 @@ class _OrdenesPageState extends State<OrdenesPage>
         },
         icon: const Icon(Icons.add),
         label: const Text('NUEVA ORDEN'),
-        backgroundColor: const Color(0xFF0D47A1),
+        backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
       ),
     );
@@ -464,8 +464,11 @@ class _OrdenesPageState extends State<OrdenesPage>
       return OutlinedButton(
         onPressed: onTap,
         style: OutlinedButton.styleFrom(
-          foregroundColor: const Color(0xFF0D47A1),
-          side: const BorderSide(color: Color(0xFF0D47A1), width: 1.5),
+          foregroundColor: Theme.of(context).colorScheme.primary,
+          side: BorderSide(
+            color: Theme.of(context).colorScheme.primary,
+            width: 1.5,
+          ),
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
@@ -486,7 +489,7 @@ class _OrdenesPageState extends State<OrdenesPage>
     return ElevatedButton(
       onPressed: onTap,
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF0D47A1),
+        backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -567,7 +570,7 @@ class _OrdenesPageState extends State<OrdenesPage>
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.blue.shade900,
+                        color: Theme.of(context).colorScheme.primary,
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
@@ -633,7 +636,7 @@ class _OrdenesPageState extends State<OrdenesPage>
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: const Color(0xFF0D47A1),
+                              color: Theme.of(context).colorScheme.primary,
                             ),
                           ),
                         ),
@@ -659,7 +662,7 @@ class _OrdenesPageState extends State<OrdenesPage>
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 16, color: const Color(0xFF0D47A1)),
+        Icon(icon, size: 16, color: Theme.of(context).colorScheme.primary),
         const SizedBox(width: 8),
         Expanded(
           child: Column(
@@ -719,7 +722,7 @@ class _OrdenesPageState extends State<OrdenesPage>
           _buildActionButton(
             'INICIAR TRABAJO',
             Icons.play_arrow_rounded,
-            const Color(0xFF0D47A1),
+            Theme.of(context).colorScheme.primary,
             () async {
               final confirm = await _showConfirmDialog(
                 'Iniciar Trabajo',
@@ -833,7 +836,7 @@ class _OrdenesPageState extends State<OrdenesPage>
       case 'ABIERTA':
         return Colors.grey;
       case 'EN_PROCESO':
-        return const Color(0xFF0D47A1);
+        return Theme.of(context).colorScheme.primary;
       case 'FINALIZADA':
         return Colors.orange;
       case 'FACTURADA':

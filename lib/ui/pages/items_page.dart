@@ -53,9 +53,9 @@ class _ItemsPageState extends State<ItemsPage>
         centerTitle: true,
         bottom: TabBar(
           controller: _tabController,
-          labelColor: const Color(0xFF0D47A1),
+          labelColor: Theme.of(context).colorScheme.primary,
           unselectedLabelColor: Colors.grey,
-          indicatorColor: const Color(0xFF0D47A1),
+          indicatorColor: Theme.of(context).colorScheme.primary,
           tabs: const [
             Tab(text: 'SERVICIOS', icon: Icon(Icons.handyman_outlined)),
             Tab(text: 'ITEMS', icon: Icon(Icons.inventory_2_outlined)),
@@ -72,7 +72,7 @@ class _ItemsPageState extends State<ItemsPage>
         },
         icon: const Icon(Icons.add),
         label: const Text('NUEVO ITEM'),
-        backgroundColor: const Color(0xFF0D47A1),
+        backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
       ),
       body: _loading
@@ -151,7 +151,7 @@ class _ItemsPageState extends State<ItemsPage>
                   'S/ ${item.precio.toStringAsFixed(2)}',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: const Color(0xFF0D47A1),
+                    color: Theme.of(context).colorScheme.primary,
                     fontSize: 16,
                   ),
                 ),

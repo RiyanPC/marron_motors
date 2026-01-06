@@ -143,13 +143,18 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
           // Header Gradient
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF0D47A1), Color(0xFF1976D2)],
+                colors: [
+                  Theme.of(context).colorScheme.primary,
+                  Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -275,13 +280,14 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     color: isSelected
-                                        ? const Color(
-                                            0xFF0D47A1,
-                                          ).withOpacity(0.08)
+                                        ? Theme.of(context).colorScheme.primary
+                                              .withOpacity(0.08)
                                         : Colors.white,
                                     border: Border.all(
                                       color: isSelected
-                                          ? const Color(0xFF0D47A1)
+                                          ? Theme.of(
+                                              context,
+                                            ).colorScheme.primary
                                           : Colors.grey[200]!,
                                       width: isSelected ? 2 : 1,
                                     ),
@@ -303,14 +309,19 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
                                     leading: CircleAvatar(
                                       backgroundColor: item.tipo == 'SERVICIO'
                                           ? Colors.orange.withOpacity(0.1)
-                                          : Colors.blue.withOpacity(0.1),
+                                          : Theme.of(context)
+                                                .colorScheme
+                                                .primary
+                                                .withOpacity(0.1),
                                       child: Icon(
                                         item.tipo == 'SERVICIO'
                                             ? Icons.build
                                             : Icons.settings,
                                         color: item.tipo == 'SERVICIO'
                                             ? Colors.orange[800]
-                                            : Colors.blue[800],
+                                            : Theme.of(
+                                                context,
+                                              ).colorScheme.primary,
                                         size: 20,
                                       ),
                                     ),
@@ -321,7 +332,9 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
                                             ? FontWeight.bold
                                             : FontWeight.w500,
                                         color: isSelected
-                                            ? const Color(0xFF0D47A1)
+                                            ? Theme.of(
+                                                context,
+                                              ).colorScheme.primary
                                             : Colors.black87,
                                       ),
                                     ),
@@ -333,9 +346,11 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
                                       ),
                                     ),
                                     trailing: isSelected
-                                        ? const Icon(
+                                        ? Icon(
                                             Icons.check_circle,
-                                            color: Color(0xFF0D47A1),
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
                                           )
                                         : null,
                                   ),
@@ -360,9 +375,9 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
                         children: [
                           Row(
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.edit_note,
-                                color: Color(0xFF0D47A1),
+                                color: Theme.of(context).colorScheme.primary,
                                 size: 20,
                               ),
                               const SizedBox(width: 8),
@@ -442,12 +457,14 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: _afectoIgv
-                                      ? const Color(0xFF0D47A1)
+                                      ? Theme.of(context).colorScheme.primary
                                       : Colors.grey,
                                 ),
                               ),
                               value: _afectoIgv,
-                              activeColor: const Color(0xFF0D47A1),
+                              activeColor: Theme.of(
+                                context,
+                              ).colorScheme.primary,
                               onChanged: (val) =>
                                   setState(() => _afectoIgv = val),
                               secondary: Icon(
@@ -455,7 +472,7 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
                                     ? Icons.receipt_long
                                     : Icons.money_off,
                                 color: _afectoIgv
-                                    ? const Color(0xFF0D47A1)
+                                    ? Theme.of(context).colorScheme.primary
                                     : Colors.grey,
                               ),
                               dense: true,
@@ -473,7 +490,9 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 16,
                                 ),
-                                backgroundColor: const Color(0xFF0D47A1),
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.primary,
                                 foregroundColor: Colors.white,
                                 elevation: 2,
                                 shape: RoundedRectangleBorder(
@@ -524,7 +543,7 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
         }
       },
       backgroundColor: Colors.white,
-      selectedColor: const Color(0xFF0D47A1),
+      selectedColor: Theme.of(context).colorScheme.primary,
       checkmarkColor: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),

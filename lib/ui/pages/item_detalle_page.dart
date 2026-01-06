@@ -20,7 +20,7 @@ class ItemDetallePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(),
+            _buildHeader(context),
             const SizedBox(height: 24),
             _buildInfoCard(context),
           ],
@@ -29,19 +29,22 @@ class ItemDetallePage extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
+    // Need context
     return Center(
       child: Column(
         children: [
           CircleAvatar(
             radius: 40,
-            backgroundColor: Colors.green.shade100,
+            backgroundColor: Theme.of(
+              context,
+            ).colorScheme.primary.withOpacity(0.1),
             child: Icon(
               item.tipo == 'SERVICIO'
                   ? Icons.build_circle_outlined
                   : Icons.inventory_2_outlined,
               size: 48,
-              color: Colors.green,
+              color: Theme.of(context).colorScheme.primary,
             ),
           ),
           const SizedBox(height: 16),
@@ -53,10 +56,10 @@ class ItemDetallePage extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'S/ ${item.precio.toStringAsFixed(2)}',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: Colors.green,
+              color: Theme.of(context).colorScheme.primary,
             ),
           ),
         ],
@@ -72,28 +75,40 @@ class ItemDetallePage extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            _buildInfoRow(Icons.category_outlined, 'Tipo', item.tipo),
+            _buildInfoRow(
+              context,
+              Icons.category_outlined,
+              'Tipo',
+              item.tipo,
+            ), // Pass context
             const Divider(),
             _buildInfoRow(
+              context,
               Icons.description_outlined,
               'Descripción',
               item.descripcion.isEmpty ? 'Sin descripción' : item.descripcion,
             ),
             const Divider(),
-            _buildInfoRow(Icons.info_outline, 'Estado', item.estado),
+            _buildInfoRow(context, Icons.info_outline, 'Estado', item.estado),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String label, String value) {
+  Widget _buildInfoRow(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value,
+  ) {
+    // Pass context
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: Colors.green, size: 24),
+          Icon(icon, color: Theme.of(context).colorScheme.primary, size: 24),
           const SizedBox(width: 16),
           Expanded(
             child: Column(

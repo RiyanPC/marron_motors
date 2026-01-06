@@ -61,9 +61,12 @@ class _HomePageState extends State<HomePage> {
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
         flexibleSpace: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color(0xFF0D47A1), Color(0xFF1976D2)],
+              colors: [
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.primary.withOpacity(0.8),
+              ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -172,7 +175,7 @@ class _HomePageState extends State<HomePage> {
         },
         label: const Text('NUEVA ORDEN'),
         icon: const Icon(Icons.add),
-        backgroundColor: const Color(0xFF0D47A1),
+        backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
       ),
     );
@@ -195,12 +198,12 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             const SizedBox(height: 4),
-            const Text(
+            Text(
               'Panel General',
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.w900,
-                color: Color(0xFF0D47A1),
+                color: Theme.of(context).colorScheme.primary,
                 letterSpacing: -0.5,
               ),
             ),
@@ -231,9 +234,9 @@ class _HomePageState extends State<HomePage> {
               },
               child: Padding(
                 padding: const EdgeInsets.all(10),
-                child: const Icon(
+                child: Icon(
                   Icons.bar_chart_rounded,
-                  color: Color(0xFF0D47A1),
+                  color: Theme.of(context).colorScheme.primary,
                   size: 28,
                 ),
               ),
@@ -348,7 +351,7 @@ class _HomePageState extends State<HomePage> {
             context,
             'Taller',
             Icons.home_repair_service,
-            const Color(0xFF0D47A1), // System Blue
+            Theme.of(context).colorScheme.primary, // System Blue
             () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const OrdenesPage()),
@@ -535,7 +538,7 @@ class _HomePageState extends State<HomePage> {
             leading: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: const Color(0xFF0D47A1),
+                color: Theme.of(context).colorScheme.primary,
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
@@ -606,7 +609,7 @@ class _HomePageState extends State<HomePage> {
       case 'En Proceso':
         return Colors.orange;
       case 'Finalizado':
-        return const Color(0xFF0D47A1);
+        return Theme.of(context).colorScheme.primary;
       case 'Entregado':
         return Colors.green;
       default:

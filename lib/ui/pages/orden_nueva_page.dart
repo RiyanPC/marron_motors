@@ -127,14 +127,14 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
       padding: const EdgeInsets.only(bottom: 12, left: 4),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: const Color(0xFF0D47A1)),
+          Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
           const SizedBox(width: 8),
           Text(
             title,
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: const Color(0xFF0D47A1),
+              color: Theme.of(context).colorScheme.primary,
               letterSpacing: 0.5,
             ),
           ),
@@ -177,12 +177,12 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0D47A1).withOpacity(0.1),
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   Icons.directions_car,
-                  color: const Color(0xFF0D47A1),
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
               const SizedBox(width: 16),
@@ -275,14 +275,16 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0D47A1),
+                backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 20),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
                 elevation: 4,
-                shadowColor: Colors.blue.withOpacity(0.4),
+                shadowColor: Theme.of(
+                  context,
+                ).colorScheme.primary.withOpacity(0.4),
               ),
             ),
           ),
@@ -306,7 +308,11 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
           children: [
             Row(
               children: [
-                Icon(Icons.person, size: 18, color: const Color(0xFF0D47A1)),
+                Icon(
+                  Icons.person,
+                  size: 18,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
                 const SizedBox(width: 8),
                 const Text(
                   'Datos del Cliente',
@@ -326,7 +332,7 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
                 Icon(
                   Icons.directions_car,
                   size: 18,
-                  color: const Color(0xFF0D47A1),
+                  color: Theme.of(context).colorScheme.primary,
                 ),
                 const SizedBox(width: 8),
                 const Text(

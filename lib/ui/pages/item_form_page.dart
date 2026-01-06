@@ -81,9 +81,12 @@ class _ItemFormPageState extends State<ItemFormPage> {
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         flexibleSpace: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color(0xFF0D47A1), Color(0xFF1976D2)],
+              colors: [
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.primary.withOpacity(0.8),
+              ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -132,7 +135,7 @@ class _ItemFormPageState extends State<ItemFormPage> {
                               _tipo == 'SERVICIO'
                                   ? Icons.build_circle
                                   : Icons.inventory_2,
-                              color: const Color(0xFF0D47A1),
+                              color: Theme.of(context).colorScheme.primary,
                             ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -349,7 +352,7 @@ class _ItemFormPageState extends State<ItemFormPage> {
                   onPressed: _saving ? null : _save,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: const Color(0xFF0D47A1),
+                    backgroundColor: Theme.of(context).colorScheme.primary,
                     foregroundColor: Colors.white,
                     elevation: 2,
                     shape: RoundedRectangleBorder(

@@ -81,7 +81,7 @@ class _ClientesPageState extends State<ClientesPage> {
       appBar: AppBar(
         title: const Text('Directorio de Clientes'),
         elevation: 0,
-        backgroundColor: const Color(0xFF0D47A1),
+        backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -92,7 +92,7 @@ class _ClientesPageState extends State<ClientesPage> {
           );
           if (result != null) _loadClientes();
         },
-        backgroundColor: const Color(0xFF0D47A1),
+        backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.person_add_alt_1),
         label: const Text('NUEVO CLIENTE'),
@@ -101,8 +101,8 @@ class _ClientesPageState extends State<ClientesPage> {
         children: [
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              color: Color(0xFF0D47A1),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary,
               borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
             ),
             child: TextField(
@@ -129,7 +129,7 @@ class _ClientesPageState extends State<ClientesPage> {
                 ? _buildEmptyState()
                 : RefreshIndicator(
                     onRefresh: _loadClientes,
-                    color: const Color(0xFF0D47A1),
+                    color: Theme.of(context).colorScheme.primary,
                     child: ListView.builder(
                       padding: const EdgeInsets.all(16),
                       itemCount: _filteredClientes.length,
@@ -201,11 +201,13 @@ class _ClientesPageState extends State<ClientesPage> {
             children: [
               CircleAvatar(
                 radius: 24,
-                backgroundColor: const Color(0xFF0D47A1).withOpacity(0.1),
+                backgroundColor: Theme.of(
+                  context,
+                ).colorScheme.primary.withOpacity(0.1),
                 child: Text(
                   cliente.nombre[0].toUpperCase(),
-                  style: const TextStyle(
-                    color: Color(0xFF0D47A1),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
