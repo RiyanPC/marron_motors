@@ -11,6 +11,7 @@ import 'pages/facturacion_page.dart';
 import 'pages/configuracion_page.dart';
 import 'pages/orden_nueva_page.dart';
 import 'pages/orden_detalle_page.dart';
+import 'pages/estadisticas_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -179,15 +180,34 @@ class _HomePageState extends State<HomePage> {
                 value: _stats!.ordenesActivas.toString(),
                 icon: Icons.engineering,
                 color: Colors.orange,
+                small: true,
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: _buildKpiCard(
-                title: 'Ganancias Mes',
-                value: 'S/ ${_stats!.gananciasMes.toStringAsFixed(2)}',
+                title: 'Ganancias',
+                value:
+                    'S/ ${_stats!.gananciasMes.toStringAsFixed(0)}', // Truncate decimals for space
                 icon: Icons.payments,
                 color: Colors.green,
+                small: true,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Material(
+              color: Colors.grey.shade100,
+              shape: const CircleBorder(),
+              child: IconButton(
+                icon: const Icon(Icons.arrow_forward_ios_rounded, size: 20),
+                color: Colors.grey.shade700,
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const EstadisticasPage()),
+                  );
+                },
+                tooltip: 'Ver Estadísticas',
               ),
             ),
           ],
@@ -201,9 +221,10 @@ class _HomePageState extends State<HomePage> {
     required String value,
     required IconData icon,
     required Color color,
+    bool small = false,
   }) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(small ? 12 : 20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -219,20 +240,42 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: color, size: small ? 20 : 24),
+              ),
+              if (!small) ...[
+                const SizedBox(width: 12),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (small)
+            Text(
+              value,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            child: Icon(icon, color: color, size: 24),
-          ),
-          const SizedBox(height: 16),
           Text(
-            value,
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            title,
+            style: TextStyle(
+              fontSize: small ? 12 : 14,
+              color: Colors.grey[600],
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
-          Text(title, style: TextStyle(fontSize: 14, color: Colors.grey[600])),
         ],
       ),
     );
@@ -244,12 +287,12 @@ class _HomePageState extends State<HomePage> {
         Expanded(
           child: _buildActionButton(
             context,
-            'Facturación',
-            Icons.receipt_long,
-            Colors.purple,
+            'Órdenes',
+            Icons.home_repair_service,
+            Colors.indigo.shade600,
             () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const FacturacionPage()),
+              MaterialPageRoute(builder: (_) => const OrdenesPage()),
             ),
           ),
         ),
@@ -257,12 +300,12 @@ class _HomePageState extends State<HomePage> {
         Expanded(
           child: _buildActionButton(
             context,
-            'Órdenes',
-            Icons.home_repair_service,
-            Colors.blue,
+            'Facturación',
+            Icons.receipt_long,
+            Colors.teal.shade600,
             () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const OrdenesPage()),
+              MaterialPageRoute(builder: (_) => const FacturacionPage()),
             ),
           ),
         ),
