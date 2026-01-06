@@ -184,6 +184,7 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
                         prefixIcon: Icon(Icons.percent),
                       ),
                       keyboardType: TextInputType.number,
+                      enabled: false,
                       validator: (v) => v!.isEmpty ? 'Campo requerido' : null,
                     ),
                     const SizedBox(height: 32),

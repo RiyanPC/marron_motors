@@ -778,7 +778,7 @@ class _OrdenesPageState extends State<OrdenesPage>
           _buildActionButton(
             'VER DETALLE',
             Icons.visibility_outlined,
-            Colors.blueGrey.shade700,
+            const Color.fromARGB(255, 57, 146, 173),
             () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => OrdenDetallePage(orden: ot)),
