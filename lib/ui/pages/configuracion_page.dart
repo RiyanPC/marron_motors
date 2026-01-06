@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/data_repository.dart';
 import '../../models/configuracion.dart';
 
@@ -15,6 +16,7 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
 
   bool _isLoading = true;
   Configuracion? _config;
+  bool _showDrawer = false;
 
   final _nombreController = TextEditingController();
   final _rucController = TextEditingController();
@@ -31,6 +33,8 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
   Future<void> _loadConfig() async {
     setState(() => _isLoading = true);
     final config = await _repository.getConfig();
+    final prefs = await SharedPreferences.getInstance();
+
     if (config != null) {
       setState(() {
         _config = config;
@@ -39,6 +43,7 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
         _direccionController.text = config.direccion;
         _telefonoController.text = config.telefono;
         _igvController.text = config.igvPorcentaje.toString();
+        _showDrawer = prefs.getBool('show_drawer') ?? false;
         _isLoading = false;
       });
     }
@@ -47,6 +52,8 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
   Future<void> _saveConfig() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
+
+      // Guardar configuración del taller
       final newConfig = Configuracion(
         id: _config!.id,
         nombreTaller: _nombreController.text,
@@ -58,16 +65,25 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
       );
 
       final success = await _repository.saveConfig(newConfig);
+
+      // Guardar preferencias de interfaz
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('show_drawer', _showDrawer);
+
       setState(() => _isLoading = false);
 
       if (success) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Configuración guardada')));
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Configuración guardada')),
+          );
+        }
       } else {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Error al guardar')));
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Error al guardar datos del taller')),
+          );
+        }
       }
     }
   }
@@ -128,6 +144,28 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.phone),
                       ),
+                    ),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'Personalización',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    SwitchListTile(
+                      title: const Text('Activar Menú Lateral (Drawer)'),
+                      subtitle: const Text(
+                        'Muestra el botón de menú en la pantalla principal',
+                      ),
+                      value: _showDrawer,
+                      onChanged: (val) {
+                        setState(() {
+                          _showDrawer = val;
+                        });
+                      },
+                      secondary: const Icon(Icons.menu),
                     ),
                     const SizedBox(height: 24),
                     const Text(

@@ -5,7 +5,6 @@ import '../pages/items_page.dart';
 import '../pages/ordenes_page.dart';
 import '../pages/facturacion_page.dart';
 import '../pages/configuracion_page.dart';
-import '../pages/dashboard_page.dart';
 import '../home_page.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -66,11 +65,11 @@ class AppDrawer extends StatelessWidget {
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
-                _drawerItem(context, Icons.dashboard, 'Dashboard', () {
+                _drawerItem(context, Icons.dashboard, 'Inicio', () {
                   Navigator.pop(context);
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (_) => const DashboardPage()),
+                    MaterialPageRoute(builder: (_) => const HomePage()),
                   );
                 }),
                 _drawerItem(context, Icons.people, 'Clientes', () {
@@ -109,13 +108,6 @@ class AppDrawer extends StatelessWidget {
                   );
                 }),
                 const Divider(),
-                _drawerItem(context, Icons.grid_view, 'Menú Principal', () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const HomePage()),
-                  );
-                }),
                 _drawerItem(context, Icons.settings, 'Configuración', () {
                   Navigator.pop(context);
                   Navigator.push(
