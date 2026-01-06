@@ -18,6 +18,8 @@ class _FacturacionPageState extends State<FacturacionPage>
   List<OrdenTrabajo> _ordenes = [];
   bool _loading = true;
   late TabController _tabController;
+  DateTime? _fechaInicio;
+  DateTime? _fechaFin;
 
   @override
   void initState() {
@@ -35,7 +37,15 @@ class _FacturacionPageState extends State<FacturacionPage>
   Future<void> _loadOrdenes() async {
     setState(() => _loading = true);
     try {
-      final data = await _repository.getOrdenes('1');
+      final data = await _repository.getOrdenes(
+        '1',
+        fechaInicio: _fechaInicio != null
+            ? '${_fechaInicio!.year}-${_fechaInicio!.month.toString().padLeft(2, '0')}-${_fechaInicio!.day.toString().padLeft(2, '0')}'
+            : null,
+        fechaFin: _fechaFin != null
+            ? '${_fechaFin!.year}-${_fechaFin!.month.toString().padLeft(2, '0')}-${_fechaFin!.day.toString().padLeft(2, '0')}'
+            : null,
+      );
       setState(() {
         _ordenes = data;
         _loading = false;
@@ -46,6 +56,63 @@ class _FacturacionPageState extends State<FacturacionPage>
         _showError('Error al cargar órdenes para facturación: $e');
       }
     }
+  }
+
+  void _aplicarFiltroRapido(String tipo) {
+    final ahora = DateTime.now();
+    DateTime inicio;
+    DateTime fin = ahora;
+
+    switch (tipo) {
+      case 'hoy':
+        inicio = DateTime(ahora.year, ahora.month, ahora.day);
+        break;
+      case '7dias':
+        inicio = ahora.subtract(const Duration(days: 7));
+        break;
+      case 'mes':
+        inicio = DateTime(ahora.year, ahora.month, 1);
+        break;
+      default:
+        return;
+    }
+
+    setState(() {
+      _fechaInicio = inicio;
+      _fechaFin = fin;
+    });
+    _loadOrdenes();
+  }
+
+  Future<void> _mostrarFiltroFechas() async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+      initialDateRange: _fechaInicio != null && _fechaFin != null
+          ? DateTimeRange(start: _fechaInicio!, end: _fechaFin!)
+          : null,
+    );
+
+    if (picked != null) {
+      setState(() {
+        _fechaInicio = picked.start;
+        _fechaFin = picked.end;
+      });
+      _loadOrdenes();
+    }
+  }
+
+  void _limpiarFiltro() {
+    setState(() {
+      _fechaInicio = null;
+      _fechaFin = null;
+    });
+    _loadOrdenes();
+  }
+
+  String _formatearFecha(DateTime fecha) {
+    return '${fecha.day.toString().padLeft(2, '0')}/${fecha.month.toString().padLeft(2, '0')}/${fecha.year}';
   }
 
   List<String> _validateOrderForBilling(OrdenTrabajo orden, String tipo) {
@@ -369,28 +436,194 @@ class _FacturacionPageState extends State<FacturacionPage>
       appBar: AppBar(
         title: const Text('Facturación y Cobros'),
         backgroundColor: const Color(0xFF0D47A1),
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: Colors.white,
-          indicatorWeight: 3,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
-          labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-          tabs: const [
-            Tab(text: 'POR COBRAR', icon: Icon(Icons.pending_actions_rounded)),
-            Tab(text: 'HISTORIAL', icon: Icon(Icons.history_rounded)),
-          ],
+        actions: [
+          IconButton(
+            icon: Icon(
+              _fechaInicio != null || _fechaFin != null
+                  ? Icons.filter_alt
+                  : Icons.filter_alt_outlined,
+            ),
+            onPressed: _mostrarFiltroFechas,
+            tooltip: 'Filtrar por fecha',
+          ),
+          if (_fechaInicio != null || _fechaFin != null)
+            IconButton(
+              icon: const Icon(Icons.clear),
+              onPressed: _limpiarFiltro,
+              tooltip: 'Limpiar filtro',
+            ),
+        ],
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(
+            _fechaInicio != null || _fechaFin != null ? 96 : 48,
+          ),
+          child: Column(
+            children: [
+              if (_fechaInicio != null || _fechaFin != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  color: Colors.white.withOpacity(0.1),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.filter_alt,
+                        size: 16,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Mostrando: ${_formatearFecha(_fechaInicio!)} - ${_formatearFecha(_fechaFin!)}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              TabBar(
+                controller: _tabController,
+                indicatorColor: Colors.white,
+                indicatorWeight: 3,
+                labelColor: Colors.white,
+                unselectedLabelColor: Colors.white70,
+                labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+                tabs: const [
+                  Tab(
+                    text: 'POR COBRAR',
+                    icon: Icon(Icons.pending_actions_rounded),
+                  ),
+                  Tab(text: 'HISTORIAL', icon: Icon(Icons.history_rounded)),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : TabBarView(
-              controller: _tabController,
+          : Column(
               children: [
-                _buildOrderList('FINALIZADA'),
-                _buildOrderList('FACTURADA'),
+                _buildQuickFilters(),
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _buildOrderList('FINALIZADA'),
+                      _buildOrderList('FACTURADA'),
+                    ],
+                  ),
+                ),
               ],
             ),
+    );
+  }
+
+  Widget _buildQuickFilters() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _buildFilterButton(
+              label: 'Hoy',
+              icon: Icons.today,
+              onTap: () => _aplicarFiltroRapido('hoy'),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _buildFilterButton(
+              label: '7 días',
+              icon: Icons.date_range,
+              onTap: () => _aplicarFiltroRapido('7dias'),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _buildFilterButton(
+              label: 'Mes',
+              icon: Icons.calendar_month,
+              onTap: () => _aplicarFiltroRapido('mes'),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _buildFilterButton(
+              label: 'Especificar',
+              icon: Icons.edit_calendar,
+              onTap: _mostrarFiltroFechas,
+              isOutlined: true,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterButton({
+    required String label,
+    required IconData icon,
+    required VoidCallback onTap,
+    bool isOutlined = false,
+  }) {
+    if (isOutlined) {
+      return OutlinedButton(
+        onPressed: onTap,
+        style: OutlinedButton.styleFrom(
+          foregroundColor: const Color(0xFF0D47A1),
+          side: const BorderSide(color: Color(0xFF0D47A1), width: 1.5),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 18),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ElevatedButton(
+      onPressed: onTap,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF0D47A1),
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        elevation: 2,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 18),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
     );
   }
 

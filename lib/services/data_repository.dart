@@ -97,11 +97,21 @@ class DataRepository {
     return response['status'] == 'success';
   }
 
-  Future<List<OrdenTrabajo>> getOrdenes(String empId) async {
-    final response = await _apiService.get(
-      ApiConfig.ordenes, // Make sure this exists in ApiConfig
-      params: {'emp_id': empId},
-    );
+  Future<List<OrdenTrabajo>> getOrdenes(
+    String empId, {
+    String? fechaInicio,
+    String? fechaFin,
+  }) async {
+    final Map<String, String> params = {'emp_id': empId};
+
+    if (fechaInicio != null) {
+      params['fecha_inicio'] = fechaInicio;
+    }
+    if (fechaFin != null) {
+      params['fecha_fin'] = fechaFin;
+    }
+
+    final response = await _apiService.get(ApiConfig.ordenes, params: params);
     if (response['status'] == 'success') {
       return (response['data'] as List)
           .map((e) => OrdenTrabajo.fromJson(e))
