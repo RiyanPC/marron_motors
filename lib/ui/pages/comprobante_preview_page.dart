@@ -56,7 +56,7 @@ class _ComprobantePreviewPageState extends State<ComprobantePreviewPage> {
             icon: const Icon(Icons.share_rounded),
             onPressed: () {
               Share.share(
-                'Hola, adjunto el comprobante ${widget.title}: ${widget.url}',
+                'Hola, adjunto el comprobante ${widget.url}',
                 subject: widget.title,
               );
             },
