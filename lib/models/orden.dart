@@ -191,4 +191,30 @@ class OrdenItem {
       'oi_afecto_igv': afectoIgv,
     };
   }
+
+  OrdenItem copyWith({
+    String? id,
+    String? otId,
+    String? itemId,
+    String? itemNombre,
+    double? cantidad,
+    double? precioUnitario,
+    double? subtotal,
+    double? igv,
+    double? total,
+    int? afectoIgv,
+  }) {
+    return OrdenItem(
+      id: id ?? this.id,
+      otId: otId ?? this.otId,
+      itemId: itemId ?? this.itemId,
+      itemNombre: itemNombre ?? this.itemNombre,
+      cantidad: cantidad ?? this.cantidad,
+      precioUnitario: precioUnitario ?? this.precioUnitario,
+      subtotal: subtotal ?? this.subtotal,
+      igv: igv ?? this.igv,
+      total: total ?? this.total,
+      afectoIgv: afectoIgv ?? this.afectoIgv,
+    );
+  }
 }

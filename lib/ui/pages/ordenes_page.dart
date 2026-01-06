@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../models/orden.dart';
+import '../../models/item.dart';
 import '../../services/data_repository.dart';
 import 'orden_nueva_page.dart';
 import 'orden_detalle_page.dart';
@@ -648,7 +649,7 @@ class _OrdenesPageState extends State<OrdenesPage>
       itemBuilder: (context, index) {
         final ot = filtered[index];
         return Container(
-          margin: const EdgeInsets.only(bottom: 16),
+          margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
             color: _highlightedOrderId == ot.id
                 ? Colors.green.shade50
@@ -657,8 +658,8 @@ class _OrdenesPageState extends State<OrdenesPage>
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.04),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
             ],
             border: Border.all(color: Colors.grey.shade200),
@@ -668,13 +669,16 @@ class _OrdenesPageState extends State<OrdenesPage>
             children: [
               // Header section
               Padding(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
+                        horizontal: 8,
+                        vertical: 4,
                       ),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.primary,
@@ -685,7 +689,7 @@ class _OrdenesPageState extends State<OrdenesPage>
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w900,
-                          fontSize: 14,
+                          fontSize: 13,
                           letterSpacing: 1,
                         ),
                       ),
@@ -698,7 +702,7 @@ class _OrdenesPageState extends State<OrdenesPage>
               const Divider(height: 1),
               // Content Section
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(12),
                 child: Column(
                   children: [
                     _buildDetailRow(
@@ -706,19 +710,19 @@ class _OrdenesPageState extends State<OrdenesPage>
                       'CLIENTE',
                       ot.cliNombre ?? 'No asignado',
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     _buildDetailRow(
                       Icons.directions_car_filled_outlined,
                       'VEHÍCULO',
                       ot.vehPlaca ?? 'S/P',
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     _buildDetailRow(
                       Icons.build_circle_outlined,
                       'SERVICIO SOLICITADO',
                       ot.descripcion,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     Row(
                       children: [
                         Expanded(
@@ -730,7 +734,7 @@ class _OrdenesPageState extends State<OrdenesPage>
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
+                            horizontal: 10,
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
@@ -741,7 +745,7 @@ class _OrdenesPageState extends State<OrdenesPage>
                           child: Text(
                             'S/ ${ot.total.toStringAsFixed(2)}',
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 14,
                               fontWeight: FontWeight.bold,
                               color: Theme.of(context).colorScheme.primary,
                             ),
@@ -749,19 +753,95 @@ class _OrdenesPageState extends State<OrdenesPage>
                         ),
                       ],
                     ),
+                    if (ot.items.isNotEmpty) ...[
+                      const Divider(height: 16),
+                      _buildItemsList(ot),
+                    ],
                   ],
                 ),
               ),
               // Removed Warning for Empty Finalized Orders as it's handled in FacturacionPage
               // Actions Section
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(12),
                 child: _buildActions(ot),
               ),
             ],
           ),
         );
       },
+    );
+  }
+
+  Widget _buildItemsList(OrdenTrabajo ot) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'DETALLE DE TRABAJOS:',
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey[700],
+          ),
+        ),
+        const SizedBox(height: 4),
+        ...ot.items.map(
+          (item) => Padding(
+            padding: const EdgeInsets.only(bottom: 0),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.check_circle_outline,
+                  size: 12,
+                  color: Colors.green.shade600,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    item.itemNombre ?? 'Sin nombre',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ),
+                Text(
+                  'x${item.cantidad.toInt()}  S/ ${item.total.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                if (ot.estado == 'EN_PROCESO') ...[
+                  const SizedBox(width: 4),
+                  InkWell(
+                    onTap: () => _editarItem(ot, item),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: Icon(
+                        Icons.edit,
+                        size: 14,
+                        color: Colors.blue.shade700,
+                      ),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () => _eliminarItem(ot, item),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: Icon(
+                        Icons.close,
+                        size: 14,
+                        color: Colors.red.shade700,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -852,33 +932,12 @@ class _OrdenesPageState extends State<OrdenesPage>
                 isOutlined: true,
               ),
               const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildActionButton(
-                      'VER ITEMS',
-                      Icons.list_alt_rounded,
-                      Colors.indigo.shade700,
-                      () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => OrdenDetallePage(orden: ot),
-                        ),
-                      ),
-                      isOutlined: true,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _buildActionButton(
-                      'AÑADIR TRABAJO',
-                      Icons.add_circle_outline,
-                      const Color(0xFF1565C0),
-                      () => _agregarTrabajo(ot),
-                      isOutlined: true,
-                    ),
-                  ),
-                ],
+              _buildActionButton(
+                'AÑADIR TRABAJO',
+                Icons.add_circle_outline,
+                const Color(0xFF1565C0),
+                () => _agregarTrabajo(ot),
+                isOutlined: true,
               ),
               const SizedBox(height: 8),
               _buildActionButton(
@@ -898,30 +957,14 @@ class _OrdenesPageState extends State<OrdenesPage>
             ],
           ),
         if (ot.estado == 'FINALIZADA')
-          Column(
-            children: [
-              _buildActionButton(
-                'VER DETALLE',
-                Icons.visibility_outlined,
-                const Color.fromARGB(255, 57, 146, 173),
-                () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => OrdenDetallePage(orden: ot),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              _buildActionButton(
-                'EMITIR',
-                Icons.receipt_long_rounded,
-                Colors.green.shade700,
-                () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const FacturacionPage()),
-                ),
-              ),
-            ],
+          _buildActionButton(
+            'EMITIR COMPROBANTE',
+            Icons.receipt_long_rounded,
+            Colors.green.shade700,
+            () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const FacturacionPage()),
+            ),
           ),
         if (ot.estado == 'FACTURADA')
           _buildActionButton(
@@ -934,6 +977,287 @@ class _OrdenesPageState extends State<OrdenesPage>
             ),
           ),
       ],
+    );
+  }
+
+  Future<void> _eliminarItem(OrdenTrabajo orden, OrdenItem item) async {
+    final confirm = await _showConfirmDialog(
+      'Eliminar Item',
+      '¿Deseas eliminar "${item.itemNombre}" de esta orden?',
+    );
+
+    if (confirm) {
+      // Show loading
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator()),
+      );
+
+      final success = await _repository.eliminarItemDesdeOrden(
+        orden.id!,
+        item.id!,
+      );
+
+      if (mounted) Navigator.pop(context);
+
+      if (success) {
+        // Optimistic Update
+        final newTotal = orden.total - item.total;
+        final updatedItems = List<OrdenItem>.from(orden.items)
+          ..removeWhere((i) => i.id == item.id);
+
+        final updatedOrden = orden.copyWith(
+          total: newTotal,
+          items: updatedItems,
+        );
+
+        _updateLocalOrder(updatedOrden);
+        _showSuccessSnackBar('Item eliminado correctamente');
+      } else {
+        _showError('No se pudo eliminar el item');
+      }
+    }
+  }
+
+  Future<void> _editarItem(OrdenTrabajo orden, OrdenItem item) async {
+    final nombreCtrl = TextEditingController(text: item.itemNombre);
+    final cantidadCtrl = TextEditingController(
+      text: item.cantidad.toInt().toString(),
+    );
+    final precioCtrl = TextEditingController(
+      text: item.precioUnitario.toStringAsFixed(2),
+    );
+    // Logic: Default is Exonerado (0) if user requests default,
+    // but we should respect existing item state if editing.
+    // User said "by default will be exonerado", implying for new/edits they prefer that.
+    // However, for an existing item with igv, we should show Gravado.
+    // Let's default to current state, but if 0, map to Exonerado.
+    String selectedTributo = item.afectoIgv == 1
+        ? '10'
+        : '20'; // 10=Gravado, 20=Exonerado
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setStateDialog) => AlertDialog(
+          title: const Text('Editar Item'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nombreCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Descripción / Nombre',
+                    prefixIcon: Icon(Icons.description),
+                  ),
+                  maxLines: 2,
+                  minLines: 1,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: cantidadCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Cantidad',
+                    prefixIcon: Icon(Icons.numbers),
+                  ),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: precioCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Precio Unit.',
+                    prefixText: 'S/ ',
+                    prefixIcon: Icon(Icons.attach_money),
+                  ),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  value: selectedTributo,
+                  decoration: const InputDecoration(
+                    labelText: 'Código Tributo',
+                    prefixIcon: Icon(Icons.receipt_long),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: '10', child: Text('Gravado (18%)')),
+                    DropdownMenuItem(
+                      value: '20',
+                      child: Text('Exonerado (0%)'),
+                    ),
+                    DropdownMenuItem(value: '30', child: Text('Inafecto (0%)')),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) {
+                      setStateDialog(() => selectedTributo = val);
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('CANCELAR'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('GUARDAR'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (result == true) {
+      final newNombre = nombreCtrl.text.trim();
+      final newCant = double.tryParse(cantidadCtrl.text) ?? item.cantidad;
+      final newPrecio = double.tryParse(precioCtrl.text) ?? item.precioUnitario;
+      final newAfectoIgv = selectedTributo == '10'
+          ? 1
+          : 0; // 10 is Gravado, others 0
+
+      if (newNombre.isEmpty || newCant <= 0 || newPrecio < 0) {
+        _showError('Valores inválidos');
+        return;
+      }
+
+      // Show loading
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator()),
+      );
+
+      String? targetItemId = item.itemId;
+      String? targetItemNombre = item.itemNombre;
+
+      // Logic: If name changed, check if exists, else create
+      if (newNombre != item.itemNombre) {
+        try {
+          final allItems = await _repository.getItems(orden.empId);
+
+          final existingItem = allItems.firstWhere(
+            (i) => i.nombre.toLowerCase() == newNombre.toLowerCase(),
+            orElse: () => Item(
+              id: '0',
+              empId: orden.empId,
+              nombre: '',
+              descripcion: '',
+              tipo: 'SERVICIO',
+              precio: 0.0,
+              codigoTributo: '10',
+              estado: 'ACTIVO',
+            ),
+          );
+
+          if (existingItem.id != '0') {
+            targetItemId = existingItem.id;
+            targetItemNombre = existingItem.nombre;
+          } else {
+            final newItem = Item(
+              id: '0',
+              empId: orden.empId,
+              nombre: newNombre,
+              descripcion: newNombre,
+              tipo: 'SERVICIO',
+              precio: newPrecio,
+              codigoTributo: selectedTributo,
+              estado: 'ACTIVO',
+            );
+
+            final createdId = await _repository.saveItem(newItem);
+            if (createdId != null) {
+              targetItemId = createdId;
+              targetItemNombre = newNombre;
+            } else {
+              throw Exception('Error al crear nuevo item');
+            }
+          }
+        } catch (e) {
+          if (mounted) Navigator.pop(context);
+          _showError('Error procesando item: $e');
+          return;
+        }
+      }
+
+      final success = await _repository.actualizarItemOrden(
+        orden.id!,
+        item.id!,
+        targetItemId!,
+        newCant,
+        newPrecio,
+        newAfectoIgv,
+      );
+
+      // Re-map afectoIgv if it changed, but actualizarItemOrden takes the NEW values already?
+      // Wait, the call above passes item.afectoIgv (OLD VALUE). We need to pass newAfectoIgv.
+      // Retry correcting the call above.
+
+      if (mounted) Navigator.pop(context);
+
+      if (success) {
+        // Optimistic Update
+        final newSubtotal = newCant * newPrecio;
+        final newIgv = (item.afectoIgv == 1) ? newSubtotal * 0.18 : 0.0;
+        final newTotalItem = newSubtotal + newIgv;
+
+        final diffTotal = newTotalItem - item.total;
+        final newTotalOrden = orden.total + diffTotal;
+
+        final updatedItem = item.copyWith(
+          itemId: targetItemId,
+          itemNombre: targetItemNombre,
+          cantidad: newCant,
+          precioUnitario: newPrecio,
+          total: newTotalItem,
+          igv: newIgv,
+          subtotal: newSubtotal,
+        );
+
+        final updatedItems = orden.items
+            .map((i) => i.id == item.id ? updatedItem : i)
+            .toList();
+
+        final updatedOrden = orden.copyWith(
+          total: newTotalOrden,
+          items: updatedItems,
+        );
+
+        _updateLocalOrder(updatedOrden);
+        _showSuccessSnackBar('Item actualizado correctamente');
+      } else {
+        _showError('No se pudo actualizar el item');
+      }
+    }
+  }
+
+  void _updateLocalOrder(OrdenTrabajo updatedOrden) {
+    final index = _ordenes.indexWhere((o) => o.id == updatedOrden.id);
+    if (index != -1) {
+      setState(() {
+        _ordenes[index] = updatedOrden;
+        // Highlight logic could go here if needed
+      });
+    }
+  }
+
+  void _showSuccessSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+      ),
     );
   }
 

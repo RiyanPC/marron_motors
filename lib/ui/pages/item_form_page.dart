@@ -20,6 +20,7 @@ class _ItemFormPageState extends State<ItemFormPage> {
   late TextEditingController _precioController;
   String _tipo = 'SERVICIO';
   String _estado = 'ACTIVO';
+  String _codigoTributo = '20'; // Default Exonerado
 
   @override
   void initState() {
@@ -34,6 +35,7 @@ class _ItemFormPageState extends State<ItemFormPage> {
     if (widget.item != null) {
       _tipo = widget.item!.tipo;
       _estado = widget.item!.estado;
+      _codigoTributo = widget.item!.codigoTributo;
     }
   }
 
@@ -48,13 +50,13 @@ class _ItemFormPageState extends State<ItemFormPage> {
       descripcion: _descripcionController.text,
       tipo: _tipo,
       precio: double.tryParse(_precioController.text) ?? 0.0,
-      codigoTributo: '10', // Default Gravado
+      codigoTributo: _codigoTributo,
       estado: _estado,
     );
 
     try {
-      final success = await _repository.saveItem(item);
-      if (success) {
+      final newItemId = await _repository.saveItem(item);
+      if (newItemId != null) {
         if (mounted) Navigator.pop(context, true);
       } else {
         throw Exception('Error al guardar el item');
@@ -151,7 +153,7 @@ class _ItemFormPageState extends State<ItemFormPage> {
                               [
                                     {'val': 'SERVICIO', 'label': 'SERVICIO'},
                                     {
-                                      'val': 'PRODUCTO',
+                                      'val': 'REPUESTO',
                                       'label': 'ITEM / REPUESTO',
                                     },
                                   ]
@@ -267,7 +269,7 @@ class _ItemFormPageState extends State<ItemFormPage> {
 
                         // Codigo Tributo
                         DropdownButtonFormField<String>(
-                          value: widget.item?.codigoTributo ?? '10',
+                          value: _codigoTributo,
                           decoration: InputDecoration(
                             labelText: 'Código de Tributo Default',
                             prefixIcon: const Icon(
@@ -305,9 +307,7 @@ class _ItemFormPageState extends State<ItemFormPage> {
                                   ),
                                 );
                               }).toList(),
-                          onChanged: (v) {
-                            // TODO: Add controller support
-                          },
+                          onChanged: (v) => setState(() => _codigoTributo = v!),
                         ),
 
                         if (isEditing) ...[

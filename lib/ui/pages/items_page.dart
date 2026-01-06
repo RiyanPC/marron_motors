@@ -83,7 +83,7 @@ class _ItemsPageState extends State<ItemsPage>
               controller: _tabController,
               children: [
                 _buildItemList('SERVICIO'),
-                _buildItemList('PRODUCTO'),
+                _buildItemList('REPUESTO'),
               ],
             ),
     );

@@ -81,12 +81,15 @@ class DataRepository {
     return null;
   }
 
-  Future<bool> saveItem(Item item) async {
+  Future<String?> saveItem(Item item) async {
     final endpoint = item.id == '0' || item.id.isEmpty
         ? ApiConfig.itemsCrear
         : ApiConfig.itemsEditar;
     final response = await _apiService.post(endpoint, item.toJson());
-    return response['status'] == 'success';
+    if (response['status'] == 'success') {
+      return response['id']?.toString() ?? item.id;
+    }
+    return null;
   }
 
   Future<bool> crearOrden(OrdenTrabajo orden) async {
@@ -170,6 +173,25 @@ class DataRepository {
     final response = await _apiService.post(ApiConfig.ordenesEliminarItem, {
       'ot_id': otId,
       'oi_id': oiId,
+    });
+    return response['status'] == 'success';
+  }
+
+  Future<bool> actualizarItemOrden(
+    String otId,
+    String oiId,
+    String newItemId,
+    double cantidad,
+    double precio,
+    int afectoIgv,
+  ) async {
+    final response = await _apiService.post(ApiConfig.ordenesActualizarItem, {
+      'ot_id': otId,
+      'oi_id': oiId,
+      'oi_item_id': newItemId,
+      'cantidad': cantidad,
+      'precio_unitario': precio,
+      'afecto_igv': afectoIgv,
     });
     return response['status'] == 'success';
   }

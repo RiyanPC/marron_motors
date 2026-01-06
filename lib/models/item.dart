@@ -3,7 +3,7 @@ class Item {
   final String empId;
   final String nombre;
   final String descripcion;
-  final String tipo; // PRODUCTO / SERVICIO
+  final String tipo; // REPUESTO / SERVICIO
   final double precio;
   final String codigoTributo;
   final String estado;
