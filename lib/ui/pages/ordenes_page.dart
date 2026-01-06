@@ -129,7 +129,7 @@ class _OrdenesPageState extends State<OrdenesPage>
     try {
       final String? url = await _repository.uploadImage(
         File(pickedFile.path),
-        folder: 'ordenes',
+        folder: 'estado_orden',
         name: 'ot_${ot.id}',
       );
 
