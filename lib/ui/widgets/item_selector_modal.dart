@@ -128,149 +128,376 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
 
   @override
   Widget build(BuildContext context) {
+    // Determine height based on screen size but keep it reasonable
+    final double modalHeight = MediaQuery.of(context).size.height * 0.85;
+
     return Container(
-      height: MediaQuery.of(context).size.height * 0.85,
-      padding: const EdgeInsets.all(16),
+      height: modalHeight,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Añadir Item a la Orden',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          // Header Gradient
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF0D47A1), Color(0xFF1976D2)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              const Spacer(),
-              TextButton.icon(
-                onPressed: _openItemForm,
-                icon: const Icon(Icons.add, size: 18),
-                label: const Text('NUEVO ITEM', style: TextStyle(fontSize: 12)),
-              ),
-              IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-
-          // Filtro de Tipo
-          Row(
-            children: [
-              _filterChip('TODOS'),
-              const SizedBox(width: 8),
-              _filterChip('SERVICIO'),
-              const SizedBox(width: 8),
-              _filterChip('PRODUCTO', label: 'ITEMS'),
-            ],
-          ),
-          const SizedBox(height: 12),
-
-          TextField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              hintText: 'Buscar item...',
-              prefixIcon: const Icon(Icons.search),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              contentPadding: const EdgeInsets.symmetric(vertical: 0),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             ),
-          ),
-          const SizedBox(height: 12),
-
-          Expanded(
-            child: _loading
-                ? const Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    itemCount: _filteredItems.length,
-                    itemBuilder: (context, index) {
-                      final item = _filteredItems[index];
-                      final isSelected = _selectedItem?.id == item.id;
-                      return Card(
-                        elevation: isSelected ? 4 : 1,
-                        color: isSelected
-                            ? const Color(0xFF0D47A1).withOpacity(0.1)
-                            : null,
-                        child: ListTile(
-                          title: Text(item.nombre),
-                          subtitle: Text('Precio ref: S/ ${item.precio}'),
-                          trailing: Icon(
-                            item.tipo == 'SERVICIO'
-                                ? Icons.build
-                                : Icons.inventory_2,
-                            size: 18,
-                            color: Colors.grey,
-                          ),
-                          onTap: () => _onItemTap(item),
-                        ),
-                      );
-                    },
-                  ),
-          ),
-
-          if (_selectedItem != null) ...[
-            const Divider(height: 32),
-            const Text(
-              'Configurar Detalle',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            Row(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: _cantidadController,
-                    decoration: const InputDecoration(
-                      labelText: 'Cantidad',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
+                const Text(
+                  'Añadir Item a la Orden',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: TextField(
-                    controller: _precioController,
-                    decoration: const InputDecoration(
-                      labelText: 'Precio Unit. (S/)',
-                      border: OutlineInputBorder(),
+                Row(
+                  children: [
+                    TextButton.icon(
+                      onPressed: _openItemForm,
+                      icon: const Icon(
+                        Icons.add,
+                        size: 18,
+                        color: Colors.white,
+                      ),
+                      label: const Text(
+                        'NUEVO',
+                        style: TextStyle(fontSize: 12, color: Colors.white),
+                      ),
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.white.withOpacity(0.2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                      ),
                     ),
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white),
+                      onPressed: () => Navigator.pop(context),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
                     ),
-                  ),
+                  ],
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            SwitchListTile(
-              title: const Text('Aplicar IGV (18%)'),
-              subtitle: Text(
-                _afectoIgv ? 'Operación Gravada' : 'Operación Exonerada',
+          ),
+
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  // Chips de Filtro
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        _filterChip('TODOS'),
+                        const SizedBox(width: 8),
+                        _filterChip('SERVICIO'),
+                        const SizedBox(width: 8),
+                        _filterChip('PRODUCTO', label: 'REPUESTOS'),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Buscador
+                  TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Buscar item por nombre...',
+                      prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                      filled: true,
+                      fillColor: Colors.grey[50],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey[300]!),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey[300]!),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 14,
+                        horizontal: 16,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Lista de Items
+                  Expanded(
+                    child: _loading
+                        ? const Center(child: CircularProgressIndicator())
+                        : _filteredItems.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.search_off,
+                                  size: 48,
+                                  color: Colors.grey[400],
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'No se encontraron items',
+                                  style: TextStyle(color: Colors.grey[600]),
+                                ),
+                              ],
+                            ),
+                          )
+                        : ListView.separated(
+                            itemCount: _filteredItems.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 8),
+                            itemBuilder: (context, index) {
+                              final item = _filteredItems[index];
+                              final isSelected = _selectedItem?.id == item.id;
+                              return InkWell(
+                                onTap: () => _onItemTap(item),
+                                borderRadius: BorderRadius.circular(12),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? const Color(
+                                            0xFF0D47A1,
+                                          ).withOpacity(0.08)
+                                        : Colors.white,
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? const Color(0xFF0D47A1)
+                                          : Colors.grey[200]!,
+                                      width: isSelected ? 2 : 1,
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                    boxShadow: [
+                                      if (!isSelected)
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.03),
+                                          blurRadius: 4,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                    ],
+                                  ),
+                                  child: ListTile(
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 4,
+                                    ),
+                                    leading: CircleAvatar(
+                                      backgroundColor: item.tipo == 'SERVICIO'
+                                          ? Colors.orange.withOpacity(0.1)
+                                          : Colors.blue.withOpacity(0.1),
+                                      child: Icon(
+                                        item.tipo == 'SERVICIO'
+                                            ? Icons.build
+                                            : Icons.settings,
+                                        color: item.tipo == 'SERVICIO'
+                                            ? Colors.orange[800]
+                                            : Colors.blue[800],
+                                        size: 20,
+                                      ),
+                                    ),
+                                    title: Text(
+                                      item.nombre,
+                                      style: TextStyle(
+                                        fontWeight: isSelected
+                                            ? FontWeight.bold
+                                            : FontWeight.w500,
+                                        color: isSelected
+                                            ? const Color(0xFF0D47A1)
+                                            : Colors.black87,
+                                      ),
+                                    ),
+                                    subtitle: Text(
+                                      'Ref: S/ ${item.precio.toStringAsFixed(2)}',
+                                      style: TextStyle(
+                                        color: Colors.grey[600],
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                    trailing: isSelected
+                                        ? const Icon(
+                                            Icons.check_circle,
+                                            color: Color(0xFF0D47A1),
+                                          )
+                                        : null,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                  ),
+
+                  // Sección de Detalle / Confirmación
+                  if (_selectedItem != null) ...[
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[50],
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.grey[200]!),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.edit_note,
+                                color: Color(0xFF0D47A1),
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Detalles de la operación',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[800],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: TextField(
+                                  controller: _cantidadController,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  decoration: const InputDecoration(
+                                    labelText: 'Cantidad',
+                                    prefixIcon: Icon(Icons.numbers, size: 18),
+                                    border: OutlineInputBorder(),
+                                    isDense: true,
+                                  ),
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(
+                                        decimal: true,
+                                      ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                flex: 3,
+                                child: TextField(
+                                  controller: _precioController,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  decoration: const InputDecoration(
+                                    labelText: 'Precio Unit.',
+                                    prefixText: 'S/ ',
+                                    prefixIcon: Icon(
+                                      Icons.attach_money,
+                                      size: 18,
+                                    ),
+                                    border: OutlineInputBorder(),
+                                    isDense: true,
+                                  ),
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(
+                                        decimal: true,
+                                      ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.grey[300]!),
+                            ),
+                            child: SwitchListTile(
+                              title: const Text(
+                                'Aplicar IGV (18%)',
+                                style: TextStyle(fontSize: 14),
+                              ),
+                              subtitle: Text(
+                                _afectoIgv
+                                    ? 'Operación Gravada'
+                                    : 'Operación Exonerada',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: _afectoIgv
+                                      ? const Color(0xFF0D47A1)
+                                      : Colors.grey,
+                                ),
+                              ),
+                              value: _afectoIgv,
+                              activeColor: const Color(0xFF0D47A1),
+                              onChanged: (val) =>
+                                  setState(() => _afectoIgv = val),
+                              secondary: Icon(
+                                _afectoIgv
+                                    ? Icons.receipt_long
+                                    : Icons.money_off,
+                                color: _afectoIgv
+                                    ? const Color(0xFF0D47A1)
+                                    : Colors.grey,
+                              ),
+                              dense: true,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _confirmSelection,
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                backgroundColor: const Color(0xFF0D47A1),
+                                foregroundColor: Colors.white,
+                                elevation: 2,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: const Text(
+                                'AÑADIR A LA ORDEN',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
               ),
-              value: _afectoIgv,
-              onChanged: (val) => setState(() => _afectoIgv = val),
-              secondary: Icon(
-                _afectoIgv ? Icons.receipt : Icons.money_off,
-                color: _afectoIgv ? const Color(0xFF0D47A1) : Colors.grey,
-              ),
-              dense: true,
             ),
-            const SizedBox(height: 12),
-            ElevatedButton(
-              onPressed: _confirmSelection,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                backgroundColor: const Color(0xFF0D47A1),
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('AÑADIR A LA ORDEN'),
-            ),
-          ],
+          ),
         ],
       ),
     );
@@ -278,8 +505,15 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
 
   Widget _filterChip(String value, {String? label}) {
     final isSelected = _tipoFiltro == value;
-    return ChoiceChip(
-      label: Text(label ?? value),
+    return FilterChip(
+      label: Text(
+        label ?? value,
+        style: TextStyle(
+          color: isSelected ? Colors.white : Colors.black87,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          fontSize: 13,
+        ),
+      ),
       selected: isSelected,
       onSelected: (selected) {
         if (selected) {
@@ -289,6 +523,17 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
           });
         }
       },
+      backgroundColor: Colors.white,
+      selectedColor: const Color(0xFF0D47A1),
+      checkmarkColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: isSelected ? Colors.transparent : Colors.grey[300]!,
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+      showCheckmark: false,
     );
   }
 }
