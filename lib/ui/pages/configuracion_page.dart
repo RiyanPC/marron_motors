@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import '../../services/data_repository.dart';
 import '../../models/configuracion.dart';
+import '../../core/theme.dart';
+import '../../core/theme_provider.dart';
 
 class ConfiguracionPage extends StatefulWidget {
   const ConfiguracionPage({super.key});
@@ -24,6 +28,11 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
   final _telefonoController = TextEditingController();
   final _igvController = TextEditingController();
 
+  // Theme selection
+  String _selectedTheme = 'Azul Clásico';
+  Color _customPrimaryColor = const Color(0xFF0D47A1);
+  Color _customAccentColor = const Color(0xFFD4AF37);
+
   @override
   void initState() {
     super.initState();
@@ -44,9 +53,76 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
         _telefonoController.text = config.telefono;
         _igvController.text = config.igvPorcentaje.toString();
         _showDrawer = prefs.getBool('show_drawer') ?? false;
+
+        // Cargar tema
+        _selectedTheme = prefs.getString('theme_name') ?? 'Azul Clásico';
+        if (_selectedTheme == 'Personalizado') {
+          final primaryValue = prefs.getInt('custom_primary_color');
+          final accentValue = prefs.getInt('custom_accent_color');
+          if (primaryValue != null) _customPrimaryColor = Color(primaryValue);
+          if (accentValue != null) _customAccentColor = Color(accentValue);
+        }
+
         _isLoading = false;
       });
     }
+  }
+
+  Future<void> _applyTheme() async {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    await themeProvider.setTheme(
+      _selectedTheme,
+      customPrimary: _selectedTheme == 'Personalizado'
+          ? _customPrimaryColor
+          : null,
+      customAccent: _selectedTheme == 'Personalizado'
+          ? _customAccentColor
+          : null,
+    );
+  }
+
+  void _showColorPicker(bool isPrimary) {
+    Color pickerColor = isPrimary ? _customPrimaryColor : _customAccentColor;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            'Seleccionar ${isPrimary ? 'Color Primario' : 'Color de Acento'}',
+          ),
+          content: SingleChildScrollView(
+            child: ColorPicker(
+              pickerColor: pickerColor,
+              onColorChanged: (color) {
+                pickerColor = color;
+              },
+              pickerAreaHeightPercent: 0.8,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('CANCELAR'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                setState(() {
+                  if (isPrimary) {
+                    _customPrimaryColor = pickerColor;
+                  } else {
+                    _customAccentColor = pickerColor;
+                  }
+                });
+                await _applyTheme();
+                if (mounted) Navigator.of(context).pop();
+              },
+              child: const Text('SELECCIONAR'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _saveConfig() async {
@@ -167,6 +243,184 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
                       },
                       secondary: const Icon(Icons.menu),
                     ),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'Apariencia',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Seleccionar Tema',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    // Temas predefinidos
+                    ...AppTheme.predefinedThemes.entries.map((entry) {
+                      return RadioListTile<String>(
+                        title: Text(entry.key),
+                        subtitle: Row(
+                          children: [
+                            Container(
+                              width: 24,
+                              height: 24,
+                              decoration: BoxDecoration(
+                                color: entry.value['primary'],
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.grey.shade300),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              width: 24,
+                              height: 24,
+                              decoration: BoxDecoration(
+                                color: entry.value['accent'],
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.grey.shade300),
+                              ),
+                            ),
+                          ],
+                        ),
+                        value: entry.key,
+                        groupValue: _selectedTheme,
+                        onChanged: (value) async {
+                          setState(() {
+                            _selectedTheme = value!;
+                          });
+                          await _applyTheme();
+                        },
+                      );
+                    }),
+                    // Tema personalizado
+                    RadioListTile<String>(
+                      title: const Text('Personalizado'),
+                      subtitle: _selectedTheme == 'Personalizado'
+                          ? Row(
+                              children: [
+                                Container(
+                                  width: 24,
+                                  height: 24,
+                                  decoration: BoxDecoration(
+                                    color: _customPrimaryColor,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Colors.grey.shade300,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  width: 24,
+                                  height: 24,
+                                  decoration: BoxDecoration(
+                                    color: _customAccentColor,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Colors.grey.shade300,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )
+                          : null,
+                      value: 'Personalizado',
+                      groupValue: _selectedTheme,
+                      onChanged: (value) async {
+                        setState(() {
+                          _selectedTheme = value!;
+                        });
+                        await _applyTheme();
+                      },
+                    ),
+                    // Selectores de color personalizado (solo visible si es tema personalizado)
+                    if (_selectedTheme == 'Personalizado') ...[
+                      const SizedBox(height: 16),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Configurar Colores',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton.icon(
+                                    onPressed: () => _showColorPicker(true),
+                                    icon: Icon(
+                                      Icons.palette,
+                                      color: _customPrimaryColor,
+                                    ),
+                                    label: const Text('Color Primario'),
+                                    style: OutlinedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 12,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: _customPrimaryColor,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: Colors.grey.shade300,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton.icon(
+                                    onPressed: () => _showColorPicker(false),
+                                    icon: Icon(
+                                      Icons.palette,
+                                      color: _customAccentColor,
+                                    ),
+                                    label: const Text('Color de Acento'),
+                                    style: OutlinedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 12,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: _customAccentColor,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: Colors.grey.shade300,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 24),
                     const Text(
                       'Tributación',
