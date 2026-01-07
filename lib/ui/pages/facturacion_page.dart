@@ -314,7 +314,8 @@ class _FacturacionPageState extends State<FacturacionPage>
 
       if (res['status'] == 'success') {
         // Optimistic UI update - mark order as FACTURADA and move to top
-        final updatedOrden = orden.copyWith(estado: 'FACTURADA');
+        final facId = res['data']['fac_id'].toString();
+        final updatedOrden = orden.copyWith(estado: 'FACTURADA', facId: facId);
         setState(() {
           // Remove from current position
           _ordenes.removeWhere((o) => o.id == orden.id);
