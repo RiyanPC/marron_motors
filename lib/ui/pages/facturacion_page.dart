@@ -6,7 +6,8 @@ import 'comprobante_preview_page.dart';
 import '../widgets/item_selector_modal.dart';
 
 class FacturacionPage extends StatefulWidget {
-  const FacturacionPage({super.key});
+  final String? highlightOrderId; // NEW
+  const FacturacionPage({super.key, this.highlightOrderId});
 
   @override
   State<FacturacionPage> createState() => _FacturacionPageState();
@@ -22,11 +23,19 @@ class _FacturacionPageState extends State<FacturacionPage>
   DateTime? _fechaFin;
   String? _activeFilter;
   String? _highlightedOrderId;
+  final Map<String, GlobalKey> _itemKeys = {};
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    if (widget.highlightOrderId != null) {
+      _highlightedOrderId = widget.highlightOrderId;
+      // Auto-clear highlight after animation
+      Future.delayed(const Duration(seconds: 3), () {
+        if (mounted) setState(() => _highlightedOrderId = null);
+      });
+    }
     _loadOrdenes();
   }
 
@@ -52,11 +61,31 @@ class _FacturacionPageState extends State<FacturacionPage>
         _ordenes = data;
         _loading = false;
       });
+
+      // Trigget Scroll if highlighted
+      if (_highlightedOrderId != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _scrollToHighlightedOrder();
+        });
+      }
     } catch (e) {
       if (mounted) {
         setState(() => _loading = false);
         _showError('Error al cargar órdenes para facturación: $e');
       }
+    }
+  }
+
+  void _scrollToHighlightedOrder() {
+    if (_highlightedOrderId == null) return;
+    final key = _itemKeys[_highlightedOrderId];
+    if (key?.currentContext != null) {
+      Scrollable.ensureVisible(
+        key!.currentContext!,
+        duration: const Duration(milliseconds: 800),
+        curve: Curves.easeInOut,
+        alignment: 0.5,
+      );
     }
   }
 
@@ -971,7 +1000,14 @@ class _FacturacionPageState extends State<FacturacionPage>
       itemCount: filtered.length,
       itemBuilder: (context, index) {
         final ot = filtered[index];
+        // Assign Key
+        // We use putIfAbsent to keep the same key for the same ID across rebuilds
+        final key = (ot.id != null)
+            ? _itemKeys.putIfAbsent(ot.id!, () => GlobalKey())
+            : null;
+
         return Container(
+          key: key,
           margin: const EdgeInsets.only(bottom: 16),
           decoration: BoxDecoration(
             color: _highlightedOrderId == ot.id

@@ -1097,7 +1097,9 @@ class _OrdenesPageState extends State<OrdenesPage>
                   Colors.green.shade700,
                   () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const FacturacionPage()),
+                    MaterialPageRoute(
+                      builder: (_) => FacturacionPage(highlightOrderId: ot.id),
+                    ),
                   ),
                 ),
               ),
