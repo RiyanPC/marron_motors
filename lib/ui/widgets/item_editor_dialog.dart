@@ -61,7 +61,7 @@ class _ItemEditorDialogState extends State<ItemEditorDialog> {
               gradient: LinearGradient(
                 colors: [
                   Theme.of(context).colorScheme.primary,
-                  Theme.of(context).colorScheme.tertiary,
+                  Theme.of(context).colorScheme.secondary,
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,

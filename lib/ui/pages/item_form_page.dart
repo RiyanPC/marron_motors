@@ -57,7 +57,7 @@ class _ItemFormPageState extends State<ItemFormPage> {
     try {
       final newItemId = await _repository.saveItem(item);
       if (newItemId != null) {
-        if (mounted) Navigator.pop(context, true);
+        if (mounted) Navigator.pop(context, newItemId);
       } else {
         throw Exception('Error al guardar el item');
       }

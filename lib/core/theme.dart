@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class AppTheme {
   // Temas Predefinidos
   static const Map<String, Map<String, Color>> predefinedThemes = {
-    'Azul Clásico': {'primary': Color(0xFF0D47A1), 'accent': Color(0xFFD4AF37)},
+    'Azul Clásico': {'primary': Color(0xFF0D47A1), 'accent': Color(0xFF4B87C3)},
     'Verde Esmeralda': {
       'primary': Color(0xFF2E7D32),
       'accent': Color(0xFF81C784),

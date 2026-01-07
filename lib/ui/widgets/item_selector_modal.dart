@@ -55,9 +55,28 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
       MaterialPageRoute(builder: (context) => const ItemFormPage()),
     );
 
-    if (result == true) {
+    if (result != null && result is String) {
+      // Item ID was returned (created or existing duplicate)
       setState(() => _loading = true);
-      _loadItems();
+      await _loadItems();
+
+      // Auto-select the newly created/existing item
+      final createdItem = _allItems.firstWhere(
+        (item) => item.id == result,
+        orElse: () => _allItems.first,
+      );
+
+      if (mounted) {
+        _onItemTap(createdItem);
+        // Show feedback
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Item "${createdItem.nombre}" seleccionado'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
     }
   }
 

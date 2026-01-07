@@ -625,7 +625,7 @@ class _FacturacionPageState extends State<FacturacionPage>
                 labelStyle: const TextStyle(fontWeight: FontWeight.bold),
                 tabs: const [
                   Tab(
-                    text: 'POR COBRAR',
+                    text: 'POR EMITIR',
                     icon: Icon(Icons.pending_actions_rounded),
                   ),
                   Tab(text: 'HISTORIAL', icon: Icon(Icons.history_rounded)),
