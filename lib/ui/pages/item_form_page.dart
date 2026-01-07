@@ -21,6 +21,7 @@ class _ItemFormPageState extends State<ItemFormPage> {
   String _tipo = 'SERVICIO';
   String _estado = 'ACTIVO';
   String _codigoTributo = '20'; // Default Exonerado
+  final FocusNode _precioFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -37,6 +38,31 @@ class _ItemFormPageState extends State<ItemFormPage> {
       _estado = widget.item!.estado;
       _codigoTributo = widget.item!.codigoTributo;
     }
+
+    // Auto-select text when price field is focused
+    // Auto-add .00 when field loses focus if no decimal
+    _precioFocusNode.addListener(() {
+      if (_precioFocusNode.hasFocus) {
+        _precioController.selection = TextSelection(
+          baseOffset: 0,
+          extentOffset: _precioController.text.length,
+        );
+      } else {
+        final text = _precioController.text.trim();
+        if (text.isNotEmpty && !text.contains('.')) {
+          _precioController.text = '$text.00';
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _nombreController.dispose();
+    _descripcionController.dispose();
+    _precioController.dispose();
+    _precioFocusNode.dispose();
+    super.dispose();
   }
 
   Future<void> _save() async {
@@ -244,10 +270,11 @@ class _ItemFormPageState extends State<ItemFormPage> {
                         // Precio
                         TextFormField(
                           controller: _precioController,
+                          focusNode: _precioFocusNode,
                           decoration: InputDecoration(
                             labelText: 'Precio Referencial (S/)',
                             prefixIcon: const Icon(
-                              Icons.attach_money,
+                              Icons.payments_outlined,
                               color: Colors.green,
                             ),
                             border: OutlineInputBorder(

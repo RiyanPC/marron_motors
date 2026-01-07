@@ -96,7 +96,8 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
   void _onItemTap(Item item) {
     setState(() {
       _selectedItem = item;
-      _precioController.text = item.precio.toStringAsFixed(2);
+      // Format price as whole number (remove decimals for easier input)
+      _precioController.text = item.precio.toInt().toString();
     });
   }
 
@@ -189,22 +190,33 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
                 ),
                 Row(
                   children: [
-                    TextButton.icon(
+                    ElevatedButton.icon(
                       onPressed: _openItemForm,
                       icon: const Icon(
-                        Icons.add,
-                        size: 18,
+                        Icons.add_circle_outline,
+                        size: 22,
                         color: Colors.white,
                       ),
                       label: const Text(
                         'NUEVO',
-                        style: TextStyle(fontSize: 12, color: Colors.white),
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
                       ),
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.white.withOpacity(0.2),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white.withOpacity(0.25),
+                        foregroundColor: Colors.white,
+                        elevation: 0,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12,
-                          vertical: 8,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: const BorderSide(color: Colors.white, width: 2),
                         ),
                       ),
                     ),
@@ -226,21 +238,6 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  // Chips de Filtro
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        _filterChip('TODOS'),
-                        const SizedBox(width: 8),
-                        _filterChip('SERVICIO'),
-                        const SizedBox(width: 8),
-                        _filterChip('REPUESTO', label: 'REPUESTOS'),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
                   // Buscador
                   TextField(
                     controller: _searchController,
@@ -261,6 +258,21 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
                         vertical: 14,
                         horizontal: 16,
                       ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Chips de Filtro
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        _filterChip('TODOS'),
+                        const SizedBox(width: 8),
+                        _filterChip('SERVICIO'),
+                        const SizedBox(width: 8),
+                        _filterChip('REPUESTO', label: 'REPUESTOS'),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -444,7 +456,7 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
                                     labelText: 'Precio Unit.',
                                     prefixText: 'S/ ',
                                     prefixIcon: Icon(
-                                      Icons.attach_money,
+                                      Icons.payments_outlined,
                                       size: 18,
                                     ),
                                     border: OutlineInputBorder(),
