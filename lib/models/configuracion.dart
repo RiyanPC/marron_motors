@@ -5,6 +5,10 @@ class Configuracion {
   final String direccion;
   final String telefono;
   final double igvPorcentaje;
+  final String? ubigeo;
+  final String? departamento;
+  final String? provincia;
+  final String? distrito;
   final String? logoUrl;
 
   Configuracion({
@@ -14,6 +18,10 @@ class Configuracion {
     required this.direccion,
     required this.telefono,
     required this.igvPorcentaje,
+    this.ubigeo,
+    this.departamento,
+    this.provincia,
+    this.distrito,
     this.logoUrl,
   });
 
@@ -25,6 +33,10 @@ class Configuracion {
       direccion: json['direccion'] ?? '',
       telefono: json['telefono'] ?? '',
       igvPorcentaje: double.parse(json['igv_porcentaje'].toString()),
+      ubigeo: json['ubigeo'],
+      departamento: json['departamento'],
+      provincia: json['provincia'],
+      distrito: json['distrito'],
       logoUrl: json['logo_url'],
     );
   }
@@ -37,6 +49,10 @@ class Configuracion {
       'direccion': direccion,
       'telefono': telefono,
       'igv_porcentaje': igvPorcentaje,
+      'ubigeo': ubigeo,
+      'departamento': departamento,
+      'provincia': provincia,
+      'distrito': distrito,
       'logo_url': logoUrl,
     };
   }

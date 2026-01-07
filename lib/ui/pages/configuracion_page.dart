@@ -26,6 +26,10 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
   final _rucController = TextEditingController();
   final _direccionController = TextEditingController();
   final _telefonoController = TextEditingController();
+  final _ubigeoController = TextEditingController();
+  final _departamentoController = TextEditingController();
+  final _provinciaController = TextEditingController();
+  final _distritoController = TextEditingController();
   final _igvController = TextEditingController();
 
   // Theme selection
@@ -51,6 +55,11 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
         _rucController.text = config.ruc;
         _direccionController.text = config.direccion;
         _telefonoController.text = config.telefono;
+        _ubigeoController.text = config.ubigeo ?? '';
+        _departamentoController.text = config.departamento ?? '';
+        _provinciaController.text = config.provincia ?? '';
+        _distritoController.text = config.distrito ?? '';
+
         _igvController.text = config.igvPorcentaje.toString();
         _showDrawer = prefs.getBool('show_drawer') ?? false;
 
@@ -137,6 +146,10 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
         direccion: _direccionController.text,
         telefono: _telefonoController.text,
         igvPorcentaje: double.parse(_igvController.text),
+        ubigeo: _ubigeoController.text,
+        departamento: _departamentoController.text,
+        provincia: _provinciaController.text,
+        distrito: _distritoController.text,
         logoUrl: _config!.logoUrl,
       );
 
@@ -204,7 +217,7 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
                     TextFormField(
                       controller: _nombreController,
                       decoration: const InputDecoration(
-                        labelText: 'Nombre del Taller',
+                        labelText: 'Razon Social',
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.business),
                       ),
@@ -230,6 +243,7 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
                       ),
                     ),
                     const SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     TextFormField(
                       controller: _telefonoController,
                       decoration: const InputDecoration(
@@ -237,6 +251,68 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.phone),
                       ),
+                    ),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'Dirección Fiscal (SUNAT)',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: _ubigeoController,
+                            decoration: const InputDecoration(
+                              labelText: 'Ubigeo (6 dígitos)',
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.location_searching),
+                            ),
+                            maxLength: 6,
+                            validator: (v) =>
+                                v != null && v.isNotEmpty && v.length != 6
+                                ? 'Debe ser 6 dígitos'
+                                : null,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: TextFormField(
+                            controller: _departamentoController,
+                            decoration: const InputDecoration(
+                              labelText: 'Departamento',
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: _provinciaController,
+                            decoration: const InputDecoration(
+                              labelText: 'Provincia',
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: TextFormField(
+                            controller: _distritoController,
+                            decoration: const InputDecoration(
+                              labelText: 'Distrito',
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 24),
                     const Text(
