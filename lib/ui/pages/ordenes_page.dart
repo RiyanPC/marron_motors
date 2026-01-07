@@ -166,29 +166,8 @@ class _OrdenesPageState extends State<OrdenesPage>
       if (mounted) Navigator.pop(context);
 
       if (success) {
-        // Manually update local state to avoid reload (Optimistic UI)
-        final newTotal = orden.total + result.total;
-        final updatedItems = List<OrdenItem>.from(orden.items)..add(result);
-
-        final updatedOrden = orden.copyWith(
-          total: newTotal,
-          items: updatedItems,
-        );
-
-        final index = _ordenes.indexWhere((o) => o.id == orden.id);
-        if (index != -1) {
-          setState(() {
-            _ordenes[index] = updatedOrden;
-            _highlightedOrderId = orden.id;
-          });
-
-          // Clear highlight after 2 seconds
-          Future.delayed(const Duration(seconds: 2), () {
-            if (mounted) {
-              setState(() => _highlightedOrderId = null);
-            }
-          });
-        }
+        // Reload orders to get updated items with IDs from backend
+        await _loadOrdenes();
 
         await _showSuccessDialog(
           'Agregado Correctamente',
@@ -996,6 +975,12 @@ class _OrdenesPageState extends State<OrdenesPage>
     );
 
     if (confirm) {
+      // Check if item has an ID
+      if (item.id == null) {
+        _showError('Error: El item no tiene un ID válido');
+        return;
+      }
+
       // Show loading
       if (!mounted) return;
       showDialog(
