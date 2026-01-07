@@ -81,7 +81,18 @@ class _ClientesPageState extends State<ClientesPage> {
       appBar: AppBar(
         title: const Text('Directorio de Clientes'),
         elevation: 0,
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.secondary,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
         foregroundColor: Colors.white,
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -92,7 +103,7 @@ class _ClientesPageState extends State<ClientesPage> {
           );
           if (result != null) _loadClientes();
         },
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: Theme.of(context).colorScheme.secondary,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.person_add_alt_1),
         label: const Text('NUEVO CLIENTE'),

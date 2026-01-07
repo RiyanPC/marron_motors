@@ -170,7 +170,21 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Configuración del Taller')),
+      appBar: AppBar(
+        title: const Text('Configuración del Taller'),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.secondary,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+      ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Padding(

@@ -54,7 +54,18 @@ class _ClienteDetallePageState extends State<ClienteDetallePage> {
       appBar: AppBar(
         title: const Text('Perfil del Cliente'),
         elevation: 0,
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.secondary,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
         foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(

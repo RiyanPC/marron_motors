@@ -532,6 +532,18 @@ class _OrdenesPageState extends State<OrdenesPage>
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
         title: const Text('Gestión de Órdenes'),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.secondary,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
         actions: [
           IconButton(
             icon: Icon(
@@ -632,7 +644,7 @@ class _OrdenesPageState extends State<OrdenesPage>
         },
         icon: const Icon(Icons.add),
         label: const Text('NUEVA ORDEN'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: Theme.of(context).colorScheme.secondary,
         foregroundColor: Colors.white,
       ),
     );
@@ -728,7 +740,7 @@ class _OrdenesPageState extends State<OrdenesPage>
     return ElevatedButton(
       onPressed: onTap,
       style: ElevatedButton.styleFrom(
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: Theme.of(context).colorScheme.secondary,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

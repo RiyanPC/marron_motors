@@ -85,7 +85,18 @@ class _VehiculosPageState extends State<VehiculosPage> {
       appBar: AppBar(
         title: const Text('Inventario de Vehículos'),
         elevation: 0,
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.secondary,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
         foregroundColor: Colors.white,
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -96,7 +107,7 @@ class _VehiculosPageState extends State<VehiculosPage> {
           );
           if (result != null) _loadVehiculos();
         },
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: Theme.of(context).colorScheme.secondary,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add_road),
         label: const Text('NUEVO VEHÍCULO'),

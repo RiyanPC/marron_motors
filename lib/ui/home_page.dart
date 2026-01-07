@@ -65,7 +65,7 @@ class _HomePageState extends State<HomePage> {
             gradient: LinearGradient(
               colors: [
                 Theme.of(context).colorScheme.primary,
-                Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                Theme.of(context).colorScheme.secondary,
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -186,7 +186,7 @@ class _HomePageState extends State<HomePage> {
         },
         label: const Text('NUEVA ORDEN'),
         icon: const Icon(Icons.add),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: Theme.of(context).colorScheme.secondary,
         foregroundColor: Colors.white,
       ),
     );

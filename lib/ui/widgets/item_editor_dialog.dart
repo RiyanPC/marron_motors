@@ -191,7 +191,7 @@ class _ItemEditorDialogState extends State<ItemEditorDialog> {
                       ).colorScheme.primary.withOpacity(0.4),
                     ),
                     child: const Text(
-                      'GUARDAR CAMBIOS',
+                      'GUARDAR',
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,

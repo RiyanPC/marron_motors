@@ -51,6 +51,18 @@ class _ItemsPageState extends State<ItemsPage>
       appBar: AppBar(
         title: const Text('Servicios y Productos'),
         centerTitle: true,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.secondary,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
         bottom: TabBar(
           controller: _tabController,
           labelColor: Colors.white,
@@ -74,7 +86,7 @@ class _ItemsPageState extends State<ItemsPage>
         },
         icon: const Icon(Icons.add),
         label: const Text('NUEVO ITEM'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: Theme.of(context).colorScheme.secondary,
         foregroundColor: Colors.white,
       ),
       body: _loading

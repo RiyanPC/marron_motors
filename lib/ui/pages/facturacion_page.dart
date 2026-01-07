@@ -770,7 +770,18 @@ class _FacturacionPageState extends State<FacturacionPage>
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
         title: const Text('Facturación y Cobros'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.secondary,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
         actions: [
           IconButton(
             icon: Icon(
@@ -948,7 +959,7 @@ class _FacturacionPageState extends State<FacturacionPage>
     return ElevatedButton(
       onPressed: onTap,
       style: ElevatedButton.styleFrom(
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: Theme.of(context).colorScheme.secondary,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

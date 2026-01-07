@@ -992,7 +992,7 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.primary,
+                backgroundColor: Theme.of(context).colorScheme.secondary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 20),
                 shape: RoundedRectangleBorder(
@@ -1001,7 +1001,7 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
                 elevation: 4,
                 shadowColor: Theme.of(
                   context,
-                ).colorScheme.primary.withOpacity(0.4),
+                ).colorScheme.secondary.withOpacity(0.4),
               ),
             ),
           ),
