@@ -19,6 +19,7 @@ class OrdenTrabajo {
   final String estado;
   final double total;
   final String? facId;
+  final String? facTipoComprobante;
   final String? foto;
   final List<OrdenItem> items;
 
@@ -43,6 +44,7 @@ class OrdenTrabajo {
     required this.estado,
     required this.total,
     this.facId,
+    this.facTipoComprobante,
     this.foto,
     required this.items,
   });
@@ -69,6 +71,7 @@ class OrdenTrabajo {
       estado: json['ot_estado'] ?? 'ABIERTA',
       total: double.tryParse(json['ot_total']?.toString() ?? '0') ?? 0.0,
       facId: json['fac_id']?.toString(),
+      facTipoComprobante: json['fac_tipo_comprobante'],
       foto: json['ot_foto'],
       items: json['items'] != null
           ? (json['items'] as List).map((e) => OrdenItem.fromJson(e)).toList()
@@ -109,6 +112,7 @@ class OrdenTrabajo {
     String? estado,
     double? total,
     String? facId,
+    String? facTipoComprobante,
     String? foto,
     List<OrdenItem>? items,
   }) {
@@ -133,6 +137,7 @@ class OrdenTrabajo {
       estado: estado ?? this.estado,
       total: total ?? this.total,
       facId: facId ?? this.facId,
+      facTipoComprobante: facTipoComprobante ?? this.facTipoComprobante,
       foto: foto ?? this.foto,
       items: items ?? this.items,
     );

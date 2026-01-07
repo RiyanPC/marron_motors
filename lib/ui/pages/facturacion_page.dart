@@ -1012,7 +1012,7 @@ class _FacturacionPageState extends State<FacturacionPage>
                       ),
                     ),
                     const Spacer(),
-                    _buildStatusPill(ot.estado),
+                    _buildStatusPillWithType(ot),
                   ],
                 ),
               ),
@@ -1204,6 +1204,14 @@ class _FacturacionPageState extends State<FacturacionPage>
   }
 
   Widget _buildStatusPill(String status) {
+    // For FACTURADA status, show the invoice type if available
+    String displayText = status;
+    if (status == 'FACTURADA') {
+      // This will be populated from orden.facTipoComprobante
+      // We'll update this in the calling code to pass the full orden
+      displayText = status;
+    }
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
@@ -1212,9 +1220,37 @@ class _FacturacionPageState extends State<FacturacionPage>
         border: Border.all(color: _getStatusColor(status).withOpacity(0.3)),
       ),
       child: Text(
-        status,
+        displayText,
         style: TextStyle(
           color: _getStatusColor(status),
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  // New method to build status pill with order context
+  Widget _buildStatusPillWithType(OrdenTrabajo orden) {
+    String displayText = orden.estado;
+
+    if (orden.estado == 'FACTURADA' && orden.facTipoComprobante != null) {
+      displayText = orden.facTipoComprobante == 'F' ? 'FACTURA' : 'BOLETA';
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: _getStatusColor(orden.estado).withOpacity(0.12),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: _getStatusColor(orden.estado).withOpacity(0.3),
+        ),
+      ),
+      child: Text(
+        displayText,
+        style: TextStyle(
+          color: _getStatusColor(orden.estado),
           fontSize: 11,
           fontWeight: FontWeight.bold,
         ),
