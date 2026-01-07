@@ -399,7 +399,10 @@ class _FacturacionPageState extends State<FacturacionPage>
                                 ),
                                 const SizedBox(width: 12),
                                 Text(
-                                  orden.vehPlaca ?? 'S/P',
+                                  (orden.vehPlaca != null &&
+                                          orden.vehPlaca!.isNotEmpty)
+                                      ? orden.vehPlaca!
+                                      : (orden.vehTipo ?? 'S/P'),
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 24,
@@ -1002,7 +1005,9 @@ class _FacturacionPageState extends State<FacturacionPage>
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        ot.vehPlaca ?? 'S/P',
+                        (ot.vehPlaca != null && ot.vehPlaca!.isNotEmpty)
+                            ? ot.vehPlaca!
+                            : (ot.vehTipo ?? 'S/P'),
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w900,
