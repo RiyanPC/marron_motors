@@ -230,6 +230,8 @@ class _OrdenesPageState extends State<OrdenesPage>
     final XFile? pickedFile = await picker.pickImage(
       source: source,
       imageQuality: 70,
+      maxWidth: 1024,
+      maxHeight: 1024,
     );
     if (pickedFile == null) return;
 

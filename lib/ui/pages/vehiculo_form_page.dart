@@ -110,6 +110,8 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
     final XFile? pickedFile = await _picker.pickImage(
       source: source,
       imageQuality: 70,
+      maxWidth: 1024,
+      maxHeight: 1024,
     );
     if (pickedFile != null) {
       setState(() => _imageFile = File(pickedFile.path));
