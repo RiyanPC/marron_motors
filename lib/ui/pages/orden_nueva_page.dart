@@ -23,12 +23,14 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
 
   // Vehiculo Fields
   late TextEditingController _placaCtrl;
-  late TextEditingController _marcaCtrl;
+  String? _marcaVehiculo; // Nullable for empty start
+  String? _tipoVehiculo; // Nullable for empty start
+  Set<String> _customMarcas = {}; // Custom brands added by user
+  Set<String> _customTipos = {}; // Custom types added by user
   late TextEditingController _modeloCtrl;
   late TextEditingController _anioCtrl;
   late TextEditingController _colorCtrl;
   late TextEditingController _vinCtrl;
-  late TextEditingController _tipoVehiculoCtrl;
   late TextEditingController _descripcionController;
 
   // New Client Fields (Nested)
@@ -49,7 +51,6 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
 
     // Init Vehiculo controllers
     _placaCtrl = TextEditingController();
-    _marcaCtrl = TextEditingController();
     _modeloCtrl = TextEditingController();
     _anioCtrl = TextEditingController();
     // Auto-assign Peru Year
@@ -57,7 +58,6 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
     _anioCtrl.text = peruTime.year.toString();
     _colorCtrl = TextEditingController();
     _vinCtrl = TextEditingController();
-    _tipoVehiculoCtrl = TextEditingController();
 
     // Init Client controllers
     _newClienteNombreCtrl = TextEditingController();
@@ -71,12 +71,10 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
   void dispose() {
     _descripcionController.dispose();
     _placaCtrl.dispose();
-    _marcaCtrl.dispose();
     _modeloCtrl.dispose();
     _anioCtrl.dispose();
     _colorCtrl.dispose();
     _vinCtrl.dispose();
-    _tipoVehiculoCtrl.dispose();
     _newClienteNombreCtrl.dispose();
     _newClienteDocCtrl.dispose();
     _newClienteDireccionCtrl.dispose();
@@ -152,12 +150,12 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
           cliId: ordenCliId,
           empId: '1',
           placa: _placaCtrl.text.toUpperCase(),
-          marca: _marcaCtrl.text.toUpperCase(),
+          marca: _marcaVehiculo ?? '',
           modelo: '',
           anio: _anioCtrl.text,
           color: _colorCtrl.text.toUpperCase(),
           vin: '',
-          tipo: _tipoVehiculoCtrl.text.toUpperCase(),
+          tipo: _tipoVehiculo ?? '',
           foto: '',
         );
         final newVehId = await _repository.saveVehiculo(newVehiculo);
@@ -197,6 +195,83 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
         ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     }
+  }
+
+  Future<String?> _showCustomInputDialog(String title, String label) async {
+    final controller = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(
+              Icons.add_circle_outline,
+              color: Theme.of(context).colorScheme.primary,
+              size: 24,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            labelText: label,
+            hintText: 'Escribir en MAYÚSCULAS',
+            prefixIcon: Icon(
+              Icons.edit_outlined,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            filled: true,
+            fillColor: Colors.grey[50],
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey[300]!),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.primary,
+                width: 2,
+              ),
+            ),
+          ),
+          textCapitalization: TextCapitalization.characters,
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(foregroundColor: Colors.grey[600]),
+            child: const Text('CANCELAR'),
+          ),
+          ElevatedButton.icon(
+            onPressed: () => Navigator.pop(context, controller.text.trim()),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            icon: const Icon(Icons.check, size: 18),
+            label: const Text('AGREGAR'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -319,19 +394,75 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
                 children: [
                   Expanded(
                     flex: 2,
-                    child: TextFormField(
-                      controller: _tipoVehiculoCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Tipo (Auto/Moto) *',
-                        border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 12,
+                    child: DropdownButtonFormField<String>(
+                      value: _tipoVehiculo,
+                      decoration: InputDecoration(
+                        labelText: 'Tipo *',
+                        hintText: 'Seleccionar...',
+                        prefixIcon: const Icon(
+                          Icons.directions_car_outlined,
+                          size: 20,
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey[50],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey[300]!),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 14,
                         ),
                       ),
-                      textCapitalization: TextCapitalization.sentences,
+                      items:
+                          [
+                                ..._customTipos,
+                                'AUTO',
+                                'MOTO',
+                                'MOTOKAR',
+                                '+ Agregar nuevo...',
+                              ]
+                              .map(
+                                (tipo) => DropdownMenuItem(
+                                  value: tipo,
+                                  child: Text(
+                                    tipo,
+                                    style: TextStyle(
+                                      fontStyle: tipo == '+ Agregar nuevo...'
+                                          ? FontStyle.italic
+                                          : FontStyle.normal,
+                                      color: tipo == '+ Agregar nuevo...'
+                                          ? Colors.blue
+                                          : null,
+                                    ),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                      onChanged: (v) async {
+                        if (v == '+ Agregar nuevo...') {
+                          final custom = await _showCustomInputDialog(
+                            'Agregar Tipo',
+                            'Tipo de vehículo',
+                          );
+                          if (custom != null && custom.isNotEmpty) {
+                            setState(() {
+                              _customTipos.add(custom.toUpperCase());
+                              _tipoVehiculo = custom.toUpperCase();
+                            });
+                          }
+                        } else {
+                          setState(() => _tipoVehiculo = v);
+                        }
+                      },
                       validator: (v) =>
-                          _isCreatingVehiculo && (v == null || v.isEmpty)
+                          _isCreatingVehiculo &&
+                              (v == null ||
+                                  v.isEmpty ||
+                                  v == '+ Agregar nuevo...')
                           ? 'Requerido'
                           : null,
                     ),
@@ -339,19 +470,68 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
                   const SizedBox(width: 10),
                   Expanded(
                     flex: 3,
-                    child: TextFormField(
-                      controller: _marcaCtrl,
-                      decoration: const InputDecoration(
+                    child: DropdownButtonFormField<String>(
+                      value: _marcaVehiculo,
+                      decoration: InputDecoration(
                         labelText: 'Marca *',
-                        border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 12,
+                        hintText: 'Seleccionar...',
+                        prefixIcon: const Icon(
+                          Icons.branding_watermark_outlined,
+                          size: 20,
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey[50],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey[300]!),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 14,
                         ),
                       ),
-                      textCapitalization: TextCapitalization.sentences,
+                      items: [..._customMarcas, '+ Agregar nueva...']
+                          .map(
+                            (marca) => DropdownMenuItem(
+                              value: marca,
+                              child: Text(
+                                marca,
+                                style: TextStyle(
+                                  fontStyle: marca == '+ Agregar nueva...'
+                                      ? FontStyle.italic
+                                      : FontStyle.normal,
+                                  color: marca == '+ Agregar nueva...'
+                                      ? Colors.blue
+                                      : null,
+                                ),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (v) async {
+                        if (v == '+ Agregar nueva...') {
+                          final custom = await _showCustomInputDialog(
+                            'Agregar Marca',
+                            'Marca del vehículo',
+                          );
+                          if (custom != null && custom.isNotEmpty) {
+                            setState(() {
+                              _customMarcas.add(custom.toUpperCase());
+                              _marcaVehiculo = custom.toUpperCase();
+                            });
+                          }
+                        } else {
+                          setState(() => _marcaVehiculo = v);
+                        }
+                      },
                       validator: (v) =>
-                          _isCreatingVehiculo && (v == null || v.isEmpty)
+                          _isCreatingVehiculo &&
+                              (v == null ||
+                                  v.isEmpty ||
+                                  v == '+ Agregar nueva...')
                           ? 'Requerido'
                           : null,
                     ),

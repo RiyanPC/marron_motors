@@ -24,7 +24,10 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
   final ImagePicker _picker = ImagePicker();
 
   late TextEditingController _placaController;
-  late TextEditingController _marcaController;
+  String? _marcaVehiculo;
+  String? _tipoVehiculo;
+  Set<String> _customMarcas = {};
+  Set<String> _customTipos = {};
   late TextEditingController _modeloController;
   late TextEditingController _anioController;
   late TextEditingController _colorController;
@@ -45,7 +48,15 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
   void initState() {
     super.initState();
     _placaController = TextEditingController(text: widget.vehiculo?.placa);
-    _marcaController = TextEditingController(text: widget.vehiculo?.marca);
+    _marcaVehiculo = widget.vehiculo?.marca;
+    _tipoVehiculo = widget.vehiculo?.tipo;
+
+    // Add existing values to custom sets if they are not standard
+    if (_marcaVehiculo != null && _marcaVehiculo!.isNotEmpty)
+      _customMarcas.add(_marcaVehiculo!);
+    if (_tipoVehiculo != null && _tipoVehiculo!.isNotEmpty)
+      _customTipos.add(_tipoVehiculo!);
+
     _modeloController = TextEditingController(text: widget.vehiculo?.modelo);
     _anioController = TextEditingController(text: widget.vehiculo?.anio);
     _colorController = TextEditingController(text: widget.vehiculo?.color);
@@ -61,6 +72,13 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
 
   @override
   void dispose() {
+    _placaController
+        .dispose(); // Add this if it was missing or keep consistency
+    _modeloController.dispose();
+    _anioController.dispose();
+    _colorController.dispose();
+    _vinController.dispose();
+    _fotoController.dispose();
     _newClienteNombreCtrl.dispose();
     _newClienteDocCtrl.dispose();
     _newClienteDireccionCtrl.dispose();
@@ -173,12 +191,13 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
         cliId: clienteId,
         empId: widget.vehiculo?.empId ?? '1',
         placa: _placaController.text.toUpperCase(),
-        marca: _marcaController.text.toUpperCase(),
+        marca: _marcaVehiculo ?? '',
         modelo: _modeloController.text.toUpperCase(),
         anio: _anioController.text,
         color: _colorController.text.toUpperCase(),
         vin: _vinController.text.toUpperCase(),
         foto: _fotoController.text,
+        tipo: _tipoVehiculo ?? '',
       );
 
       final newId = await _repository.saveVehiculo(vehiculo);
@@ -209,6 +228,83 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
     } finally {
       if (mounted) setState(() => _saving = false);
     }
+  }
+
+  Future<String?> _showCustomInputDialog(String title, String label) async {
+    final controller = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(
+              Icons.add_circle_outline,
+              color: Theme.of(context).colorScheme.primary,
+              size: 24,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            labelText: label,
+            hintText: 'Escribir en MAYÚSCULAS',
+            prefixIcon: Icon(
+              Icons.edit_outlined,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            filled: true,
+            fillColor: Colors.grey[50],
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey[300]!),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.primary,
+                width: 2,
+              ),
+            ),
+          ),
+          textCapitalization: TextCapitalization.characters,
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(foregroundColor: Colors.grey[600]),
+            child: const Text('CANCELAR'),
+          ),
+          ElevatedButton.icon(
+            onPressed: () => Navigator.pop(context, controller.text.trim()),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            icon: const Icon(Icons.check, size: 18),
+            label: const Text('AGREGAR'),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildSectionHeader(IconData icon, String title) {
@@ -586,17 +682,179 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
                             Row(
                               children: [
                                 Expanded(
-                                  child: TextFormField(
-                                    controller: _marcaController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Marca',
-                                      prefixIcon: Icon(
-                                        Icons.branding_watermark_outlined,
+                                  flex: 2,
+                                  child: DropdownButtonFormField<String>(
+                                    value: _tipoVehiculo,
+                                    decoration: InputDecoration(
+                                      labelText: 'Tipo',
+                                      hintText: 'Seleccionar...',
+                                      prefixIcon: const Icon(
+                                        Icons.directions_car_outlined,
+                                        size: 20,
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.grey[50],
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(
+                                          color: Colors.grey[300]!,
+                                        ),
                                       ),
                                     ),
+                                    items:
+                                        [
+                                              ..._customTipos,
+                                              'AUTO',
+                                              'CAMIONETA',
+                                              'CAMIÓN',
+                                              'MOTO',
+                                              'MOTOKAR',
+                                              '+ Agregar nuevo...',
+                                            ]
+                                            .map(
+                                              (tipo) => DropdownMenuItem(
+                                                value: tipo,
+                                                child: Text(
+                                                  tipo,
+                                                  style: TextStyle(
+                                                    fontStyle:
+                                                        tipo ==
+                                                            '+ Agregar nuevo...'
+                                                        ? FontStyle.italic
+                                                        : FontStyle.normal,
+                                                    color:
+                                                        tipo ==
+                                                            '+ Agregar nuevo...'
+                                                        ? Colors.blue
+                                                        : null,
+                                                  ),
+                                                ),
+                                              ),
+                                            )
+                                            .toList(),
+                                    onChanged: (v) async {
+                                      if (v == '+ Agregar nuevo...') {
+                                        final custom =
+                                            await _showCustomInputDialog(
+                                              'Agregar Tipo',
+                                              'Tipo de vehículo',
+                                            );
+                                        if (custom != null &&
+                                            custom.isNotEmpty) {
+                                          setState(() {
+                                            _customTipos.add(
+                                              custom.toUpperCase(),
+                                            );
+                                            _tipoVehiculo = custom
+                                                .toUpperCase();
+                                          });
+                                        }
+                                      } else {
+                                        setState(() => _tipoVehiculo = v);
+                                      }
+                                    },
                                   ),
                                 ),
-                                const SizedBox(width: 16),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  flex: 3,
+                                  child: DropdownButtonFormField<String>(
+                                    value: _marcaVehiculo,
+                                    decoration: InputDecoration(
+                                      labelText: 'Marca',
+                                      hintText: 'Seleccionar...',
+                                      prefixIcon: const Icon(
+                                        Icons.branding_watermark_outlined,
+                                        size: 20,
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.grey[50],
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(
+                                          color: Colors.grey[300]!,
+                                        ),
+                                      ),
+                                    ),
+                                    items:
+                                        [
+                                              ..._customMarcas,
+                                              'TOYOTA',
+                                              'HONDA',
+                                              'NISSAN',
+                                              'HYUNDAI',
+                                              'KIA',
+                                              'MAZDA',
+                                              'SUZUKI',
+                                              'MITSUBISHI',
+                                              'CHEVROLET',
+                                              'FORD',
+                                              'VOLKSWAGEN',
+                                              'YAMAHA',
+                                              'BAJAJ',
+                                              '+ Agregar nueva...',
+                                            ]
+                                            .map(
+                                              (marca) => DropdownMenuItem(
+                                                value: marca,
+                                                child: Text(
+                                                  marca,
+                                                  style: TextStyle(
+                                                    fontStyle:
+                                                        marca ==
+                                                            '+ Agregar nueva...'
+                                                        ? FontStyle.italic
+                                                        : FontStyle.normal,
+                                                    color:
+                                                        marca ==
+                                                            '+ Agregar nueva...'
+                                                        ? Colors.blue
+                                                        : null,
+                                                  ),
+                                                ),
+                                              ),
+                                            )
+                                            .toList(),
+                                    onChanged: (v) async {
+                                      if (v == '+ Agregar nueva...') {
+                                        final custom =
+                                            await _showCustomInputDialog(
+                                              'Agregar Marca',
+                                              'Marca del vehículo',
+                                            );
+                                        if (custom != null &&
+                                            custom.isNotEmpty) {
+                                          setState(() {
+                                            _customMarcas.add(
+                                              custom.toUpperCase(),
+                                            );
+                                            _marcaVehiculo = custom
+                                                .toUpperCase();
+                                          });
+                                        }
+                                      } else {
+                                        setState(() => _marcaVehiculo = v);
+                                      }
+                                    },
+                                    validator: (v) =>
+                                        (v == null ||
+                                            v.isEmpty ||
+                                            v == '+ Agregar nueva...')
+                                        ? 'Requerido'
+                                        : null,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              children: [
                                 Expanded(
                                   child: TextFormField(
                                     controller: _modeloController,
