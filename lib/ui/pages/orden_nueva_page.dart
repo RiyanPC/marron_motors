@@ -28,6 +28,7 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
   late TextEditingController _anioCtrl;
   late TextEditingController _colorCtrl;
   late TextEditingController _vinCtrl;
+  late TextEditingController _tipoVehiculoCtrl;
   late TextEditingController _descripcionController;
 
   // New Client Fields (Nested)
@@ -53,6 +54,7 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
     _anioCtrl = TextEditingController();
     _colorCtrl = TextEditingController();
     _vinCtrl = TextEditingController();
+    _tipoVehiculoCtrl = TextEditingController();
 
     // Init Client controllers
     _newClienteNombreCtrl = TextEditingController();
@@ -71,6 +73,7 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
     _anioCtrl.dispose();
     _colorCtrl.dispose();
     _vinCtrl.dispose();
+    _tipoVehiculoCtrl.dispose();
     _newClienteNombreCtrl.dispose();
     _newClienteDocCtrl.dispose();
     _newClienteDireccionCtrl.dispose();
@@ -151,6 +154,7 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
           anio: _anioCtrl.text,
           color: _colorCtrl.text.toUpperCase(),
           vin: _vinCtrl.text.toUpperCase(),
+          tipo: _tipoVehiculoCtrl.text.toUpperCase(),
           foto: '',
         );
         final newVehId = await _repository.saveVehiculo(newVehiculo);
@@ -326,6 +330,22 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
                           _isCreatingVehiculo && (v == null || v.isEmpty)
                           ? 'Requerido'
                           : null,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    flex: 2,
+                    child: TextFormField(
+                      controller: _tipoVehiculoCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Tipo (Auto/Moto)',
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 12,
+                        ),
+                      ),
+                      textCapitalization: TextCapitalization.sentences,
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -612,15 +632,18 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
             ] else ...[
               // Vehicle Autocomplete (Search Mode)
               Autocomplete<Vehiculo>(
-                displayStringForOption: (Vehiculo option) => option.placa,
+                displayStringForOption: (Vehiculo option) =>
+                    '${option.tipo} ${option.marca} ${option.modelo} ${option.color} - ${option.placa}',
                 optionsBuilder: (TextEditingValue textEditingValue) {
                   if (textEditingValue.text == '') {
                     return const Iterable<Vehiculo>.empty();
                   }
                   return _vehiculos.where((Vehiculo option) {
-                    return option.placa.toLowerCase().contains(
-                      textEditingValue.text.toLowerCase(),
-                    );
+                    final search = textEditingValue.text.toLowerCase();
+                    return option.placa.toLowerCase().contains(search) ||
+                        option.tipo.toLowerCase().contains(search) ||
+                        option.marca.toLowerCase().contains(search) ||
+                        option.modelo.toLowerCase().contains(search);
                   });
                 },
                 onSelected: (Vehiculo selection) {
@@ -645,13 +668,14 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
                       if (_selectedVehiculo != null &&
                           textEditingController.text.isEmpty &&
                           !focusNode.hasFocus) {
-                        textEditingController.text = _selectedVehiculo!.placa;
+                        textEditingController.text =
+                            '${_selectedVehiculo!.tipo} ${_selectedVehiculo!.marca} ${_selectedVehiculo!.modelo}';
                       }
                       return TextFormField(
                         controller: textEditingController,
                         focusNode: focusNode,
                         decoration: InputDecoration(
-                          labelText: 'Buscar Placa *',
+                          labelText: 'Buscar Vehículo (Tipo, Placa...) *',
                           prefixIcon: const Icon(Icons.search),
                           border: const OutlineInputBorder(),
                           suffixIcon: textEditingController.text.isNotEmpty
@@ -798,7 +822,7 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
             const Divider(),
             _infoRow(
               'Vehículo:',
-              '${_selectedVehiculo?.marca} ${_selectedVehiculo?.modelo}',
+              '${_selectedVehiculo?.tipo} ${_selectedVehiculo?.marca} ${_selectedVehiculo?.modelo} ${_selectedVehiculo?.color}',
             ),
             _infoRow(
               'Año/Color:',
