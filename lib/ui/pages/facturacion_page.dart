@@ -284,17 +284,21 @@ class _FacturacionPageState extends State<FacturacionPage>
       if (mounted) Navigator.pop(context); // Close loading
 
       if (res['status'] == 'success') {
-        _loadOrdenes();
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Comprobante ${res['data']['serie']}-${res['data']['numero']} aceptado',
-              ),
-              backgroundColor: Colors.green,
-            ),
-          );
-        }
+        // Optimistic UI update - mark order as FACTURADA and move to top
+        final updatedOrden = orden.copyWith(estado: 'FACTURADA');
+        setState(() {
+          // Remove from current position
+          _ordenes.removeWhere((o) => o.id == orden.id);
+          // Add at the beginning (top of the list)
+          _ordenes.insert(0, updatedOrden);
+        });
+
+        // Show animated success dialog
+        await _showInvoiceSuccessDialog(
+          orden,
+          tipo,
+          '${res['data']['serie']}-${res['data']['numero']}',
+        );
       } else {
         _showError(res['message'] ?? 'Error desconocido');
       }
@@ -302,6 +306,174 @@ class _FacturacionPageState extends State<FacturacionPage>
       if (mounted) Navigator.pop(context);
       _showError(e.toString());
     }
+  }
+
+  Future<void> _showInvoiceSuccessDialog(
+    OrdenTrabajo orden,
+    String tipo,
+    String numero,
+  ) async {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Animated check icon
+              TweenAnimationBuilder<double>(
+                duration: const Duration(milliseconds: 600),
+                tween: Tween(begin: 0.0, end: 1.0),
+                builder: (context, value, child) {
+                  return Transform.scale(
+                    scale: value,
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade50,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.check_circle_rounded,
+                        size: 64,
+                        color: Colors.green.shade600,
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 20),
+              Text(
+                '¡$tipo EMITIDA!',
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                numero,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Vehicle info with animation
+              TweenAnimationBuilder<double>(
+                duration: const Duration(milliseconds: 800),
+                tween: Tween(begin: 0.0, end: 1.0),
+                curve: Curves.easeOutBack,
+                builder: (context, value, child) {
+                  return Transform.translate(
+                    offset: Offset(0, 20 * (1 - value)),
+                    child: Opacity(
+                      opacity: value.clamp(0.0, 1.0),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Theme.of(context).colorScheme.primary,
+                              Theme.of(
+                                context,
+                              ).colorScheme.primary.withOpacity(0.8),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.directions_car,
+                                  color: Colors.white,
+                                  size: 28,
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  orden.vehPlaca ?? 'S/P',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 2,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              orden.cliNombre ?? '',
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 14,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const Divider(height: 20, color: Colors.white30),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  'TOTAL',
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                Text(
+                                  'S/ ${orden.total.toStringAsFixed(2)}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    // Switch to HISTORIAL tab
+                    _tabController.animateTo(1);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    'CONTINUAR',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _verComprobante(String facId) async {
@@ -1052,29 +1224,48 @@ class _FacturacionPageState extends State<FacturacionPage>
 
   Widget _buildActions(OrdenTrabajo ot) {
     if (ot.estado == 'FACTURADA') {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Icon(Icons.check_circle, color: Colors.green.shade600, size: 16),
-          const SizedBox(width: 8),
-          Text(
-            'ORDEN FACTURADA',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              color: Colors.green.shade700,
-            ),
-          ),
-          if (ot.facId != null)
-            TextButton.icon(
-              onPressed: () => _verComprobante(ot.facId!),
-              icon: const Icon(Icons.visibility_outlined, size: 16),
-              label: const Text(
-                'VER DOCUMENTO',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.check_circle, color: Colors.green.shade600, size: 18),
+              const SizedBox(width: 8),
+              Text(
+                'COMPROBANTE EMITIDO',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green.shade700,
+                ),
               ),
-              style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
+            ],
+          ),
+          if (ot.facId != null) ...[
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              onPressed: () => _verComprobante(ot.facId!),
+              icon: const Icon(Icons.picture_as_pdf, size: 20),
+              label: const Text(
+                'VER DOCUMENTO PDF',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                elevation: 3,
+              ),
             ),
+          ],
         ],
       );
     }

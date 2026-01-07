@@ -124,18 +124,25 @@ class _OrdenesPageState extends State<OrdenesPage>
   }
 
   Future<void> _updateStatus(OrdenTrabajo orden, String newStatus) async {
-    setState(() => _loading = true);
     final success = await _repository.actualizarEstadoOrden(
       orden.id!,
       newStatus,
     );
+
     if (success) {
-      await _loadOrdenes();
+      // Optimistic update: update state and reorder
+      final updatedOrden = orden.copyWith(estado: newStatus);
+      setState(() {
+        // Remove from current position
+        _ordenes.removeWhere((o) => o.id == orden.id);
+        // Add at the beginning (top of the list)
+        _ordenes.insert(0, updatedOrden);
+      });
+
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Orden actualizada a $newStatus')));
     } else {
-      setState(() => _loading = false);
       _showError('No se pudo actualizar el estado');
     }
   }
