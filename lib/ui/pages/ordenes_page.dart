@@ -11,7 +11,8 @@ import '../widgets/item_selector_modal.dart';
 import '../widgets/item_editor_dialog.dart';
 
 class OrdenesPage extends StatefulWidget {
-  const OrdenesPage({super.key});
+  final int initialTabIndex;
+  const OrdenesPage({super.key, this.initialTabIndex = 0});
 
   @override
   State<OrdenesPage> createState() => _OrdenesPageState();
@@ -31,7 +32,11 @@ class _OrdenesPageState extends State<OrdenesPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(
+      length: 3,
+      vsync: this,
+      initialIndex: widget.initialTabIndex,
+    );
     _loadOrdenes();
   }
 
@@ -139,9 +144,13 @@ class _OrdenesPageState extends State<OrdenesPage>
         _ordenes.insert(0, updatedOrden);
       });
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Orden actualizada a $newStatus')));
+      if (newStatus == 'FINALIZADA') {
+        _showFinalizationSuccess(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Orden actualizada a $newStatus')),
+        );
+      }
     } else {
       _showError('No se pudo actualizar el estado');
     }
@@ -376,6 +385,101 @@ class _OrdenesPageState extends State<OrdenesPage>
             child: const Text('ENTENDIDO'),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showFinalizationSuccess(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.0, end: 1.0),
+                duration: const Duration(milliseconds: 600),
+                curve: Curves.elasticOut,
+                builder: (context, value, child) {
+                  return Transform.scale(
+                    scale: value,
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade50,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.check_circle,
+                        size: 60,
+                        color: Colors.green.shade600,
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                '¡Orden Finalizada!',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'El trabajo ha sido completado.\nYa puedes proceder con la facturación.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+              ),
+              const SizedBox(height: 32),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text('LUEGO'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context); // Close dialog
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const FacturacionPage(),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 2,
+                      ),
+                      child: const Text(
+                        'FACTURAR',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -672,7 +776,9 @@ class _OrdenesPageState extends State<OrdenesPage>
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        ot.vehPlaca ?? 'S/P',
+                        (ot.vehPlaca != null && ot.vehPlaca!.isNotEmpty)
+                            ? ot.vehPlaca!
+                            : (ot.vehTipo ?? 'S/P'),
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w900,
@@ -701,7 +807,9 @@ class _OrdenesPageState extends State<OrdenesPage>
                     _buildDetailRow(
                       Icons.directions_car_filled_outlined,
                       'VEHÍCULO',
-                      ot.vehPlaca ?? 'S/P',
+                      (ot.vehPlaca != null && ot.vehPlaca!.isNotEmpty)
+                          ? ot.vehPlaca!
+                          : (ot.vehTipo ?? 'S/P'),
                     ),
                     const SizedBox(height: 8),
                     _buildDetailRow(

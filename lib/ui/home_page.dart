@@ -167,11 +167,22 @@ class _HomePageState extends State<HomePage> {
                     ),
             ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          final result = await Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const OrdenNuevaPage()),
           );
+          if (result == true) {
+            if (mounted) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const OrdenesPage(initialTabIndex: 0),
+                ),
+              );
+              _loadData();
+            }
+          }
         },
         label: const Text('NUEVA ORDEN'),
         icon: const Icon(Icons.add),
@@ -542,7 +553,9 @@ class _HomePageState extends State<HomePage> {
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
-                orden.vehPlaca ?? 'S/P',
+                (orden.vehPlaca != null && orden.vehPlaca!.isNotEmpty)
+                    ? orden.vehPlaca!
+                    : (orden.vehTipo ?? 'S/P'),
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,

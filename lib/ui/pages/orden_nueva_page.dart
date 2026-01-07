@@ -150,10 +150,10 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
           empId: '1',
           placa: _placaCtrl.text.toUpperCase(),
           marca: _marcaCtrl.text.toUpperCase(),
-          modelo: _modeloCtrl.text.toUpperCase(),
-          anio: _anioCtrl.text,
+          modelo: '',
+          anio: '',
           color: _colorCtrl.text.toUpperCase(),
-          vin: _vinCtrl.text.toUpperCase(),
+          vin: '',
           tipo: _tipoVehiculoCtrl.text.toUpperCase(),
           foto: '',
         );
@@ -311,34 +311,15 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
             const Divider(),
             if (_isCreatingVehiculo) ...[
               // New Vehicle Form
+              // New Vehicle Form: Only Tipo, Color, Placa (Optional)
               Row(
                 children: [
                   Expanded(
                     flex: 2,
                     child: TextFormField(
-                      controller: _placaCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Placa *',
-                        border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 12,
-                        ),
-                      ),
-                      textCapitalization: TextCapitalization.characters,
-                      validator: (v) =>
-                          _isCreatingVehiculo && (v == null || v.isEmpty)
-                          ? 'Requerido'
-                          : null,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    flex: 2,
-                    child: TextFormField(
                       controller: _tipoVehiculoCtrl,
                       decoration: const InputDecoration(
-                        labelText: 'Tipo (Auto/Moto)',
+                        labelText: 'Tipo (Auto/Moto) *',
                         border: OutlineInputBorder(),
                         contentPadding: EdgeInsets.symmetric(
                           horizontal: 10,
@@ -346,6 +327,10 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
                         ),
                       ),
                       textCapitalization: TextCapitalization.sentences,
+                      validator: (v) =>
+                          _isCreatingVehiculo && (v == null || v.isEmpty)
+                          ? 'Requerido'
+                          : null,
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -354,7 +339,7 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
                     child: TextFormField(
                       controller: _marcaCtrl,
                       decoration: const InputDecoration(
-                        labelText: 'Marca',
+                        labelText: 'Marca *',
                         border: OutlineInputBorder(),
                         contentPadding: EdgeInsets.symmetric(
                           horizontal: 10,
@@ -374,71 +359,38 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
               Row(
                 children: [
                   Expanded(
-                    child: TextFormField(
-                      controller: _modeloCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Modelo',
-                        border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 12,
-                        ),
-                      ),
-                      textCapitalization: TextCapitalization.sentences,
-                      validator: (v) =>
-                          _isCreatingVehiculo && (v == null || v.isEmpty)
-                          ? 'Requerido'
-                          : null,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: TextFormField(
-                      controller: _anioCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Año',
-                        border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 12,
-                        ),
-                      ),
-                      keyboardType: TextInputType.number,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
+                    flex: 2,
                     child: TextFormField(
                       controller: _colorCtrl,
                       decoration: const InputDecoration(
-                        labelText: 'Color',
+                        labelText: 'Color *',
                         border: OutlineInputBorder(),
                         contentPadding: EdgeInsets.symmetric(
                           horizontal: 10,
                           vertical: 12,
                         ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: TextFormField(
-                      controller: _vinCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'VIN',
-                        border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 12,
-                        ),
-                      ),
+                      textCapitalization: TextCapitalization.sentences,
+                      validator: (v) =>
+                          _isCreatingVehiculo && (v == null || v.isEmpty)
+                          ? 'Requerido'
+                          : null,
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: _placaCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Placa (Opcional)',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 12,
+                  ),
+                ),
+                textCapitalization: TextCapitalization.characters,
               ),
               const SizedBox(height: 16),
               const Divider(),
@@ -502,8 +454,11 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
                     Expanded(
                       child: TextFormField(
                         controller: _newClienteDocCtrl,
+                        maxLength: _newClienteTipoDoc == 'DNI' ? 8 : 11,
                         decoration: InputDecoration(
                           labelText: 'N° Documento *',
+                          counterText:
+                              '', // Hides default counter but keeps limit
                           border: const OutlineInputBorder(),
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 10,
@@ -536,10 +491,19 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
                           ),
                         ),
                         keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
                         validator: (v) {
                           if (!_isCreatingVehiculo || !_isCreatingClient)
                             return null;
                           if (v == null || v.isEmpty) return 'Requerido';
+                          if (_newClienteTipoDoc == 'DNI' && v.length != 8) {
+                            return 'DNI debe tener 8 dígitos';
+                          }
+                          if (_newClienteTipoDoc == 'RUC' && v.length != 11) {
+                            return 'RUC debe tener 11 dígitos';
+                          }
                           return null;
                         },
                       ),

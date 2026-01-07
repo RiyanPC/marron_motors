@@ -6,6 +6,7 @@ class OrdenTrabajo {
   final String fechaIngreso;
   final String? fechaCreate;
   final String? vehPlaca;
+  final String? vehTipo;
   final String? vehMarca;
   final String? vehModelo;
   final int? vehAnio;
@@ -31,6 +32,7 @@ class OrdenTrabajo {
     required this.fechaIngreso,
     this.fechaCreate,
     this.vehPlaca,
+    this.vehTipo,
     this.vehMarca,
     this.vehModelo,
     this.vehAnio,
@@ -58,6 +60,7 @@ class OrdenTrabajo {
       fechaIngreso: json['ot_fecha_ingreso'] ?? '',
       fechaCreate: json['ot_fecha_create'],
       vehPlaca: json['veh_placa'],
+      vehTipo: json['veh_tipo'],
       vehMarca: json['veh_marca'],
       vehModelo: json['veh_modelo'],
       vehAnio: int.tryParse(json['veh_anio']?.toString() ?? ''),
@@ -99,6 +102,7 @@ class OrdenTrabajo {
     String? fechaIngreso,
     String? fechaCreate,
     String? vehPlaca,
+    String? vehTipo,
     String? vehMarca,
     String? vehModelo,
     int? vehAnio,
@@ -124,6 +128,7 @@ class OrdenTrabajo {
       fechaIngreso: fechaIngreso ?? this.fechaIngreso,
       fechaCreate: fechaCreate ?? this.fechaCreate,
       vehPlaca: vehPlaca ?? this.vehPlaca,
+      vehTipo: vehTipo ?? this.vehTipo,
       vehMarca: vehMarca ?? this.vehMarca,
       vehModelo: vehModelo ?? this.vehModelo,
       vehAnio: vehAnio ?? this.vehAnio,
