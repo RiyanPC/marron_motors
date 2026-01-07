@@ -8,6 +8,7 @@ import 'orden_nueva_page.dart';
 import 'orden_detalle_page.dart';
 import 'facturacion_page.dart';
 import '../widgets/item_selector_modal.dart';
+import '../widgets/item_editor_dialog.dart';
 
 class OrdenesPage extends StatefulWidget {
   const OrdenesPage({super.key});
@@ -932,27 +933,35 @@ class _OrdenesPageState extends State<OrdenesPage>
                 isOutlined: true,
               ),
               const SizedBox(height: 8),
-              _buildActionButton(
-                'AÑADIR TRABAJO',
-                Icons.add_circle_outline,
-                const Color(0xFF1565C0),
-                () => _agregarTrabajo(ot),
-                isOutlined: true,
-              ),
-              const SizedBox(height: 8),
-              _buildActionButton(
-                'FINALIZAR',
-                Icons.task_alt_rounded,
-                Colors.orange.shade800,
-                () async {
-                  final confirm = await _showConfirmDialog(
-                    'Finalizar Trabajo',
-                    '¿Confirmas que deseas finalizar el trabajo? La orden pasará al módulo de FACTURACIÓN.',
-                  );
-                  if (confirm) {
-                    _updateStatus(ot, 'FINALIZADA');
-                  }
-                },
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildActionButton(
+                      'AÑADIR TRABAJO',
+                      Icons.add_circle_outline,
+                      const Color(0xFF1565C0),
+                      () => _agregarTrabajo(ot),
+                      isOutlined: true,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _buildActionButton(
+                      'FINALIZAR',
+                      Icons.task_alt_rounded,
+                      Colors.orange.shade800,
+                      () async {
+                        final confirm = await _showConfirmDialog(
+                          'Finalizar Trabajo',
+                          '¿Confirmas que deseas finalizar el trabajo? La orden pasará al módulo de FACTURACIÓN.',
+                        );
+                        if (confirm) {
+                          _updateStatus(ot, 'FINALIZADA');
+                        }
+                      },
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -1022,108 +1031,22 @@ class _OrdenesPageState extends State<OrdenesPage>
   }
 
   Future<void> _editarItem(OrdenTrabajo orden, OrdenItem item) async {
-    final nombreCtrl = TextEditingController(text: item.itemNombre);
-    final cantidadCtrl = TextEditingController(
-      text: item.cantidad.toInt().toString(),
-    );
-    final precioCtrl = TextEditingController(
-      text: item.precioUnitario.toStringAsFixed(2),
-    );
-    // Logic: Default is Exonerado (0) if user requests default,
-    // but we should respect existing item state if editing.
-    // User said "by default will be exonerado", implying for new/edits they prefer that.
-    // However, for an existing item with igv, we should show Gravado.
-    // Let's default to current state, but if 0, map to Exonerado.
-    String selectedTributo = item.afectoIgv == 1
-        ? '10'
-        : '20'; // 10=Gravado, 20=Exonerado
-
-    final result = await showDialog<bool>(
+    final result = await showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (context, setStateDialog) => AlertDialog(
-          title: const Text('Editar Item'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: nombreCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Descripción / Nombre',
-                    prefixIcon: Icon(Icons.description),
-                  ),
-                  maxLines: 2,
-                  minLines: 1,
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: cantidadCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Cantidad',
-                    prefixIcon: Icon(Icons.numbers),
-                  ),
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: precioCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Precio Unit.',
-                    prefixText: 'S/ ',
-                    prefixIcon: Icon(Icons.attach_money),
-                  ),
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                  value: selectedTributo,
-                  decoration: const InputDecoration(
-                    labelText: 'Código Tributo',
-                    prefixIcon: Icon(Icons.receipt_long),
-                  ),
-                  items: const [
-                    DropdownMenuItem(value: '10', child: Text('Gravado (18%)')),
-                    DropdownMenuItem(
-                      value: '20',
-                      child: Text('Exonerado (0%)'),
-                    ),
-                    DropdownMenuItem(value: '30', child: Text('Inafecto (0%)')),
-                  ],
-                  onChanged: (val) {
-                    if (val != null) {
-                      setStateDialog(() => selectedTributo = val);
-                    }
-                  },
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('CANCELAR'),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('GUARDAR'),
-            ),
-          ],
-        ),
+      builder: (ctx) => ItemEditorDialog(
+        initialNombre: item.itemNombre,
+        initialCantidad: item.cantidad,
+        initialPrecio: item.precioUnitario,
+        initialAfectoIgv: item.afectoIgv,
       ),
     );
 
-    if (result == true) {
-      final newNombre = nombreCtrl.text.trim();
-      final newCant = double.tryParse(cantidadCtrl.text) ?? item.cantidad;
-      final newPrecio = double.tryParse(precioCtrl.text) ?? item.precioUnitario;
-      final newAfectoIgv = selectedTributo == '10'
-          ? 1
-          : 0; // 10 is Gravado, others 0
+    if (result != null) {
+      final newNombre = result['nombre'] as String;
+      final newCant = result['cantidad'] as double;
+      final newPrecio = result['precio'] as double;
+      final newAfectoIgv = result['afectoIgv'] as int;
+      final selectedTributo = result['codigoTributo'] as String;
 
       if (newNombre.isEmpty || newCant <= 0 || newPrecio < 0) {
         _showError('Valores inválidos');
@@ -1207,26 +1130,68 @@ class _OrdenesPageState extends State<OrdenesPage>
 
       if (success) {
         // Optimistic Update
+        final newIgvValue = (newAfectoIgv == 1)
+            ? (newCant * newPrecio * 0.18)
+            : 0.0;
         final newSubtotal = newCant * newPrecio;
-        final newIgv = (item.afectoIgv == 1) ? newSubtotal * 0.18 : 0.0;
-        final newTotalItem = newSubtotal + newIgv;
+        final newTotalItem = newSubtotal + newIgvValue;
 
-        final diffTotal = newTotalItem - item.total;
-        final newTotalOrden = orden.total + diffTotal;
-
-        final updatedItem = item.copyWith(
-          itemId: targetItemId,
-          itemNombre: targetItemNombre,
-          cantidad: newCant,
-          precioUnitario: newPrecio,
-          total: newTotalItem,
-          igv: newIgv,
-          subtotal: newSubtotal,
+        // Check if we are merging into an existing item (excluding the one we are editing)
+        final collisionIndex = orden.items.indexWhere(
+          (i) => i.itemId == targetItemId && i.id != item.id,
         );
 
-        final updatedItems = orden.items
-            .map((i) => i.id == item.id ? updatedItem : i)
-            .toList();
+        List<OrdenItem> updatedItems;
+        final double diffTotal;
+
+        if (collisionIndex != -1) {
+          // COLLISION DETECTED: Merge
+          final collisionsItem = orden.items[collisionIndex];
+
+          final mergedCant = collisionsItem.cantidad + newCant;
+          final mergedSubtotal = mergedCant * newPrecio;
+          final mergedIgvVal = (newAfectoIgv == 1)
+              ? mergedSubtotal * 0.18
+              : 0.0;
+          final mergedTotal = mergedSubtotal + mergedIgvVal;
+
+          final mergedItem = collisionsItem.copyWith(
+            cantidad: mergedCant,
+            precioUnitario: newPrecio,
+            subtotal: mergedSubtotal,
+            igv: mergedIgvVal,
+            total: mergedTotal,
+            afectoIgv: newAfectoIgv,
+          );
+
+          updatedItems = List<OrdenItem>.from(orden.items);
+          updatedItems[collisionIndex] = mergedItem;
+          updatedItems.removeWhere((i) => i.id == item.id);
+
+          // Diff = NewMergedTotal - (OldItemTotal + OldCollisionTotal)
+          diffTotal = mergedTotal - (item.total + collisionsItem.total);
+        } else {
+          // No collision, just update
+          final diff = newTotalItem - item.total;
+          diffTotal = diff;
+
+          final updatedItem = item.copyWith(
+            itemId: targetItemId,
+            itemNombre: targetItemNombre,
+            cantidad: newCant,
+            precioUnitario: newPrecio,
+            total: newTotalItem,
+            igv: newIgvValue,
+            subtotal: newSubtotal,
+            afectoIgv: newAfectoIgv,
+          );
+
+          updatedItems = orden.items
+              .map((i) => i.id == item.id ? updatedItem : i)
+              .toList();
+        }
+
+        final newTotalOrden = orden.total + diffTotal;
 
         final updatedOrden = orden.copyWith(
           total: newTotalOrden,
