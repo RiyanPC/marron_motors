@@ -4,7 +4,8 @@ import '../../services/data_repository.dart';
 
 class ItemFormPage extends StatefulWidget {
   final Item? item;
-  const ItemFormPage({super.key, this.item});
+  final String? initialName;
+  const ItemFormPage({super.key, this.item, this.initialName});
 
   @override
   State<ItemFormPage> createState() => _ItemFormPageState();
@@ -18,7 +19,7 @@ class _ItemFormPageState extends State<ItemFormPage> {
   late TextEditingController _nombreController;
   late TextEditingController _descripcionController;
   late TextEditingController _precioController;
-  String _tipo = 'SERVICIO';
+  String _tipo = 'REPUESTO';
   String _estado = 'ACTIVO';
   String _codigoTributo = '20'; // Default Exonerado
   final FocusNode _precioFocusNode = FocusNode();
@@ -26,7 +27,9 @@ class _ItemFormPageState extends State<ItemFormPage> {
   @override
   void initState() {
     super.initState();
-    _nombreController = TextEditingController(text: widget.item?.nombre);
+    _nombreController = TextEditingController(
+      text: widget.item?.nombre ?? widget.initialName,
+    );
     _descripcionController = TextEditingController(
       text: widget.item?.descripcion,
     );

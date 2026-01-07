@@ -80,6 +80,39 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
     }
   }
 
+  void _openItemFormWithName(String initialName) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ItemFormPage(initialName: initialName),
+      ),
+    );
+
+    if (result != null && result is String) {
+      // Item ID was returned (created or existing duplicate)
+      setState(() => _loading = true);
+      await _loadItems();
+
+      // Auto-select the newly created/existing item
+      final createdItem = _allItems.firstWhere(
+        (item) => item.id == result,
+        orElse: () => _allItems.first,
+      );
+
+      if (mounted) {
+        _onItemTap(createdItem);
+        // Show feedback
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Item "${createdItem.nombre}" seleccionado'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
+
   void _filterItems() {
     final query = _searchController.text.toLowerCase();
     setState(() {
@@ -296,6 +329,33 @@ class _ItemSelectorModalState extends State<ItemSelectorModal> {
                                   'No se encontraron items',
                                   style: TextStyle(color: Colors.grey[600]),
                                 ),
+                                if (_searchController.text
+                                    .trim()
+                                    .isNotEmpty) ...[
+                                  const SizedBox(height: 20),
+                                  ElevatedButton.icon(
+                                    onPressed: () {
+                                      _openItemFormWithName(
+                                        _searchController.text.trim(),
+                                      );
+                                    },
+                                    icon: const Icon(Icons.add_circle_outline),
+                                    label: const Text('CREAR NUEVO ITEM'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 24,
+                                        vertical: 16,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
                           )
