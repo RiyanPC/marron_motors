@@ -75,7 +75,7 @@ class OrdenTrabajo {
       total: double.tryParse(json['ot_total']?.toString() ?? '0') ?? 0.0,
       facId: json['fac_id']?.toString(),
       facTipoComprobante: json['fac_tipo_comprobante'],
-      foto: json['ot_foto'],
+      foto: json['ot_foto'] ?? json['veh_foto'],
       items: json['items'] != null
           ? (json['items'] as List).map((e) => OrdenItem.fromJson(e)).toList()
           : [],

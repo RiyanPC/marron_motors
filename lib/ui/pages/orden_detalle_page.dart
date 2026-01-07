@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../models/orden.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
+import 'dart:typed_data';
 
 class OrdenDetallePage extends StatelessWidget {
   final OrdenTrabajo orden;
@@ -82,13 +86,86 @@ class OrdenDetallePage extends StatelessWidget {
                 icon: Icons.camera_alt_rounded,
                 child: Column(
                   children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        orden.foto!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const Icon(Icons.broken_image, size: 50),
+                    GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => Dialog(
+                            backgroundColor: Colors.transparent,
+                            insetPadding: EdgeInsets.zero,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                GestureDetector(
+                                  onTap: () => Navigator.pop(context),
+                                  child: Container(
+                                    color: Colors.black.withOpacity(0.9),
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                  ),
+                                ),
+                                InteractiveViewer(
+                                  maxScale: 4.0,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(16),
+                                    child: Image.network(
+                                      orden.foto!,
+                                      fit: BoxFit.contain,
+                                      width:
+                                          MediaQuery.of(context).size.width *
+                                          0.95,
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                          0.8,
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 40,
+                                  right: 70,
+                                  child: CircleAvatar(
+                                    backgroundColor: Colors.white,
+                                    child: IconButton(
+                                      icon: const Icon(
+                                        Icons.download,
+                                        color: Colors.black,
+                                      ),
+                                      onPressed: () => _downloadAndShareImage(
+                                        context,
+                                        orden.foto!,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 40,
+                                  right: 20,
+                                  child: CircleAvatar(
+                                    backgroundColor: Colors.white,
+                                    child: IconButton(
+                                      icon: const Icon(
+                                        Icons.close,
+                                        color: Colors.black,
+                                      ),
+                                      onPressed: () => Navigator.pop(context),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          orden.foto!,
+                          fit: BoxFit.cover,
+                          height: 200,
+                          width: double.infinity,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(Icons.broken_image, size: 50),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -315,6 +392,35 @@ class OrdenDetallePage extends StatelessWidget {
         return Colors.green;
       default:
         return Colors.black;
+    }
+  }
+
+  Future<void> _downloadAndShareImage(BuildContext context, String url) async {
+    try {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Preparando imagen...')));
+
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final Uint8List bytes = response.bodyBytes;
+        final xfile = XFile.fromData(
+          bytes,
+          name: 'vehiculo_${DateTime.now().millisecondsSinceEpoch}.jpg',
+          mimeType: 'image/jpeg',
+        );
+
+        await Share.shareXFiles([xfile], text: 'Foto del vehículo');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No se pudo descargar la imagen')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error al compartir: $e')));
     }
   }
 }

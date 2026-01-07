@@ -1,6 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:http/http.dart' as http;
+import 'dart:typed_data';
 import '../../models/orden.dart';
 import '../../models/item.dart';
 import '../../services/data_repository.dart';
@@ -255,6 +258,31 @@ class _OrdenesPageState extends State<OrdenesPage>
       _showError('Error: $e');
     } finally {
       setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _downloadAndShareImage(String url) async {
+    try {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Preparando imagen...')));
+
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final Uint8List bytes = response.bodyBytes;
+        final xfile = XFile.fromData(
+          bytes,
+          name: 'vehiculo_${DateTime.now().millisecondsSinceEpoch}.jpg',
+          mimeType: 'image/jpeg',
+        );
+
+        await Share.shareXFiles([xfile], text: 'Foto del vehículo');
+      } else {
+        _showError('No se pudo descargar la imagen');
+      }
+    } catch (e) {
+      _showError('Error al compartir: $e');
     }
   }
 
@@ -809,62 +837,167 @@ class _OrdenesPageState extends State<OrdenesPage>
               // Content Section
               Padding(
                 padding: const EdgeInsets.all(12),
-                child: Column(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildDetailRow(
-                      Icons.person,
-                      'CLIENTE',
-                      ot.cliNombre ?? 'No asignado',
-                    ),
-                    const SizedBox(height: 8),
-                    _buildDetailRow(
-                      Icons.directions_car_filled_outlined,
-                      'VEHÍCULO',
-                      (ot.vehPlaca != null && ot.vehPlaca!.isNotEmpty)
-                          ? ot.vehPlaca!
-                          : (ot.vehTipo ?? 'S/P'),
-                    ),
-                    const SizedBox(height: 8),
-                    _buildDetailRow(
-                      Icons.build_circle_outlined,
-                      'SERVICIO SOLICITADO',
-                      ot.descripcion,
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildDetailRow(
-                            Icons.calendar_month,
-                            'FECHA',
-                            ot.fechaIngreso,
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
+                    if (ot.foto != null && ot.foto!.isNotEmpty)
+                      GestureDetector(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => Dialog(
+                              backgroundColor: Colors.transparent,
+                              insetPadding: EdgeInsets.zero,
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () => Navigator.pop(context),
+                                    child: Container(
+                                      color: Colors.black.withOpacity(0.9),
+                                      width: double.infinity,
+                                      height: double.infinity,
+                                    ),
+                                  ),
+                                  InteractiveViewer(
+                                    maxScale: 4.0,
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(16),
+                                      child: Image.network(
+                                        ot.foto!,
+                                        fit: BoxFit.contain,
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                            0.95,
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                            0.8,
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    top: 40,
+                                    right: 70,
+                                    child: CircleAvatar(
+                                      backgroundColor: Colors.white,
+                                      child: IconButton(
+                                        icon: const Icon(
+                                          Icons.download,
+                                          color: Colors.black,
+                                        ),
+                                        onPressed: () =>
+                                            _downloadAndShareImage(ot.foto!),
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    top: 40,
+                                    right: 20,
+                                    child: CircleAvatar(
+                                      backgroundColor: Colors.white,
+                                      child: IconButton(
+                                        icon: const Icon(
+                                          Icons.close,
+                                          color: Colors.black,
+                                        ),
+                                        onPressed: () => Navigator.pop(context),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          width: 90,
+                          height: 90,
+                          margin: const EdgeInsets.only(right: 12),
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade50,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(color: Colors.grey.shade200),
+                            color: Colors.grey.shade50,
                           ),
-                          child: Text(
-                            'S/ ${ot.total.toStringAsFixed(2)}',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.primary,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(
+                              ot.foto!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Center(
+                                    child: Icon(
+                                      Icons.directions_car,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
                             ),
                           ),
                         ),
-                      ],
+                      ),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          _buildDetailRow(
+                            Icons.person,
+                            'CLIENTE',
+                            ot.cliNombre ?? 'No asignado',
+                          ),
+                          const SizedBox(height: 8),
+                          _buildDetailRow(
+                            Icons.directions_car_filled_outlined,
+                            'VEHÍCULO',
+                            (ot.vehPlaca != null && ot.vehPlaca!.isNotEmpty)
+                                ? ot.vehPlaca!
+                                : (ot.vehTipo ?? 'S/P'),
+                          ),
+                          const SizedBox(height: 8),
+                          _buildDetailRow(
+                            Icons.build_circle_outlined,
+                            'SERVICIO SOLICITADO',
+                            ot.descripcion,
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildDetailRow(
+                                  Icons.calendar_month,
+                                  'FECHA',
+                                  ot.fechaIngreso,
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade50,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: Colors.grey.shade200,
+                                  ),
+                                ),
+                                child: Text(
+                                  'S/ ${ot.total.toStringAsFixed(2)}',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (ot.items.isNotEmpty) ...[
+                            const Divider(height: 16),
+                            _buildItemsList(ot),
+                          ],
+                        ],
+                      ),
                     ),
-                    if (ot.items.isNotEmpty) ...[
-                      const Divider(height: 16),
-                      _buildItemsList(ot),
-                    ],
                   ],
                 ),
               ),
@@ -1014,19 +1147,32 @@ class _OrdenesPageState extends State<OrdenesPage>
       mainAxisSize: MainAxisSize.min,
       children: [
         if (ot.estado == 'ABIERTA')
-          _buildActionButton(
-            'INICIAR TRABAJO',
-            Icons.play_arrow_rounded,
-            Theme.of(context).colorScheme.primary,
-            () async {
-              final confirm = await _showConfirmDialog(
-                'Iniciar Trabajo',
-                '¿Confirmas que deseas pasar esta orden a estado "En Proceso"?',
-              );
-              if (confirm) {
-                _updateStatus(ot, 'EN_PROCESO');
-              }
-            },
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildActionButton(
+                'SUBIR FOTO',
+                Icons.add_a_photo_outlined,
+                Colors.teal.shade700,
+                () => _pickAndUploadFoto(ot),
+                isOutlined: true,
+              ),
+              const SizedBox(height: 8),
+              _buildActionButton(
+                'INICIAR TRABAJO',
+                Icons.play_arrow_rounded,
+                Theme.of(context).colorScheme.primary,
+                () async {
+                  final confirm = await _showConfirmDialog(
+                    'Iniciar Trabajo',
+                    '¿Confirmas que deseas pasar esta orden a estado "En Proceso"?',
+                  );
+                  if (confirm) {
+                    _updateStatus(ot, 'EN_PROCESO');
+                  }
+                },
+              ),
+            ],
           ),
         if (ot.estado == 'EN_PROCESO')
           Column(
