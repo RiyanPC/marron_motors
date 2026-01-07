@@ -52,6 +52,9 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
     _marcaCtrl = TextEditingController();
     _modeloCtrl = TextEditingController();
     _anioCtrl = TextEditingController();
+    // Auto-assign Peru Year
+    final peruTime = DateTime.now().toUtc().subtract(const Duration(hours: 5));
+    _anioCtrl.text = peruTime.year.toString();
     _colorCtrl = TextEditingController();
     _vinCtrl = TextEditingController();
     _tipoVehiculoCtrl = TextEditingController();
@@ -151,7 +154,7 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
           placa: _placaCtrl.text.toUpperCase(),
           marca: _marcaCtrl.text.toUpperCase(),
           modelo: '',
-          anio: '',
+          anio: _anioCtrl.text,
           color: _colorCtrl.text.toUpperCase(),
           vin: '',
           tipo: _tipoVehiculoCtrl.text.toUpperCase(),
@@ -375,6 +378,24 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
                           _isCreatingVehiculo && (v == null || v.isEmpty)
                           ? 'Requerido'
                           : null,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    flex: 2,
+                    child: TextFormField(
+                      controller: _anioCtrl,
+                      readOnly: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Año (Auto)',
+                        border: OutlineInputBorder(),
+                        filled: true,
+                        fillColor: Color(0xFFF5F5F5),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 12,
+                        ),
+                      ),
                     ),
                   ),
                 ],

@@ -9,6 +9,8 @@ import 'orden_detalle_page.dart';
 import 'facturacion_page.dart';
 import '../widgets/item_selector_modal.dart';
 import '../widgets/item_editor_dialog.dart';
+import '../../core/api_config.dart';
+import 'comprobante_preview_page.dart';
 
 class OrdenesPage extends StatefulWidget {
   final int initialTabIndex;
@@ -385,6 +387,17 @@ class _OrdenesPageState extends State<OrdenesPage>
             child: const Text('ENTENDIDO'),
           ),
         ],
+      ),
+    );
+  }
+
+  Future<void> _verComprobante(String facId) async {
+    final url = '${ApiConfig.baseUrl}/facturas/ver.php?id=$facId';
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) =>
+            ComprobantePreviewPage(url: url, title: 'Factura #$facId'),
       ),
     );
   }
@@ -1060,24 +1073,73 @@ class _OrdenesPageState extends State<OrdenesPage>
             ],
           ),
         if (ot.estado == 'FINALIZADA')
-          _buildActionButton(
-            'EMITIR COMPROBANTE',
-            Icons.receipt_long_rounded,
-            Colors.green.shade700,
-            () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const FacturacionPage()),
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: _buildActionButton(
+                  'VER DETALLE',
+                  Icons.visibility_outlined,
+                  const Color.fromARGB(255, 57, 146, 173),
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => OrdenDetallePage(orden: ot),
+                    ),
+                  ),
+                  isOutlined: true,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildActionButton(
+                  'EMITIR',
+                  Icons.receipt_long_rounded,
+                  Colors.green.shade700,
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const FacturacionPage()),
+                  ),
+                ),
+              ),
+            ],
           ),
         if (ot.estado == 'FACTURADA')
-          _buildActionButton(
-            'VER DETALLE',
-            Icons.visibility_outlined,
-            const Color.fromARGB(255, 57, 146, 173),
-            () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => OrdenDetallePage(orden: ot)),
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: _buildActionButton(
+                  'VER DETALLE',
+                  Icons.visibility_outlined,
+                  const Color.fromARGB(255, 57, 146, 173),
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => OrdenDetallePage(orden: ot),
+                    ),
+                  ),
+                  isOutlined: true,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildActionButton(
+                  ot.facTipoComprobante == 'F' ? 'VER FACTURA' : 'VER BOLETA',
+                  Icons.picture_as_pdf,
+                  Colors.green.shade700,
+                  () {
+                    if (ot.facId != null) {
+                      _verComprobante(ot.facId!);
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('ID de comprobante no disponible'),
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ),
+            ],
           ),
       ],
     );

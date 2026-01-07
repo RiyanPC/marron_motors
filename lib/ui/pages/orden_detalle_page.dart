@@ -31,7 +31,6 @@ class OrdenDetallePage extends StatelessWidget {
                   _buildDetailedRow('Nombre', orden.cliNombre ?? 'No asignado'),
                   _buildDetailedRow('Documento', orden.cliDocumento ?? 'N/A'),
                   _buildDetailedRow('Teléfonos', orden.cliTelefono ?? 'N/A'),
-                  _buildDetailedRow('Email', orden.cliEmail ?? 'N/A'),
                   _buildDetailedRow('Dirección', orden.cliDireccion ?? 'N/A'),
                 ],
               ),
@@ -48,6 +47,7 @@ class OrdenDetallePage extends StatelessWidget {
                     orden.vehPlaca ?? 'S/P',
                     isBold: true,
                   ),
+                  _buildDetailedRow('Tipo', orden.vehTipo ?? 'N/A'),
                   _buildDetailedRow(
                     'Marca/Modelo',
                     '${orden.vehMarca ?? ''} ${orden.vehModelo ?? ''}',
@@ -63,7 +63,7 @@ class OrdenDetallePage extends StatelessWidget {
               title: 'SERVICIO SOLICITADO',
               icon: Icons.description_rounded,
               child: Text(
-                orden.descripcion,
+                orden.descripcion.isEmpty ? 'No registrado' : orden.descripcion,
                 style: const TextStyle(fontSize: 14, height: 1.4),
               ),
             ),
