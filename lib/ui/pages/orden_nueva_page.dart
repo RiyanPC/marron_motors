@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/services.dart';
 import '../../services/data_repository.dart';
 import '../../models/orden.dart';
 import '../../models/vehiculo.dart';
 import '../../models/cliente.dart';
-import '../widgets/vehiculo_selector_modal.dart';
 
 class OrdenNuevaPage extends StatefulWidget {
   const OrdenNuevaPage({super.key});
@@ -18,9 +18,26 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
   final _formKey = GlobalKey<FormState>();
 
   Vehiculo? _selectedVehiculo;
-  Cliente? _selectedCliente;
+  List<Vehiculo> _vehiculos = [];
+  bool _isCreatingVehiculo = false;
+
+  // Vehiculo Fields
+  late TextEditingController _placaCtrl;
+  late TextEditingController _marcaCtrl;
+  late TextEditingController _modeloCtrl;
+  late TextEditingController _anioCtrl;
+  late TextEditingController _colorCtrl;
+  late TextEditingController _vinCtrl;
   late TextEditingController _descripcionController;
+
+  // New Client Fields (Nested)
+  Cliente? _selectedCliente;
+  bool _isCreatingClient = false;
   List<Cliente> _clientes = [];
+  late TextEditingController _newClienteNombreCtrl;
+  late TextEditingController _newClienteDocCtrl;
+  late TextEditingController _newClienteDireccionCtrl;
+  String _newClienteTipoDoc = 'DNI';
 
   bool _loading = true;
 
@@ -28,53 +45,150 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
   void initState() {
     super.initState();
     _descripcionController = TextEditingController();
+
+    // Init Vehiculo controllers
+    _placaCtrl = TextEditingController();
+    _marcaCtrl = TextEditingController();
+    _modeloCtrl = TextEditingController();
+    _anioCtrl = TextEditingController();
+    _colorCtrl = TextEditingController();
+    _vinCtrl = TextEditingController();
+
+    // Init Client controllers
+    _newClienteNombreCtrl = TextEditingController();
+    _newClienteDocCtrl = TextEditingController();
+    _newClienteDireccionCtrl = TextEditingController();
+
     _loadData();
   }
 
   @override
   void dispose() {
     _descripcionController.dispose();
+    _placaCtrl.dispose();
+    _marcaCtrl.dispose();
+    _modeloCtrl.dispose();
+    _anioCtrl.dispose();
+    _colorCtrl.dispose();
+    _vinCtrl.dispose();
+    _newClienteNombreCtrl.dispose();
+    _newClienteDocCtrl.dispose();
+    _newClienteDireccionCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _loadData() async {
     try {
       final clients = await _repository.getClientes('1');
+      final vehicles = await _repository.getVehiculos('1');
       setState(() {
         _clientes = clients;
+        _vehiculos = vehicles;
         _loading = false;
       });
     } catch (e) {
-      setState(() => _loading = false);
+      if (mounted) setState(() => _loading = false);
     }
   }
 
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate() || _selectedVehiculo == null) return;
-    _formKey.currentState!.save();
+    if (!_formKey.currentState!.validate()) return;
 
-    final orden = OrdenTrabajo(
-      empId: '1',
-      vehId: _selectedVehiculo?.id ?? '',
-      descripcion: _descripcionController.text,
-      fechaIngreso: DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
-      estado: 'ABIERTA',
-      total: 0,
-      items: [],
-    );
-
-    try {
-      final success = await _repository.crearOrden(orden);
-      if (success) {
-        Navigator.pop(context, true); // Retornamos true para refrescar la lista
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Ingreso registrado correctamente')),
-        );
-      }
-    } catch (e) {
+    if (!_isCreatingVehiculo && _selectedVehiculo == null) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      ).showSnackBar(const SnackBar(content: Text('Seleccione un vehículo')));
+      return;
+    }
+
+    if (_isCreatingVehiculo) {
+      if (!_isCreatingClient && _selectedCliente == null) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Seleccione un cliente')));
+        return;
+      }
+    }
+
+    _formKey.currentState!.save();
+
+    setState(() => _loading = true);
+
+    try {
+      String ordenVehId = '';
+
+      if (_isCreatingVehiculo) {
+        // 1. Resolve Client ID
+        String ordenCliId = '';
+        if (_isCreatingClient) {
+          final newCliente = Cliente(
+            id: '0',
+            empId: '1',
+            nombre: _newClienteNombreCtrl.text.toUpperCase(),
+            tipoDocumento: _newClienteTipoDoc,
+            numeroDocumento: _newClienteDocCtrl.text,
+            telefono: '',
+            email: '',
+            direccion: _newClienteDireccionCtrl.text.toUpperCase(),
+            ubigeo: '',
+            estado: 'ACTIVO',
+          );
+          final newCliId = await _repository.saveCliente(newCliente);
+          if (newCliId == null) throw Exception('Error al crear cliente');
+          ordenCliId = newCliId;
+        } else {
+          ordenCliId = _selectedCliente!.id;
+        }
+
+        // 2. Create Vehicle
+        final newVehiculo = Vehiculo(
+          id: '0',
+          cliId: ordenCliId,
+          empId: '1',
+          placa: _placaCtrl.text.toUpperCase(),
+          marca: _marcaCtrl.text.toUpperCase(),
+          modelo: _modeloCtrl.text.toUpperCase(),
+          anio: _anioCtrl.text,
+          color: _colorCtrl.text.toUpperCase(),
+          vin: _vinCtrl.text.toUpperCase(),
+          foto: '',
+        );
+        final newVehId = await _repository.saveVehiculo(newVehiculo);
+        if (newVehId == null) throw Exception('Error al crear vehículo');
+        ordenVehId = newVehId;
+      } else {
+        ordenVehId = _selectedVehiculo!.id;
+      }
+
+      // 3. Create Order
+      final orden = OrdenTrabajo(
+        empId: '1',
+        vehId: ordenVehId,
+        descripcion: _descripcionController.text,
+        fechaIngreso: DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
+        estado: 'ABIERTA',
+        total: 0,
+        items: [],
+      );
+
+      final success = await _repository.crearOrden(orden);
+      if (success) {
+        if (mounted) {
+          Navigator.pop(context, true);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Ingreso registrado correctamente')),
+          );
+        }
+      } else {
+        throw Exception('Error al crear la orden');
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _loading = false);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
     }
   }
 
@@ -145,79 +259,419 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
 
   Widget _buildVehiculoSelector() {
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: InkWell(
-        onTap: () async {
-          final result = await showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  _isCreatingVehiculo ? 'Nuevo Vehículo' : 'Buscar Vehículo',
+                  style: TextStyle(
+                    color: Colors.grey[700],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                TextButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      _isCreatingVehiculo = !_isCreatingVehiculo;
+                      if (_isCreatingVehiculo) {
+                        // clear selected
+                        _selectedVehiculo = null;
+                        _selectedCliente = null;
+                      } else {
+                        // clear new forms
+                        _selectedCliente = null;
+                      }
+                    });
+                  },
+                  icon: Icon(
+                    _isCreatingVehiculo ? Icons.search : Icons.add,
+                    size: 18,
+                  ),
+                  label: Text(
+                    _isCreatingVehiculo
+                        ? 'Seleccionar existente'
+                        : 'Crear Nuevo',
+                  ),
+                ),
+              ],
             ),
-            builder: (context) =>
-                VehiculoSelectorModal(initialSelectedId: _selectedVehiculo?.id),
-          );
-
-          if (result is Vehiculo) {
-            setState(() {
-              _selectedVehiculo = result;
-              _selectedCliente = _clientes.firstWhere(
-                (c) => c.id == _selectedVehiculo?.cliId,
-                orElse: () => _selectedCliente!, // Fallback
-              );
-            });
-          }
-        },
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.directions_car,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+            const Divider(),
+            if (_isCreatingVehiculo) ...[
+              // New Vehicle Form
+              Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: TextFormField(
+                      controller: _placaCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Placa *',
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 12,
+                        ),
+                      ),
+                      textCapitalization: TextCapitalization.characters,
+                      validator: (v) =>
+                          _isCreatingVehiculo && (v == null || v.isEmpty)
+                          ? 'Requerido'
+                          : null,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    flex: 3,
+                    child: TextFormField(
+                      controller: _marcaCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Marca',
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 12,
+                        ),
+                      ),
+                      textCapitalization: TextCapitalization.sentences,
+                      validator: (v) =>
+                          _isCreatingVehiculo && (v == null || v.isEmpty)
+                          ? 'Requerido'
+                          : null,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _selectedVehiculo != null
-                          ? _selectedVehiculo!.placa
-                          : 'Seleccionar Vehículo',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: _selectedVehiculo != null
-                            ? Colors.black
-                            : Colors.grey[600],
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _modeloCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Modelo',
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 12,
+                        ),
+                      ),
+                      textCapitalization: TextCapitalization.sentences,
+                      validator: (v) =>
+                          _isCreatingVehiculo && (v == null || v.isEmpty)
+                          ? 'Requerido'
+                          : null,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _anioCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Año',
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 12,
+                        ),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _colorCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Color',
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 12,
+                        ),
                       ),
                     ),
-                    if (_selectedVehiculo != null)
-                      Text(
-                        '${_selectedVehiculo!.marca} ${_selectedVehiculo!.modelo}',
-                        style: TextStyle(color: Colors.grey[600], fontSize: 13),
-                      )
-                    else
-                      const Text(
-                        'Toca para buscar placa o vehículo',
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _vinCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'VIN',
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 12,
+                        ),
                       ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              const Divider(),
+              // Nested Client Selector
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Propietario (${_isCreatingClient ? 'Nuevo' : 'Existente'})',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _isCreatingClient = !_isCreatingClient;
+                        _selectedCliente = null;
+                      });
+                    },
+                    child: Text(
+                      _isCreatingClient ? 'Buscar Existente' : 'Nuevo Cliente',
+                    ),
+                  ),
+                ],
+              ),
+              if (_isCreatingClient) ...[
+                Row(
+                  children: [
+                    SizedBox(
+                      width: 80,
+                      child: DropdownButtonFormField<String>(
+                        value: _newClienteTipoDoc,
+                        isExpanded: true,
+                        decoration: const InputDecoration(
+                          labelText: 'Tipo',
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 5,
+                            vertical: 12,
+                          ),
+                          border: OutlineInputBorder(),
+                        ),
+                        items: ['DNI', 'RUC']
+                            .map(
+                              (t) => DropdownMenuItem(
+                                value: t,
+                                child: Text(
+                                  t,
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (v) =>
+                            setState(() => _newClienteTipoDoc = v!),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _newClienteDocCtrl,
+                        decoration: InputDecoration(
+                          labelText: 'N° Documento *',
+                          border: const OutlineInputBorder(),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 12,
+                          ),
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.search),
+                            onPressed: () async {
+                              try {
+                                final doc = _newClienteDocCtrl.text;
+                                if (doc.isEmpty) return;
+                                // Reuse consult logic
+                                final data = await _repository
+                                    .consultaDocumento(_newClienteTipoDoc, doc);
+                                if (data != null && mounted) {
+                                  setState(() {
+                                    if (_newClienteTipoDoc == 'DNI') {
+                                      _newClienteNombreCtrl.text =
+                                          data['nombre'] ?? '';
+                                    } else {
+                                      _newClienteNombreCtrl.text =
+                                          data['razonSocial'] ?? '';
+                                      _newClienteDireccionCtrl.text =
+                                          data['direccion'] ?? '';
+                                    }
+                                  });
+                                }
+                              } catch (_) {}
+                            },
+                          ),
+                        ),
+                        keyboardType: TextInputType.number,
+                        validator: (v) {
+                          if (!_isCreatingVehiculo || !_isCreatingClient)
+                            return null;
+                          if (v == null || v.isEmpty) return 'Requerido';
+                          return null;
+                        },
+                      ),
+                    ),
                   ],
                 ),
+                const SizedBox(height: 10),
+                TextFormField(
+                  controller: _newClienteNombreCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Nombre / Razón Social *',
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 12,
+                    ),
+                  ),
+                  validator: (v) =>
+                      _isCreatingVehiculo &&
+                          _isCreatingClient &&
+                          (v == null || v.isEmpty)
+                      ? 'Requerido'
+                      : null,
+                ),
+                const SizedBox(height: 10),
+                TextFormField(
+                  controller: _newClienteDireccionCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Dirección',
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 12,
+                    ),
+                  ),
+                ),
+              ] else ...[
+                // Client Autocomplete
+                Autocomplete<Cliente>(
+                  displayStringForOption: (Cliente option) =>
+                      '${option.nombre} (${option.numeroDocumento})',
+                  optionsBuilder: (TextEditingValue textEditingValue) {
+                    if (textEditingValue.text == '') {
+                      return const Iterable<Cliente>.empty();
+                    }
+                    return _clientes.where((Cliente option) {
+                      return option.nombre.toLowerCase().contains(
+                            textEditingValue.text.toLowerCase(),
+                          ) ||
+                          option.numeroDocumento.contains(
+                            textEditingValue.text,
+                          );
+                    });
+                  },
+                  onSelected: (Cliente selection) {
+                    setState(() {
+                      _selectedCliente = selection;
+                    });
+                  },
+                  fieldViewBuilder:
+                      (
+                        context,
+                        textEditingController,
+                        focusNode,
+                        onFieldSubmitted,
+                      ) {
+                        return TextFormField(
+                          controller: textEditingController,
+                          focusNode: focusNode,
+                          decoration: InputDecoration(
+                            labelText: 'Buscar Cliente *',
+                            prefixIcon: const Icon(Icons.search),
+                            border: const OutlineInputBorder(),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 12,
+                            ),
+                          ),
+                          validator: (v) {
+                            if (_isCreatingVehiculo &&
+                                !_isCreatingClient &&
+                                _selectedCliente == null)
+                              return 'Seleccione un cliente';
+                            return null;
+                          },
+                        );
+                      },
+                ),
+              ],
+            ] else ...[
+              // Vehicle Autocomplete (Search Mode)
+              Autocomplete<Vehiculo>(
+                displayStringForOption: (Vehiculo option) => option.placa,
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  if (textEditingValue.text == '') {
+                    return const Iterable<Vehiculo>.empty();
+                  }
+                  return _vehiculos.where((Vehiculo option) {
+                    return option.placa.toLowerCase().contains(
+                      textEditingValue.text.toLowerCase(),
+                    );
+                  });
+                },
+                onSelected: (Vehiculo selection) {
+                  setState(() {
+                    _selectedVehiculo = selection;
+                    try {
+                      _selectedCliente = _clientes.firstWhere(
+                        (c) => c.id == selection.cliId,
+                      );
+                    } catch (_) {
+                      _selectedCliente = null;
+                    }
+                  });
+                },
+                fieldViewBuilder:
+                    (
+                      context,
+                      textEditingController,
+                      focusNode,
+                      onFieldSubmitted,
+                    ) {
+                      if (_selectedVehiculo != null &&
+                          textEditingController.text.isEmpty &&
+                          !focusNode.hasFocus) {
+                        textEditingController.text = _selectedVehiculo!.placa;
+                      }
+                      return TextFormField(
+                        controller: textEditingController,
+                        focusNode: focusNode,
+                        decoration: InputDecoration(
+                          labelText: 'Buscar Placa *',
+                          prefixIcon: const Icon(Icons.search),
+                          border: const OutlineInputBorder(),
+                          suffixIcon: textEditingController.text.isNotEmpty
+                              ? IconButton(
+                                  icon: const Icon(Icons.clear),
+                                  onPressed: () {
+                                    textEditingController.clear();
+                                    setState(() {
+                                      _selectedVehiculo = null;
+                                      _selectedCliente = null;
+                                    });
+                                  },
+                                )
+                              : null,
+                        ),
+                      );
+                    },
               ),
-              Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
             ],
-          ),
+          ],
         ),
       ),
     );

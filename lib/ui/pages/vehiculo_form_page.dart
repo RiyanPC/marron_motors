@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter/services.dart';
 import '../../models/vehiculo.dart';
 import '../../models/cliente.dart';
 import '../../services/data_repository.dart';
-import '../widgets/cliente_selector_modal.dart';
 
 class VehiculoFormPage extends StatefulWidget {
   final Vehiculo? vehiculo;
@@ -31,7 +31,15 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
   late TextEditingController _vinController;
   late TextEditingController _fotoController;
 
+  // New Client Fields
+  late TextEditingController _newClienteNombreCtrl;
+  late TextEditingController _newClienteDocCtrl;
+  late TextEditingController _newClienteDireccionCtrl;
+
   Cliente? _selectedCliente;
+  List<Cliente> _clientes = [];
+  bool _isCreatingClient = false;
+  String _newClienteTipoDoc = 'DNI';
 
   @override
   void initState() {
@@ -43,42 +51,38 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
     _colorController = TextEditingController(text: widget.vehiculo?.color);
     _vinController = TextEditingController(text: widget.vehiculo?.vin);
     _fotoController = TextEditingController(text: widget.vehiculo?.foto);
+
+    _newClienteNombreCtrl = TextEditingController();
+    _newClienteDocCtrl = TextEditingController();
+    _newClienteDireccionCtrl = TextEditingController();
+
     _loadInitialData();
   }
 
-  Future<void> _loadInitialData() async {
-    if (widget.vehiculo != null) {
-      try {
-        final clientes = await _repository.getClientes('1');
-        setState(() {
-          _selectedCliente = clientes.firstWhere(
-            (c) => c.id == widget.vehiculo!.cliId,
-          );
-          _loadingClientes = false;
-        });
-      } catch (e) {
-        setState(() => _loadingClientes = false);
-      }
-    } else {
-      setState(() => _loadingClientes = false);
-    }
+  @override
+  void dispose() {
+    _newClienteNombreCtrl.dispose();
+    _newClienteDocCtrl.dispose();
+    _newClienteDireccionCtrl.dispose();
+    super.dispose();
   }
 
-  void _openClienteSelector() async {
-    final result = await showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) =>
-          ClienteSelectorModal(initialSelectedId: _selectedCliente?.id),
-    );
-
-    if (result is Cliente) {
+  Future<void> _loadInitialData() async {
+    try {
+      final clientes = await _repository.getClientes('1');
       setState(() {
-        _selectedCliente = result;
+        _clientes = clientes;
+        if (widget.vehiculo != null) {
+          try {
+            _selectedCliente = clientes.firstWhere(
+              (c) => c.id == widget.vehiculo!.cliId,
+            );
+          } catch (_) {}
+        }
+        _loadingClientes = false;
       });
+    } catch (e) {
+      if (mounted) setState(() => _loadingClientes = false);
     }
   }
 
@@ -129,7 +133,8 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
-    if (_selectedCliente == null) {
+
+    if (!_isCreatingClient && _selectedCliente == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Debe seleccionar un cliente')),
       );
@@ -137,22 +142,48 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
     }
 
     setState(() => _saving = true);
-    final vehiculo = Vehiculo(
-      id: widget.vehiculo?.id ?? '0',
-      cliId: _selectedCliente!.id,
-      empId: widget.vehiculo?.empId ?? '1',
-      placa: _placaController.text,
-      marca: _marcaController.text,
-      modelo: _modeloController.text,
-      anio: _anioController.text,
-      color: _colorController.text,
-      vin: _vinController.text,
-      foto: _fotoController.text,
-    );
 
     try {
+      String clienteId;
+
+      if (_isCreatingClient) {
+        // Crear nuevo cliente
+        final newCliente = Cliente(
+          id: '0',
+          empId: '1',
+          nombre: _newClienteNombreCtrl.text.toUpperCase(),
+          tipoDocumento: _newClienteTipoDoc,
+          numeroDocumento: _newClienteDocCtrl.text,
+          telefono: '',
+          email: '',
+          direccion: _newClienteDireccionCtrl.text.toUpperCase(),
+          ubigeo: '',
+          estado: 'ACTIVO',
+        );
+
+        final newClientId = await _repository.saveCliente(newCliente);
+        if (newClientId == null) throw Exception('Error al crear el cliente');
+        clienteId = newClientId;
+      } else {
+        clienteId = _selectedCliente!.id;
+      }
+
+      final vehiculo = Vehiculo(
+        id: widget.vehiculo?.id ?? '0',
+        cliId: clienteId,
+        empId: widget.vehiculo?.empId ?? '1',
+        placa: _placaController.text.toUpperCase(),
+        marca: _marcaController.text.toUpperCase(),
+        modelo: _modeloController.text.toUpperCase(),
+        anio: _anioController.text,
+        color: _colorController.text.toUpperCase(),
+        vin: _vinController.text.toUpperCase(),
+        foto: _fotoController.text,
+      );
+
       final newId = await _repository.saveVehiculo(vehiculo);
       if (newId != null) {
+        // Get full data to return
         final savedVehiculo = Vehiculo(
           id: newId,
           cliId: vehiculo.cliId,
@@ -236,27 +267,269 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
                         padding: const EdgeInsets.all(16),
                         child: Column(
                           children: [
-                            InkWell(
-                              onTap: _openClienteSelector,
-                              child: InputDecorator(
-                                decoration: const InputDecoration(
-                                  labelText: 'Seleccionar Cliente *',
-                                  prefixIcon: Icon(Icons.person),
-                                  suffixIcon: Icon(Icons.arrow_drop_down),
-                                ),
-                                child: Text(
-                                  _selectedCliente != null
-                                      ? '${_selectedCliente!.nombre} (${_selectedCliente!.numeroDocumento})'
-                                      : 'Toca para buscar un cliente',
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  _isCreatingClient
+                                      ? 'Nuevo Cliente'
+                                      : 'Buscar Cliente Existente',
                                   style: TextStyle(
-                                    color: _selectedCliente != null
-                                        ? Colors.black87
-                                        : Colors.grey.shade600,
-                                    fontSize: 14,
+                                    color: Colors.grey[700],
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
-                              ),
+                                TextButton.icon(
+                                  onPressed: () {
+                                    setState(() {
+                                      _isCreatingClient = !_isCreatingClient;
+                                      if (!_isCreatingClient) {
+                                        _selectedCliente = null;
+                                      }
+                                    });
+                                  },
+                                  icon: Icon(
+                                    _isCreatingClient
+                                        ? Icons.search
+                                        : Icons.add,
+                                    size: 18,
+                                  ),
+                                  label: Text(
+                                    _isCreatingClient
+                                        ? 'Seleccionar existente'
+                                        : 'Cliente no existente -> añadir',
+                                  ),
+                                ),
+                              ],
                             ),
+                            const Divider(),
+                            if (_isCreatingClient) ...[
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    flex: 1,
+                                    child: DropdownButtonFormField<String>(
+                                      value: _newClienteTipoDoc,
+                                      isExpanded: true,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Tipo',
+                                        contentPadding: EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                          vertical: 15,
+                                        ),
+                                        border: OutlineInputBorder(),
+                                      ),
+                                      items: ['DNI', 'RUC']
+                                          .map(
+                                            (t) => DropdownMenuItem(
+                                              value: t,
+                                              child: Text(t),
+                                            ),
+                                          )
+                                          .toList(),
+                                      onChanged: (v) => setState(
+                                        () => _newClienteTipoDoc = v!,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    flex: 2,
+                                    child: TextFormField(
+                                      controller: _newClienteDocCtrl,
+                                      decoration: InputDecoration(
+                                        labelText: 'N° Documento *',
+                                        border: const OutlineInputBorder(),
+                                        counterText: '',
+                                        suffixIcon: IconButton(
+                                          icon: const Icon(Icons.search),
+                                          onPressed: () async {
+                                            // Implementar consulta RUC/DNI rápida si se desea
+                                            // Por ahora solo validación
+                                            final doc = _newClienteDocCtrl.text;
+                                            if (doc.isNotEmpty) {
+                                              try {
+                                                // Usar el repositorio existente para consultar
+                                                final data = await _repository
+                                                    .consultaDocumento(
+                                                      _newClienteTipoDoc,
+                                                      doc,
+                                                    );
+                                                if (data != null && mounted) {
+                                                  setState(() {
+                                                    if (_newClienteTipoDoc ==
+                                                        'DNI') {
+                                                      _newClienteNombreCtrl
+                                                              .text =
+                                                          data['nombre'] ?? '';
+                                                    } else {
+                                                      _newClienteNombreCtrl
+                                                              .text =
+                                                          data['razonSocial'] ??
+                                                          '';
+                                                      _newClienteDireccionCtrl
+                                                              .text =
+                                                          data['direccion'] ??
+                                                          '';
+                                                    }
+                                                  });
+                                                  ScaffoldMessenger.of(
+                                                    context,
+                                                  ).showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text(
+                                                        'Datos encontrados',
+                                                      ),
+                                                    ),
+                                                  );
+                                                } else if (mounted) {
+                                                  ScaffoldMessenger.of(
+                                                    context,
+                                                  ).showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text(
+                                                        'No encontrado',
+                                                      ),
+                                                    ),
+                                                  );
+                                                }
+                                              } catch (_) {}
+                                            }
+                                          },
+                                        ),
+                                      ),
+                                      keyboardType: TextInputType.number,
+                                      maxLength: _newClienteTipoDoc == 'DNI'
+                                          ? 8
+                                          : 11,
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.digitsOnly,
+                                      ],
+                                      validator: (v) {
+                                        if (!_isCreatingClient) return null;
+                                        if (v == null || v.isEmpty)
+                                          return 'Requerido';
+                                        if (_newClienteTipoDoc == 'DNI' &&
+                                            v.length != 8)
+                                          return '8 dígitos';
+                                        if (_newClienteTipoDoc == 'RUC' &&
+                                            v.length != 11)
+                                          return '11 dígitos';
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              TextFormField(
+                                controller: _newClienteNombreCtrl,
+                                decoration: const InputDecoration(
+                                  labelText: 'Nombre / Razón Social *',
+                                  border: OutlineInputBorder(),
+                                  prefixIcon: Icon(Icons.person_outline),
+                                ),
+                                textCapitalization:
+                                    TextCapitalization.characters,
+                                validator: (v) {
+                                  if (!_isCreatingClient) return null;
+                                  return v!.isEmpty ? 'Requerido' : null;
+                                },
+                              ),
+                              const SizedBox(height: 12),
+                              TextFormField(
+                                controller: _newClienteDireccionCtrl,
+                                decoration: const InputDecoration(
+                                  labelText: 'Dirección (Opcional)',
+                                  border: OutlineInputBorder(),
+                                  prefixIcon: Icon(Icons.place_outlined),
+                                ),
+                                textCapitalization:
+                                    TextCapitalization.sentences,
+                              ),
+                            ] else ...[
+                              Autocomplete<Cliente>(
+                                displayStringForOption: (Cliente option) =>
+                                    '${option.nombre} (${option.numeroDocumento})',
+                                optionsBuilder:
+                                    (TextEditingValue textEditingValue) {
+                                      if (textEditingValue.text == '') {
+                                        return const Iterable<Cliente>.empty();
+                                      }
+                                      return _clientes.where((Cliente option) {
+                                        return option.nombre
+                                                .toLowerCase()
+                                                .contains(
+                                                  textEditingValue.text
+                                                      .toLowerCase(),
+                                                ) ||
+                                            option.numeroDocumento.contains(
+                                              textEditingValue.text,
+                                            );
+                                      });
+                                    },
+                                onSelected: (Cliente selection) {
+                                  setState(() {
+                                    _selectedCliente = selection;
+                                  });
+                                },
+                                initialValue: _selectedCliente != null
+                                    ? TextEditingValue(
+                                        text:
+                                            '${_selectedCliente!.nombre} (${_selectedCliente!.numeroDocumento})',
+                                      )
+                                    : null,
+                                fieldViewBuilder:
+                                    (
+                                      context,
+                                      textEditingController,
+                                      focusNode,
+                                      onFieldSubmitted,
+                                    ) {
+                                      // Hack para establecer el valor inicial si se selecciona uno y luego se vuelve
+                                      if (_selectedCliente != null &&
+                                          textEditingController.text.isEmpty &&
+                                          !focusNode.hasFocus) {
+                                        textEditingController.text =
+                                            '${_selectedCliente!.nombre} (${_selectedCliente!.numeroDocumento})';
+                                      }
+
+                                      return TextFormField(
+                                        controller: textEditingController,
+                                        focusNode: focusNode,
+                                        decoration: InputDecoration(
+                                          labelText: 'Buscar Cliente *',
+                                          prefixIcon: const Icon(Icons.search),
+                                          hintText: 'Nombre o Documento',
+                                          border: const OutlineInputBorder(),
+                                          suffixIcon:
+                                              textEditingController
+                                                  .text
+                                                  .isNotEmpty
+                                              ? IconButton(
+                                                  icon: const Icon(Icons.clear),
+                                                  onPressed: () {
+                                                    textEditingController
+                                                        .clear();
+                                                    setState(
+                                                      () => _selectedCliente =
+                                                          null,
+                                                    );
+                                                  },
+                                                )
+                                              : null,
+                                        ),
+                                        validator: (v) {
+                                          if (_isCreatingClient) return null;
+                                          if (_selectedCliente == null)
+                                            return 'Seleccione un cliente';
+                                          return null;
+                                        },
+                                      );
+                                    },
+                              ),
+                            ],
                           ],
                         ),
                       ),
