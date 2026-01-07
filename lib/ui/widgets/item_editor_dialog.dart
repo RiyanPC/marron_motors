@@ -112,7 +112,7 @@ class _ItemEditorDialogState extends State<ItemEditorDialog> {
                       child: _buildTextField(
                         controller: _precioCtrl,
                         label: 'Precio Unit.',
-                        icon: Icons.attach_money,
+                        icon: Icons.payments_outlined,
                         prefixText: 'S/ ',
                         isNumeric: true,
                       ),

@@ -244,7 +244,8 @@ class _OrdenesPageState extends State<OrdenesPage>
       if (url != null) {
         final success = await _repository.actualizarFotoOrden(ot.id!, url);
         if (success) {
-          _loadOrdenes();
+          final newOrden = ot.copyWith(foto: url);
+          _updateLocalOrder(newOrden);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Foto subida correctamente')),
           );
@@ -837,170 +838,180 @@ class _OrdenesPageState extends State<OrdenesPage>
               // Content Section
               Padding(
                 padding: const EdgeInsets.all(12),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (ot.foto != null && ot.foto!.isNotEmpty)
-                      GestureDetector(
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => Dialog(
-                              backgroundColor: Colors.transparent,
-                              insetPadding: EdgeInsets.zero,
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  GestureDetector(
-                                    onTap: () => Navigator.pop(context),
-                                    child: Container(
-                                      color: Colors.black.withOpacity(0.9),
-                                      width: double.infinity,
-                                      height: double.infinity,
-                                    ),
-                                  ),
-                                  InteractiveViewer(
-                                    maxScale: 4.0,
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(16),
-                                      child: Image.network(
-                                        ot.foto!,
-                                        fit: BoxFit.contain,
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                            0.95,
-                                        height:
-                                            MediaQuery.of(context).size.height *
-                                            0.8,
+                child: IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (ot.foto != null && ot.foto!.isNotEmpty)
+                        GestureDetector(
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) => Dialog(
+                                backgroundColor: Colors.transparent,
+                                insetPadding: EdgeInsets.zero,
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () => Navigator.pop(context),
+                                      child: Container(
+                                        color: Colors.black.withOpacity(0.9),
+                                        width: double.infinity,
+                                        height: double.infinity,
                                       ),
                                     ),
-                                  ),
-                                  Positioned(
-                                    top: 40,
-                                    right: 70,
-                                    child: CircleAvatar(
-                                      backgroundColor: Colors.white,
-                                      child: IconButton(
-                                        icon: const Icon(
-                                          Icons.download,
-                                          color: Colors.black,
+                                    InteractiveViewer(
+                                      maxScale: 4.0,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(16),
+                                        child: Image.network(
+                                          ot.foto!,
+                                          fit: BoxFit.contain,
+                                          width:
+                                              MediaQuery.of(
+                                                context,
+                                              ).size.width *
+                                              0.95,
+                                          height:
+                                              MediaQuery.of(
+                                                context,
+                                              ).size.height *
+                                              0.8,
                                         ),
-                                        onPressed: () =>
-                                            _downloadAndShareImage(ot.foto!),
                                       ),
                                     ),
-                                  ),
-                                  Positioned(
-                                    top: 40,
-                                    right: 20,
-                                    child: CircleAvatar(
-                                      backgroundColor: Colors.white,
-                                      child: IconButton(
-                                        icon: const Icon(
-                                          Icons.close,
-                                          color: Colors.black,
+                                    Positioned(
+                                      top: 40,
+                                      right: 70,
+                                      child: CircleAvatar(
+                                        backgroundColor: Colors.white,
+                                        child: IconButton(
+                                          icon: const Icon(
+                                            Icons.download,
+                                            color: Colors.black,
+                                          ),
+                                          onPressed: () =>
+                                              _downloadAndShareImage(ot.foto!),
                                         ),
-                                        onPressed: () => Navigator.pop(context),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                    Positioned(
+                                      top: 40,
+                                      right: 20,
+                                      child: CircleAvatar(
+                                        backgroundColor: Colors.white,
+                                        child: IconButton(
+                                          icon: const Icon(
+                                            Icons.close,
+                                            color: Colors.black,
+                                          ),
+                                          onPressed: () =>
+                                              Navigator.pop(context),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
+                            );
+                          },
+                          child: Container(
+                            width: 100, // Slightly wider
+                            margin: const EdgeInsets.only(right: 12),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.grey.shade200),
+                              color: Colors.grey.shade50,
                             ),
-                          );
-                        },
-                        child: Container(
-                          width: 90,
-                          height: 90,
-                          margin: const EdgeInsets.only(right: 12),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.grey.shade200),
-                            color: Colors.grey.shade50,
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.network(
-                              ot.foto!,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Center(
-                                    child: Icon(
-                                      Icons.directions_car,
-                                      color: Colors.grey,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                ot.foto!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    const Center(
+                                      child: Icon(
+                                        Icons.directions_car,
+                                        color: Colors.grey,
+                                      ),
                                     ),
-                                  ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    Expanded(
-                      child: Column(
-                        children: [
-                          _buildDetailRow(
-                            Icons.person,
-                            'CLIENTE',
-                            ot.cliNombre ?? 'No asignado',
-                          ),
-                          const SizedBox(height: 8),
-                          _buildDetailRow(
-                            Icons.directions_car_filled_outlined,
-                            'VEHÍCULO',
-                            (ot.vehPlaca != null && ot.vehPlaca!.isNotEmpty)
-                                ? ot.vehPlaca!
-                                : (ot.vehTipo ?? 'S/P'),
-                          ),
-                          const SizedBox(height: 8),
-                          _buildDetailRow(
-                            Icons.build_circle_outlined,
-                            'SERVICIO SOLICITADO',
-                            ot.descripcion,
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildDetailRow(
-                                  Icons.calendar_month,
-                                  'FECHA',
-                                  ot.fechaIngreso,
-                                ),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade50,
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: Colors.grey.shade200,
+                      Expanded(
+                        child: Column(
+                          children: [
+                            _buildDetailRow(
+                              Icons.person,
+                              'CLIENTE',
+                              ot.cliNombre ?? 'No asignado',
+                            ),
+                            const SizedBox(height: 8),
+                            _buildDetailRow(
+                              Icons.directions_car_filled_outlined,
+                              'VEHÍCULO',
+                              (ot.vehPlaca != null && ot.vehPlaca!.isNotEmpty)
+                                  ? ot.vehPlaca!
+                                  : (ot.vehTipo ?? 'S/P'),
+                            ),
+                            const SizedBox(height: 8),
+                            _buildDetailRow(
+                              Icons.build_circle_outlined,
+                              'SERVICIO SOLICITADO',
+                              ot.descripcion,
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _buildDetailRow(
+                                    Icons.calendar_month,
+                                    'FECHA',
+                                    ot.fechaIngreso,
                                   ),
                                 ),
-                                child: Text(
-                                  'S/ ${ot.total.toStringAsFixed(2)}',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.primary,
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade50,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: Colors.grey.shade200,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'S/ ${ot.total.toStringAsFixed(2)}',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          if (ot.items.isNotEmpty) ...[
-                            const Divider(height: 16),
-                            _buildItemsList(ot),
+                              ],
+                            ),
                           ],
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
+              if (ot.items.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Column(
+                    children: [const Divider(height: 16), _buildItemsList(ot)],
+                  ),
+                ),
+
               // Removed Warning for Empty Finalized Orders as it's handled in FacturacionPage
               // Actions Section
               Padding(
@@ -1052,15 +1063,17 @@ class _OrdenesPageState extends State<OrdenesPage>
                   ),
                 ),
                 if (ot.estado == 'EN_PROCESO') ...[
-                  const SizedBox(width: 4),
+                  const SizedBox(width: 8), // Increased spacing
                   InkWell(
                     onTap: () => _editarItem(ot, item),
                     borderRadius: BorderRadius.circular(12),
                     child: Padding(
-                      padding: const EdgeInsets.all(4),
+                      padding: const EdgeInsets.all(
+                        8,
+                      ), // Increased touch target
                       child: Icon(
                         Icons.edit,
-                        size: 14,
+                        size: 18, // Slightly larger icon
                         color: Colors.blue.shade700,
                       ),
                     ),
@@ -1069,10 +1082,12 @@ class _OrdenesPageState extends State<OrdenesPage>
                     onTap: () => _eliminarItem(ot, item),
                     borderRadius: BorderRadius.circular(12),
                     child: Padding(
-                      padding: const EdgeInsets.all(4),
+                      padding: const EdgeInsets.all(
+                        8,
+                      ), // Increased touch target
                       child: Icon(
                         Icons.close,
-                        size: 14,
+                        size: 18, // Slightly larger icon
                         color: Colors.red.shade700,
                       ),
                     ),
