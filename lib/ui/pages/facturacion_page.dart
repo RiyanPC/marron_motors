@@ -798,6 +798,11 @@ class _FacturacionPageState extends State<FacturacionPage>
               onPressed: _limpiarFiltro,
               tooltip: 'Limpiar filtro',
             ),
+          IconButton(
+            icon: const Icon(Icons.help_outline),
+            onPressed: _showHelpDialog,
+            tooltip: 'Información sobre facturación',
+          ),
         ],
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(
@@ -866,6 +871,99 @@ class _FacturacionPageState extends State<FacturacionPage>
                 ),
               ],
             ),
+    );
+  }
+
+  void _showHelpDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              Icons.info_outline,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(width: 10),
+            const Text('Guía de Facturación'),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                '¿Cuándo emitir BOLETA o FACTURA?',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              _buildHelpItem(
+                'BOLETA:',
+                'Para consumidores finales. Si el monto es mayor a S/ 700, es obligatorio identificar al cliente (DNI).',
+                Colors.blue,
+              ),
+              const SizedBox(height: 8),
+              _buildHelpItem(
+                'FACTURA:',
+                'Para empresas o personas con RUC. Es obligatorio ingresar RUC y Dirección del cliente.',
+                Colors.purple,
+              ),
+              const Divider(height: 24),
+              const Text(
+                'Estados de la Orden:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              _buildHelpItem(
+                'FINALIZADA:',
+                'Orden lista para ser cobrada. Puedes agregar últimos ajustes antes de emitir comprobante.',
+                Colors.orange,
+              ),
+              const SizedBox(height: 8),
+              _buildHelpItem(
+                'FACTURADA:',
+                'Comprobante emitido y enviado a SUNAT. Ya no se pueden modificar los items.',
+                Colors.green,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('CERRAR'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHelpItem(String title, String description, Color color) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          margin: const EdgeInsets.only(top: 6, right: 8),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        Expanded(
+          child: RichText(
+            text: TextSpan(
+              style: const TextStyle(color: Colors.black87, fontSize: 13),
+              children: [
+                TextSpan(
+                  text: '$title ',
+                  style: TextStyle(fontWeight: FontWeight.bold, color: color),
+                ),
+                TextSpan(text: description),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -1171,10 +1269,7 @@ class _FacturacionPageState extends State<FacturacionPage>
               if (ot.estado == 'FINALIZADA' && ot.items.isEmpty)
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 16),
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 8,
-                    horizontal: 12,
-                  ),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: Colors.amber.shade50,
                     borderRadius: BorderRadius.circular(8),
@@ -1185,18 +1280,37 @@ class _FacturacionPageState extends State<FacturacionPage>
                       Icon(
                         Icons.warning_amber_rounded,
                         color: Colors.amber.shade800,
-                        size: 20,
+                        size: 24,
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 12),
                       Expanded(
-                        child: Text(
-                          'Requiere añadir trabajos para facturar',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.amber.shade900,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Orden vacía',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.amber.shade900,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const Text(
+                              'Requiere trabajos para facturar.',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ],
                         ),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => _agregarTrabajo(ot),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.amber.shade700,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                        child: const Text('AÑADIR'),
                       ),
                     ],
                   ),
@@ -1285,24 +1399,28 @@ class _FacturacionPageState extends State<FacturacionPage>
   // New method to build status pill with order context
   Widget _buildStatusPillWithType(OrdenTrabajo orden) {
     String displayText = orden.estado;
+    Color color = _getStatusColor(orden.estado);
 
     if (orden.estado == 'FACTURADA' && orden.facTipoComprobante != null) {
       displayText = orden.facTipoComprobante == 'F' ? 'FACTURA' : 'BOLETA';
+      if (orden.facTipoComprobante == 'F') {
+        color = Colors.purple; // Purple for Factura
+      } else {
+        color = Colors.blue.shade700; // Blue for Boleta
+      }
     }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: _getStatusColor(orden.estado).withOpacity(0.12),
+        color: color.withOpacity(0.12),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: _getStatusColor(orden.estado).withOpacity(0.3),
-        ),
+        border: Border.all(color: color.withOpacity(0.3)),
       ),
       child: Text(
         displayText,
         style: TextStyle(
-          color: _getStatusColor(orden.estado),
+          color: color,
           fontSize: 11,
           fontWeight: FontWeight.bold,
         ),
