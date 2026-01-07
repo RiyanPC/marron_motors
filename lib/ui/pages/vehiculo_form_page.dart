@@ -260,7 +260,7 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
           controller: controller,
           decoration: InputDecoration(
             labelText: label,
-            hintText: 'Escribir en MAYÚSCULAS',
+            hintText: 'Escribir nombre...',
             prefixIcon: Icon(
               Icons.edit_outlined,
               color: Theme.of(context).colorScheme.primary,
@@ -280,7 +280,7 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
               ),
             ),
           ),
-          textCapitalization: TextCapitalization.characters,
+          textCapitalization: TextCapitalization.sentences, // Natural typing
           autofocus: true,
         ),
         actions: [
@@ -290,7 +290,10 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
             child: const Text('CANCELAR'),
           ),
           ElevatedButton.icon(
-            onPressed: () => Navigator.pop(context, controller.text.trim()),
+            onPressed: () => Navigator.pop(
+              context,
+              controller.text.trim().toUpperCase(),
+            ), // Force uppercase on save
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Colors.white,
@@ -436,7 +439,26 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
                                       controller: _newClienteDocCtrl,
                                       decoration: InputDecoration(
                                         labelText: 'N° Documento *',
-                                        border: const OutlineInputBorder(),
+                                        filled: true,
+                                        fillColor: Colors.grey[50],
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          borderSide: BorderSide(
+                                            color: Colors.grey[300]!,
+                                          ),
+                                        ),
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 14,
+                                            ),
                                         counterText: '',
                                         suffixIcon: IconButton(
                                           icon: const Icon(Icons.search),
@@ -521,10 +543,24 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
                               const SizedBox(height: 12),
                               TextFormField(
                                 controller: _newClienteNombreCtrl,
-                                decoration: const InputDecoration(
+                                decoration: InputDecoration(
                                   labelText: 'Nombre / Razón Social *',
-                                  border: OutlineInputBorder(),
-                                  prefixIcon: Icon(Icons.person_outline),
+                                  prefixIcon: const Icon(Icons.person_outline),
+                                  filled: true,
+                                  fillColor: Colors.grey[50],
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: Colors.grey[300]!,
+                                    ),
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 14,
+                                  ),
                                 ),
                                 textCapitalization:
                                     TextCapitalization.characters,
@@ -536,10 +572,24 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
                               const SizedBox(height: 12),
                               TextFormField(
                                 controller: _newClienteDireccionCtrl,
-                                decoration: const InputDecoration(
+                                decoration: InputDecoration(
                                   labelText: 'Dirección (Opcional)',
-                                  border: OutlineInputBorder(),
-                                  prefixIcon: Icon(Icons.place_outlined),
+                                  prefixIcon: const Icon(Icons.place_outlined),
+                                  filled: true,
+                                  fillColor: Colors.grey[50],
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: Colors.grey[300]!,
+                                    ),
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 14,
+                                  ),
                                 ),
                                 textCapitalization:
                                     TextCapitalization.sentences,
@@ -598,7 +648,26 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
                                           labelText: 'Buscar Cliente *',
                                           prefixIcon: const Icon(Icons.search),
                                           hintText: 'Nombre o Documento',
-                                          border: const OutlineInputBorder(),
+                                          filled: true,
+                                          fillColor: Colors.grey[50],
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                          ),
+                                          enabledBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                            borderSide: BorderSide(
+                                              color: Colors.grey[300]!,
+                                            ),
+                                          ),
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                                horizontal: 12,
+                                                vertical: 14,
+                                              ),
                                           suffixIcon:
                                               textEditingController
                                                   .text
@@ -644,10 +713,21 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
                           children: [
                             TextFormField(
                               controller: _placaController,
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 labelText: 'Número de Placa *',
-                                prefixIcon: Icon(Icons.numbers),
+                                prefixIcon: const Icon(Icons.numbers),
                                 hintText: 'Ej: ABC-123',
+                                filled: true,
+                                fillColor: Colors.grey[50],
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Colors.grey[300]!,
+                                  ),
+                                ),
                               ),
                               textCapitalization: TextCapitalization.characters,
                               validator: (v) => v!.isEmpty ? 'Requerido' : null,
@@ -655,9 +735,20 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
                             const SizedBox(height: 16),
                             TextFormField(
                               controller: _vinController,
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 labelText: 'VIN / Chasis / Motor',
-                                prefixIcon: Icon(Icons.fingerprint),
+                                prefixIcon: const Icon(Icons.fingerprint),
+                                filled: true,
+                                fillColor: Colors.grey[50],
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Colors.grey[300]!,
+                                  ),
+                                ),
                               ),
                             ),
                           ],
@@ -685,6 +776,7 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
                                   flex: 2,
                                   child: DropdownButtonFormField<String>(
                                     value: _tipoVehiculo,
+                                    isExpanded: true,
                                     decoration: InputDecoration(
                                       labelText: 'Tipo',
                                       hintText: 'Seleccionar...',
@@ -763,6 +855,7 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
                                   flex: 3,
                                   child: DropdownButtonFormField<String>(
                                     value: _marcaVehiculo,
+                                    isExpanded: true,
                                     decoration: InputDecoration(
                                       labelText: 'Marca',
                                       hintText: 'Seleccionar...',
@@ -858,10 +951,21 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
                                 Expanded(
                                   child: TextFormField(
                                     controller: _modeloController,
-                                    decoration: const InputDecoration(
+                                    decoration: InputDecoration(
                                       labelText: 'Modelo',
-                                      prefixIcon: Icon(
+                                      prefixIcon: const Icon(
                                         Icons.model_training_outlined,
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.grey[50],
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(
+                                          color: Colors.grey[300]!,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -874,10 +978,21 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
                                 Expanded(
                                   child: TextFormField(
                                     controller: _anioController,
-                                    decoration: const InputDecoration(
+                                    decoration: InputDecoration(
                                       labelText: 'Año',
-                                      prefixIcon: Icon(
+                                      prefixIcon: const Icon(
                                         Icons.calendar_today_outlined,
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.grey[50],
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(
+                                          color: Colors.grey[300]!,
+                                        ),
                                       ),
                                     ),
                                     keyboardType: TextInputType.number,
@@ -895,9 +1010,22 @@ class _VehiculoFormPageState extends State<VehiculoFormPage> {
                                 Expanded(
                                   child: TextFormField(
                                     controller: _colorController,
-                                    decoration: const InputDecoration(
+                                    decoration: InputDecoration(
                                       labelText: 'Color',
-                                      prefixIcon: Icon(Icons.palette_outlined),
+                                      prefixIcon: const Icon(
+                                        Icons.palette_outlined,
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.grey[50],
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(
+                                          color: Colors.grey[300]!,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),

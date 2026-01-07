@@ -227,7 +227,7 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
           controller: controller,
           decoration: InputDecoration(
             labelText: label,
-            hintText: 'Escribir en MAYÚSCULAS',
+            hintText: 'Escribir nombre...',
             prefixIcon: Icon(
               Icons.edit_outlined,
               color: Theme.of(context).colorScheme.primary,
@@ -247,7 +247,7 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
               ),
             ),
           ),
-          textCapitalization: TextCapitalization.characters,
+          textCapitalization: TextCapitalization.sentences,
           autofocus: true,
         ),
         actions: [
@@ -257,7 +257,8 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
             child: const Text('CANCELAR'),
           ),
           ElevatedButton.icon(
-            onPressed: () => Navigator.pop(context, controller.text.trim()),
+            onPressed: () =>
+                Navigator.pop(context, controller.text.trim().toUpperCase()),
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Colors.white,
@@ -396,6 +397,7 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
                     flex: 2,
                     child: DropdownButtonFormField<String>(
                       value: _tipoVehiculo,
+                      isExpanded: true,
                       decoration: InputDecoration(
                         labelText: 'Tipo *',
                         hintText: 'Seleccionar...',
@@ -472,6 +474,7 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
                     flex: 3,
                     child: DropdownButtonFormField<String>(
                       value: _marcaVehiculo,
+                      isExpanded: true,
                       decoration: InputDecoration(
                         labelText: 'Marca *',
                         hintText: 'Seleccionar...',
@@ -545,12 +548,24 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
                     flex: 2,
                     child: TextFormField(
                       controller: _colorCtrl,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Color *',
-                        border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 12,
+                        prefixIcon: const Icon(
+                          Icons.palette_outlined,
+                          size: 20,
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey[50], // Consistent filled color
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey[300]!),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 14,
                         ),
                       ),
                       textCapitalization: TextCapitalization.sentences,
@@ -565,15 +580,27 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
                     flex: 2,
                     child: TextFormField(
                       controller: _anioCtrl,
-                      readOnly: true,
-                      decoration: const InputDecoration(
+                      readOnly:
+                          true, // Year is read-only unless we add a picker
+                      decoration: InputDecoration(
                         labelText: 'Año (Auto)',
-                        border: OutlineInputBorder(),
+                        prefixIcon: const Icon(
+                          Icons.calendar_today_outlined,
+                          size: 20,
+                        ),
                         filled: true,
-                        fillColor: Color(0xFFF5F5F5),
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 12,
+                        fillColor: Colors
+                            .grey[200], // Slightly darker to indicate read-only/disabled
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey[300]!),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 14,
                         ),
                       ),
                     ),
@@ -583,12 +610,21 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
               const SizedBox(height: 10),
               TextFormField(
                 controller: _placaCtrl,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Placa (Opcional)',
-                  border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 12,
+                  prefixIcon: const Icon(Icons.numbers_outlined, size: 20),
+                  filled: true,
+                  fillColor: Colors.grey[50],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey[300]!),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 14,
                   ),
                 ),
                 textCapitalization: TextCapitalization.characters,
@@ -628,14 +664,6 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
                       child: DropdownButtonFormField<String>(
                         value: _newClienteTipoDoc,
                         isExpanded: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Tipo',
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 5,
-                            vertical: 12,
-                          ),
-                          border: OutlineInputBorder(),
-                        ),
                         items: ['DNI', 'RUC']
                             .map(
                               (t) => DropdownMenuItem(
@@ -649,6 +677,22 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
                             .toList(),
                         onChanged: (v) =>
                             setState(() => _newClienteTipoDoc = v!),
+                        decoration: InputDecoration(
+                          labelText: 'Tipo',
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 12,
+                          ),
+                          filled: true,
+                          fillColor: Colors.grey[50],
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey[300]!),
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -658,12 +702,19 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
                         maxLength: _newClienteTipoDoc == 'DNI' ? 8 : 11,
                         decoration: InputDecoration(
                           labelText: 'N° Documento *',
-                          counterText:
-                              '', // Hides default counter but keeps limit
-                          border: const OutlineInputBorder(),
+                          counterText: '',
+                          filled: true,
+                          fillColor: Colors.grey[50],
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey[300]!),
+                          ),
                           contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 12,
+                            horizontal: 12,
+                            vertical: 14,
                           ),
                           suffixIcon: IconButton(
                             icon: const Icon(Icons.search),
@@ -671,7 +722,6 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
                               try {
                                 final doc = _newClienteDocCtrl.text;
                                 if (doc.isEmpty) return;
-                                // Reuse consult logic
                                 final data = await _repository
                                     .consultaDocumento(_newClienteTipoDoc, doc);
                                 if (data != null && mounted) {
@@ -714,12 +764,20 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
                 const SizedBox(height: 10),
                 TextFormField(
                   controller: _newClienteNombreCtrl,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Nombre / Razón Social *',
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 12,
+                    filled: true,
+                    fillColor: Colors.grey[50],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey[300]!),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 14,
                     ),
                   ),
                   validator: (v) =>
@@ -732,12 +790,20 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
                 const SizedBox(height: 10),
                 TextFormField(
                   controller: _newClienteDireccionCtrl,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Dirección',
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 12,
+                    filled: true,
+                    fillColor: Colors.grey[50],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey[300]!),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 14,
                     ),
                   ),
                 ),
@@ -777,10 +843,18 @@ class _OrdenNuevaPageState extends State<OrdenNuevaPage> {
                           decoration: InputDecoration(
                             labelText: 'Buscar Cliente *',
                             prefixIcon: const Icon(Icons.search),
-                            border: const OutlineInputBorder(),
+                            filled: true,
+                            fillColor: Colors.grey[50],
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
                             contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 12,
+                              horizontal: 12,
+                              vertical: 14,
                             ),
                           ),
                           validator: (v) {
