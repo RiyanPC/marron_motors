@@ -116,7 +116,7 @@ class _ItemFormPageState extends State<ItemFormPage> {
             gradient: LinearGradient(
               colors: [
                 Theme.of(context).colorScheme.primary,
-                Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                Theme.of(context).colorScheme.secondary,
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -175,6 +175,13 @@ class _ItemFormPageState extends State<ItemFormPage> {
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(color: Colors.grey[300]!),
                             ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: Theme.of(context).colorScheme.secondary,
+                                width: 2,
+                              ),
+                            ),
                             filled: true,
                             fillColor: Colors.grey[50],
                           ),
@@ -212,6 +219,13 @@ class _ItemFormPageState extends State<ItemFormPage> {
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: Theme.of(context).colorScheme.secondary,
+                                width: 2,
+                              ),
                             ),
                             filled: true,
                             fillColor: Colors.grey[50],
@@ -287,6 +301,13 @@ class _ItemFormPageState extends State<ItemFormPage> {
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(color: Colors.grey[300]!),
                             ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: Theme.of(context).colorScheme.secondary,
+                                width: 2,
+                              ),
+                            ),
                             filled: true,
                             fillColor: Colors.grey[50],
                           ),
@@ -312,6 +333,13 @@ class _ItemFormPageState extends State<ItemFormPage> {
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: Theme.of(context).colorScheme.secondary,
+                                width: 2,
+                              ),
                             ),
                             filled: true,
                             fillColor: Colors.grey[50],
@@ -356,6 +384,21 @@ class _ItemFormPageState extends State<ItemFormPage> {
                               ),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: Colors.grey[300]!,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.secondary,
+                                  width: 2,
+                                ),
                               ),
                               filled: true,
                               fillColor: Colors.grey[50],
