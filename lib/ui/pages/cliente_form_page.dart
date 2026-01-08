@@ -158,6 +158,19 @@ class _ClienteFormPageState extends State<ClienteFormPage> {
       appBar: AppBar(
         title: Text(isEditing ? 'Editar Cliente' : 'Nuevo Cliente'),
         elevation: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.secondary,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
