@@ -16,7 +16,7 @@
     <!-- Permission to manage external storage (for downloads) -->
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
     <application
-        android:label="facturacion_flutter"
+        android:label="Taller Miguel"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true"

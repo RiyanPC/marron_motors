@@ -25,17 +25,8 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
     setState(() => _isDownloading = true);
 
     try {
-      // Request storage permission for Android
-      if (Platform.isAndroid) {
-        final status = await Permission.storage.request();
-        if (!status.isGranted) {
-          if (mounted) {
-            _showError('Se necesita permiso de almacenamiento para descargar');
-          }
-          setState(() => _isDownloading = false);
-          return;
-        }
-      }
+      // No explicit storage permission needed for app-specific directories on Android 10+
+      // and getExternalStorageDirectory() uses app-specific storage.
 
       // Download PDF
       final response = await http.get(Uri.parse(widget.url));
