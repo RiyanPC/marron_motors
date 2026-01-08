@@ -64,6 +64,8 @@ class _EstadisticasPageState extends State<EstadisticasPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  _buildTopKpiGrid(),
+                  const SizedBox(height: 32),
                   _buildHeader('RESUMEN DE KPI'),
                   const SizedBox(height: 12),
                   _buildKpiSection(),
@@ -89,6 +91,88 @@ class _EstadisticasPageState extends State<EstadisticasPage> {
         fontSize: 12,
         fontWeight: FontWeight.bold,
         letterSpacing: 1,
+      ),
+    );
+  }
+
+  Widget _buildTopKpiGrid() {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildCompactKpiCard(
+            title: 'Activas',
+            value: _stats!.ordenesActivas.toString(),
+            icon: Icons.engineering,
+            color: Colors.orange,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildCompactKpiCard(
+            title: 'Ganancias',
+            value: 'S/ ${_stats!.gananciasMes.toStringAsFixed(0)}',
+            icon: Icons.payments,
+            color: Colors.green,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCompactKpiCard({
+    required String title,
+    required String value,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: color, size: 24),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: Colors.black87,
+            ),
+          ),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w600,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
   }

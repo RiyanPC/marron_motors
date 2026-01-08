@@ -11,7 +11,6 @@ import 'pages/facturacion_page.dart';
 import 'pages/configuracion_page.dart';
 import 'pages/orden_nueva_page.dart';
 import 'pages/orden_detalle_page.dart';
-import 'pages/estadisticas_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -105,10 +104,8 @@ class _HomePageState extends State<HomePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildWelcomeSection(),
+                          _buildWelcomeCard(),
                           const SizedBox(height: 24),
-                          _buildKpiGrid(),
-                          const SizedBox(height: 32),
                           Text(
                             'ACCIONES RÁPIDAS',
                             style: TextStyle(
@@ -192,165 +189,196 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildWelcomeSection() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Hola, Bienvenido',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Panel General',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.w900,
-                color: Theme.of(context).colorScheme.primary,
-                letterSpacing: -0.5,
-              ),
-            ),
-          ],
-        ),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-            border: Border.all(color: Colors.grey.shade200),
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(12),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const EstadisticasPage()),
-                );
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: Icon(
-                  Icons.bar_chart_rounded,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: 28,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+  Widget _buildWelcomeCard() {
+    // Lima, Peru timezone is UTC-5
+    final now = DateTime.now().toUtc().subtract(const Duration(hours: 5));
+    final hour = now.hour;
+    String greeting;
+    if (hour < 12) {
+      greeting = 'Buenos días';
+    } else if (hour < 19) {
+      greeting = 'Buenas tardes';
+    } else {
+      greeting = 'Buenas noches';
+    }
 
-  Widget _buildKpiGrid() {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildKpiCard(
-            title: 'Activas',
-            value: _stats!.ordenesActivas.toString(),
-            icon: Icons.engineering,
-            color: Colors.orange,
-            small: true,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildKpiCard(
-            title: 'Ganancias',
-            value:
-                'S/ ${_stats!.gananciasMes.toStringAsFixed(0)}', // Truncate decimals for space
-            icon: Icons.payments,
-            color: Colors.green,
-            small: true,
-          ),
-        ),
-      ],
-    );
-  }
+    final months = [
+      'enero',
+      'febrero',
+      'marzo',
+      'abril',
+      'mayo',
+      'junio',
+      'julio',
+      'agosto',
+      'septiembre',
+      'octubre',
+      'noviembre',
+      'diciembre',
+    ];
+    final days = [
+      'domingo',
+      'lunes',
+      'martes',
+      'miércoles',
+      'jueves',
+      'viernes',
+      'sábado',
+    ];
 
-  Widget _buildKpiCard({
-    required String title,
-    required String value,
-    required IconData icon,
-    required Color color,
-    bool small = false,
-  }) {
+    final dateStr =
+        '${days[now.weekday % 7]}, ${now.day} de ${months[now.month - 1]} de ${now.year}';
+    final timeStr =
+        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+
+    // Calculate stats
+    int totalServicios = _stats!.ordenesRecientes.length;
+    int pendientes = _stats!.ordenesRecientes
+        .where((o) => o.estado.toUpperCase() == 'ABIERTA')
+        .length;
+    int enProceso = _stats!.ordenesRecientes
+        .where(
+          (o) =>
+              o.estado.toUpperCase() == 'EN_PROCESO' ||
+              o.estado == 'En Proceso',
+        )
+        .length;
+    int completados = _stats!.ordenesRecientes
+        .where(
+          (o) => [
+            'FINALIZADA',
+            'FACTURADA',
+            'ENTREGADO',
+          ].contains(o.estado.toUpperCase()),
+        )
+        .length;
+
     return Container(
-      padding: EdgeInsets.all(small ? 14 : 20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        gradient: LinearGradient(
+          colors: [
+            Theme.of(context).colorScheme.primary,
+            Theme.of(context).colorScheme.primary.withOpacity(0.8),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
           ),
         ],
-        border: Border.all(color: Colors.grey.shade200),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(icon, color: color, size: 24),
-              ),
-              if (!small) ...[
-                const SizedBox(width: 12),
-                Text(
-                  value,
+              Expanded(
+                child: Text(
+                  '$greeting!',
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
-              ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.calendar_today,
+                        color: Colors.white70,
+                        size: 14,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        dateStr,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.access_time,
+                        color: Colors.white70,
+                        size: 14,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        timeStr,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ],
           ),
           const SizedBox(height: 12),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              color: Colors.black87,
-            ),
+          const Text(
+            'Bienvenido al sistema de gestión de tu taller mecánico. Aquí podrás administrar órdenes de reparación, clientes y facturación de forma rápida y eficiente.',
+            style: TextStyle(fontSize: 14, color: Colors.white),
           ),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey[600],
-              fontWeight: FontWeight.w600,
-            ),
-            overflow: TextOverflow.ellipsis,
+          const Divider(color: Colors.white30, height: 32),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatColumn(
+                  totalServicios.toString(),
+                  'Servicios Totales',
+                ),
+              ),
+              Expanded(
+                child: _buildStatColumn(pendientes.toString(), 'Pendientes'),
+              ),
+              Expanded(
+                child: _buildStatColumn(enProceso.toString(), 'En Proceso'),
+              ),
+              Expanded(
+                child: _buildStatColumn(completados.toString(), 'Completados'),
+              ),
+            ],
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildStatColumn(String value, String label) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 10, color: Colors.white70),
+        ),
+      ],
     );
   }
 
