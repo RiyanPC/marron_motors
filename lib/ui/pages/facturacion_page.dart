@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/orden.dart';
 import '../../services/data_repository.dart';
 import '../../core/api_config.dart';
-import 'comprobante_preview_page.dart';
+import 'pdf_viewer_page.dart';
 import '../widgets/item_selector_modal.dart';
 
 class FacturacionPage extends StatefulWidget {
@@ -510,12 +510,11 @@ class _FacturacionPageState extends State<FacturacionPage>
   }
 
   Future<void> _verComprobante(String facId) async {
-    final url = '${ApiConfig.baseUrl}/facturas/ver.php?id=$facId';
+    final pdfUrl = '${ApiConfig.baseUrl}/facturas/descargar_pdf.php?id=$facId';
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) =>
-            ComprobantePreviewPage(url: url, title: 'Factura #$facId'),
+        builder: (_) => PdfViewerPage(url: pdfUrl, title: 'Factura #$facId'),
       ),
     );
   }
