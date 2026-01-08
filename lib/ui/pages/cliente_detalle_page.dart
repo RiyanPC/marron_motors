@@ -120,7 +120,14 @@ class _ClienteDetallePageState extends State<ClienteDetallePage> {
       width: double.infinity,
       padding: const EdgeInsets.only(bottom: 32, top: 20),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary,
+        gradient: LinearGradient(
+          colors: [
+            Theme.of(context).colorScheme.primary,
+            Theme.of(context).colorScheme.secondary,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
       ),
       child: Column(

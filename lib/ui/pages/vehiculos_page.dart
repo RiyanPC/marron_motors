@@ -98,28 +98,13 @@ class _VehiculosPageState extends State<VehiculosPage> {
           ),
         ),
         foregroundColor: Colors.white,
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const VehiculoFormPage()),
-          );
-          if (result != null) _loadVehiculos();
-        },
-        backgroundColor: Theme.of(context).colorScheme.secondary,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.add_road),
-        label: const Text('NUEVO VEHÍCULO'),
-      ),
-      body: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
-            ),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(80),
+          child: Padding(
+            padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
             child: TextField(
               controller: _searchController,
               style: const TextStyle(color: Colors.white),
@@ -137,6 +122,23 @@ class _VehiculosPageState extends State<VehiculosPage> {
               ),
             ),
           ),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const VehiculoFormPage()),
+          );
+          if (result != null) _loadVehiculos();
+        },
+        backgroundColor: Theme.of(context).colorScheme.secondary,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.add_road),
+        label: const Text('NUEVO VEHÍCULO'),
+      ),
+      body: Column(
+        children: [
           Expanded(
             child: _loading
                 ? const Center(child: CircularProgressIndicator())

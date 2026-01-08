@@ -94,28 +94,13 @@ class _ClientesPageState extends State<ClientesPage> {
           ),
         ),
         foregroundColor: Colors.white,
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const ClienteFormPage()),
-          );
-          if (result != null) _loadClientes();
-        },
-        backgroundColor: Theme.of(context).colorScheme.secondary,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.person_add_alt_1),
-        label: const Text('NUEVO CLIENTE'),
-      ),
-      body: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
-            ),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(80),
+          child: Padding(
+            padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
             child: TextField(
               controller: _searchController,
               style: const TextStyle(color: Colors.white),
@@ -133,6 +118,23 @@ class _ClientesPageState extends State<ClientesPage> {
               ),
             ),
           ),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ClienteFormPage()),
+          );
+          if (result != null) _loadClientes();
+        },
+        backgroundColor: Theme.of(context).colorScheme.secondary,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.person_add_alt_1),
+        label: const Text('NUEVO CLIENTE'),
+      ),
+      body: Column(
+        children: [
           Expanded(
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
