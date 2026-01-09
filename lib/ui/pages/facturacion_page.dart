@@ -170,9 +170,6 @@ class _FacturacionPageState extends State<FacturacionPage>
       if (doc.length != 11) {
         errors.add('RUC debe tener 11 dígitos.');
       }
-      if (orden.cliDireccion == null || orden.cliDireccion!.isEmpty) {
-        errors.add('Dirección es requerida para Factura.');
-      }
     }
     return errors;
   }
